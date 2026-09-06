@@ -2,9 +2,13 @@ import { ADDY_DEFAULT_BASE_URL, ADDY_FORMATS } from "./addy";
 import { SIMPLELOGIN_DEFAULT_BASE_URL, SIMPLELOGIN_MODES } from "./simplelogin";
 import type { AliasProviderId } from "./types";
 
-// What the settings screen needs to know about a provider, declared rather than switched on.
-// Adding a provider should be a descriptor plus a client, with no `if (id === ...)` anywhere in
-// the UI. See docs/email-aliases.md.
+// What the settings screen needs to know about a provider, declared rather than switched on:
+// which extra settings it has, which are required, and where their choices come from. Adding a
+// provider should be a descriptor plus a client, with no `if (id === ...)` deciding structure.
+//
+// Deliberately no copy. Labels and hints live in the UI, where Lingui can extract them; a
+// descriptor holding English strings would be a second place for translated text to go missing.
+// See docs/email-aliases.md.
 
 /**
  * One provider-specific setting.
@@ -15,13 +19,9 @@ import type { AliasProviderId } from "./types";
  */
 export interface AliasField {
 	key: string;
-	/** Shown as the field's label. Translated at the call site, not here. */
-	label: string;
 	options: readonly string[] | "domains";
 	/** A create cannot be attempted until this has a value. */
 	required: boolean;
-	/** Why someone would change it, when the answer is not obvious from the label. */
-	hint?: string;
 }
 
 export interface AliasProviderDescriptor {
@@ -43,20 +43,8 @@ export const ALIAS_PROVIDERS: readonly AliasProviderDescriptor[] = [
 		selfHostable: true,
 		keyUrl: "https://app.addy.io/settings/api",
 		fields: [
-			{
-				key: "domain",
-				label: "Alias domain",
-				options: "domains",
-				required: true,
-				hint: "Addy needs a domain before it can create an alias.",
-			},
-			{
-				key: "format",
-				label: "Alias format",
-				options: ADDY_FORMATS,
-				required: false,
-				hint: "Leave unset to use your Addy account's own default.",
-			},
+			{ key: "domain", options: "domains", required: true },
+			{ key: "format", options: ADDY_FORMATS, required: false },
 		],
 	},
 	{
@@ -65,17 +53,7 @@ export const ALIAS_PROVIDERS: readonly AliasProviderDescriptor[] = [
 		defaultBaseUrl: SIMPLELOGIN_DEFAULT_BASE_URL,
 		selfHostable: true,
 		keyUrl: "https://app.simplelogin.io/dashboard/api_key",
-		fields: [
-			{
-				key: "mode",
-				label: "Alias style",
-				options: SIMPLELOGIN_MODES,
-				required: false,
-				// The tradeoff is stated because it is a privacy choice, not a cosmetic one: a
-				// `word` alias carries the site's name and so discloses where it is used.
-				hint: "Word aliases include the site's name, which is easier to recognise but tells anyone who sees the address where you used it. UUID aliases reveal nothing.",
-			},
-		],
+		fields: [{ key: "mode", options: SIMPLELOGIN_MODES, required: false }],
 	},
 ];
 

@@ -5,6 +5,7 @@ import { useCan } from "../../../context/PlatformContext";
 import { ScrollEdgeFades, useScrollEdges } from "../../components/ui/scroll-edges";
 import { cn } from "../../components/ui/utils";
 import { AboutSection } from "./components/AboutSection";
+import { AliasSection } from "./components/AliasSection";
 import { AppearanceSection } from "./components/AppearanceSection";
 import { BackupSection } from "./components/BackupSection";
 import { BrowserPairingSection } from "./components/BrowserPairingSection";
@@ -73,6 +74,7 @@ export function Settings() {
 				{tab === "general" && (
 					<>
 						<GeneralSection />
+						<AliasSection />
 						<AppearanceSection />
 						<DeleteVaultSection />
 					</>
