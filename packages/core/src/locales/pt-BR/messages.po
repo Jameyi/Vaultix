@@ -255,9 +255,7 @@ msgstr "Adicionada ao criar uma chave de acesso em um site com Bramble. Remova p
 msgid "Addy needs a domain before it can create an alias."
 msgstr "Addy precisa de um domínio antes de poder criar um alias."
 
-#: packages/core/src/app/entry-modes/login.tsx
-#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-#: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
+#: packages/core/src/app/components/ui/advanced-disclosure.tsx
 msgid "Advanced"
 msgstr "Avançado"
 
@@ -2092,6 +2090,11 @@ msgstr "Somente {brand} pode desbloquear. Adicionar ou remover uma face ou impre
 msgid "Only Face ID or a fingerprint can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
 msgstr "Somente Face ID ou uma impressão digital pode desbloquear. Adicionar ou remover uma face ou impressão digital desativa esse recurso, e será necessário reativá-lo com sua senha mestra."
 
+#. placeholder {0}: descriptor.label
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Only for a self-hosted {0}. Leave empty to use the hosted service."
+msgstr "Somente para um {0} auto-hospedado. Deixe em branco para usar o serviço hospedado."
+
 #: packages/core/src/app/screens/Settings/components/BiometricSection.tsx
 msgid "Only your passcode can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
 msgstr "Somente seu código de acesso pode desbloquear. Adicionar ou remover uma face ou impressão digital desativa esse recurso, e será necessário reativá-lo com sua senha mestra."
@@ -2724,13 +2727,14 @@ msgstr "Envia um prefixo SHA-1 de 5 caracteres de cada senha salva para haveibee
 msgid "Separator"
 msgstr "Separador"
 
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Server URL"
 msgstr "URL do servidor"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
-msgid "Server URL (self-hosted only)"
-msgstr "URL do servidor (somente auto-hospedado)"
+#~ msgid "Server URL (self-hosted only)"
+#~ msgstr "URL do servidor (somente auto-hospedado)"
 
 #: packages/core/src/app/screens/Settings/components/MasterPasswordSection.tsx
 msgid "Set password"

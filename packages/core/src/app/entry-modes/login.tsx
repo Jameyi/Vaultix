@@ -37,6 +37,7 @@ import { formatDate, formatDateTimeExact } from "../../util/format-date";
 import { generate } from "../../util/password-gen";
 import { classifyScannedQr, parseTotp, type QrScanFailure, totpAt } from "../../util/totp";
 import { PasswordGeneratorModal } from "../components/PasswordGeneratorModal";
+import { AdvancedDisclosure } from "../components/ui/advanced-disclosure";
 import { Button } from "../components/ui/button";
 import { SelectField } from "../components/ui/select-field";
 import { TextArea } from "../components/ui/text-area";
@@ -83,7 +84,6 @@ function LoginFields({ initialBreach }: EntryFieldsProps) {
 		append: appendUrl,
 		remove: removeUrl,
 	} = useFieldArray({ control, name: "urls" });
-	const [advancedOpen, setAdvancedOpen] = useState(false);
 	const [generatorOpen, setGeneratorOpen] = useState(false);
 	const aliases = useAliasProvider();
 	const [aliasState, setAliasState] = useState<AliasFieldState>({ kind: "idle" });
@@ -452,48 +452,30 @@ function LoginFields({ initialBreach }: EntryFieldsProps) {
 
 			<TextArea label={t`Notes (optional)`} rows={3} {...register("notes")} />
 
-			<div>
-				<Button
-					variant="link"
-					size="none"
-					onClick={() => setAdvancedOpen((o) => !o)}
-					className="flex items-center gap-1.5 text-xs active:scale-[0.98]"
-					aria-expanded={advancedOpen}
-				>
-					{advancedOpen ? (
-						<ChevronDown className="w-3.5 h-3.5" />
-					) : (
-						<ChevronRight className="w-3.5 h-3.5" />
-					)}
-					<Trans>Advanced</Trans>
-				</Button>
-				{advancedOpen && (
-					<div className="mt-3 space-y-4 pl-4 border-l border-border/40">
-						<ToggleRow
-							title={t`Enable autofill`}
-							subtitle={t`Show this entry in the autofill dropdown. When off, it's never auto-filled but stays in your vault.`}
-							checked={watch("autofillEnabled")}
-							onChange={(v) => setValue("autofillEnabled", v, { shouldDirty: true })}
-						/>
-						<ToggleRow
-							title={t`Auto-submit after fill`}
-							subtitle={t`Press Enter / submit the form right after the credentials are filled in.`}
-							checked={watch("autoSubmit")}
-							onChange={(v) => setValue("autoSubmit", v, { shouldDirty: true })}
-						/>
-						<div>
-							<SelectField label={t`Subdomain match`} {...register("subdomainMatch")}>
-								<option value="etld1">{t`eTLD+1 (default, matches all subdomains)`}</option>
-								<option value="exact">{t`Exact hostname only`}</option>
-								<option value="subdomain">{t`This domain and its subdomains`}</option>
-							</SelectField>
-							<p className="text-xs text-muted-foreground mt-1.5">
-								<Trans>Controls which URLs this entry will offer credentials for.</Trans>
-							</p>
-						</div>
-					</div>
-				)}
-			</div>
+			<AdvancedDisclosure>
+				<ToggleRow
+					title={t`Enable autofill`}
+					subtitle={t`Show this entry in the autofill dropdown. When off, it's never auto-filled but stays in your vault.`}
+					checked={watch("autofillEnabled")}
+					onChange={(v) => setValue("autofillEnabled", v, { shouldDirty: true })}
+				/>
+				<ToggleRow
+					title={t`Auto-submit after fill`}
+					subtitle={t`Press Enter / submit the form right after the credentials are filled in.`}
+					checked={watch("autoSubmit")}
+					onChange={(v) => setValue("autoSubmit", v, { shouldDirty: true })}
+				/>
+				<div>
+					<SelectField label={t`Subdomain match`} {...register("subdomainMatch")}>
+						<option value="etld1">{t`eTLD+1 (default, matches all subdomains)`}</option>
+						<option value="exact">{t`Exact hostname only`}</option>
+						<option value="subdomain">{t`This domain and its subdomains`}</option>
+					</SelectField>
+					<p className="text-xs text-muted-foreground mt-1.5">
+						<Trans>Controls which URLs this entry will offer credentials for.</Trans>
+					</p>
+				</div>
+			</AdvancedDisclosure>
 		</>
 	);
 }

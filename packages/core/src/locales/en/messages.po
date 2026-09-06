@@ -255,9 +255,7 @@ msgstr "Added when you create a passkey on a site with Bramble. Remove to delete
 msgid "Addy needs a domain before it can create an alias."
 msgstr "Addy needs a domain before it can create an alias."
 
-#: packages/core/src/app/entry-modes/login.tsx
-#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-#: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
+#: packages/core/src/app/components/ui/advanced-disclosure.tsx
 msgid "Advanced"
 msgstr "Advanced"
 
@@ -2084,6 +2082,11 @@ msgstr "Only {brand} can unlock. Adding or removing a face or fingerprint turns 
 msgid "Only Face ID or a fingerprint can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
 msgstr "Only Face ID or a fingerprint can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
 
+#. placeholder {0}: descriptor.label
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Only for a self-hosted {0}. Leave empty to use the hosted service."
+msgstr "Only for a self-hosted {0}. Leave empty to use the hosted service."
+
 #: packages/core/src/app/screens/Settings/components/BiometricSection.tsx
 msgid "Only your passcode can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
 msgstr "Only your passcode can unlock. Adding or removing a face or fingerprint turns this off, and you'll re-enable it with your master password."
@@ -2716,13 +2719,14 @@ msgstr "Sends a 5-character SHA-1 prefix of each saved password to haveibeenpwne
 msgid "Separator"
 msgstr "Separator"
 
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Server URL"
 msgstr "Server URL"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
-msgid "Server URL (self-hosted only)"
-msgstr "Server URL (self-hosted only)"
+#~ msgid "Server URL (self-hosted only)"
+#~ msgstr "Server URL (self-hosted only)"
 
 #: packages/core/src/app/screens/Settings/components/MasterPasswordSection.tsx
 msgid "Set password"

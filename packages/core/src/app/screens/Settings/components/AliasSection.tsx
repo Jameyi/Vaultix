@@ -10,6 +10,7 @@ import {
 	describeProvider,
 } from "../../../../aliases";
 import { type SaveAliasInput, useAliasProvider } from "../../../../hooks/useAliasProvider";
+import { AdvancedDisclosure } from "../../../components/ui/advanced-disclosure";
 import { Button } from "../../../components/ui/button";
 import { SelectField } from "../../../components/ui/select-field";
 import { TextField } from "../../../components/ui/text-field";
@@ -200,17 +201,6 @@ export function AliasSection() {
 				</a>
 			</div>
 
-			{descriptor.selfHostable && (
-				<TextField
-					label={t`Server URL (self-hosted only)`}
-					type="url"
-					autoComplete="off"
-					value={baseUrl}
-					disabled={busy}
-					onChange={(e) => setBaseUrl(e.target.value)}
-				/>
-			)}
-
 			{descriptor.fields.map((field) => {
 				const fromAccount = field.options === "domains";
 				const choices: string[] = fromAccount
@@ -246,6 +236,26 @@ export function AliasSection() {
 					</div>
 				);
 			})}
+
+			{descriptor.selfHostable && (
+				<AdvancedDisclosure>
+					<div>
+						<TextField
+							label={t`Server URL`}
+							type="url"
+							autoComplete="off"
+							value={baseUrl}
+							disabled={busy}
+							onChange={(e) => setBaseUrl(e.target.value)}
+						/>
+						<p className="text-xs text-muted-foreground mt-1.5">
+							<Trans>
+								Only for a self-hosted {descriptor.label}. Leave empty to use the hosted service.
+							</Trans>
+						</p>
+					</div>
+				</AdvancedDisclosure>
+			)}
 
 			{missing.length > 0 && domainList.length === 0 && (
 				<p className="text-xs text-muted-foreground">
