@@ -178,6 +178,7 @@ export type JoinUnlock = { kind: "password"; password: string };
 /** Re-auth for deleting a vault: the master password, or a security-key tap. */
 export type DeleteVaultAuth = { password: string } | { webauthnKey: true };
 
+import { aliasConfigKeyFor } from "../aliases/config";
 import { backupTargetsKeyFor } from "../backup/config";
 import { exportToOs } from "../exchange";
 import { toKdbxEntries } from "../export/kdbx";
@@ -1620,6 +1621,11 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 				await backupCreds?.remove(activeId, t.id).catch(() => {});
 			}
 			await storage.removeMeta(backupTargetsKeyFor(activeId)).catch(() => {});
+			// Its alias provider, whose API key can spend the user's allowance at a third party and
+			// delete the aliases already made. VEK-wrapped, so it is unreadable the moment the blob
+			// above is gone, but the same rule applies as to the settings above: a delete leaves
+			// nothing of the vault behind.
+			await storage.removeMeta(aliasConfigKeyFor(activeId)).catch(() => {});
 			await dropActiveRecord();
 			// Clear the recorded active vault: it is sticky (the effect above only ever writes it),
 			// so after a delete it still named the vault we just erased. Mobile's sync resolves its
