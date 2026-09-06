@@ -361,6 +361,33 @@ quota, because it can, and a limit of 10 makes it worth showing. And the
 theoretical: on a free Addy account, four idle presses of a regenerate button
 consume nearly half the allowance.
 
+**Creates are verified on both.** With `format` omitted, Addy applied the
+account default and returned `w40myp02@anonaddy.com`, eight lowercase
+alphanumerics (`random_characters`). Omitting the field is therefore the right
+default: the user's own choice at the provider wins, and the setting is an
+override rather than something we must always supply. The create also moved
+`active_shared_domain_alias_count` from 0 to 1, so the counter is live and a
+"1 of 10 used" line in settings costs one field of an endpoint already called.
+
+**SimpleLogin's `hostname` shapes the address, not just the dashboard.** Passing
+`bramble-spike.example.com` produced `example.reentry351@simplelogin.com`. The
+site name is lifted into the local part, which has two consequences the design
+has to take a position on.
+
+The hostname we send has to be the registrable domain, cleanly derived, because
+it ends up in an address the user reads and gives out. `registrableDomain`
+(`platform-extension/src/dedupe.ts`) already does this for the corner prompt; the
+alias path uses the same derivation rather than passing a raw form URL through.
+
+And the address discloses where it was used. Anyone shown
+`example.reentry351@simplelogin.com` learns the holder has an account at
+example.com, which is a real loss for a feature whose purpose is
+compartmentalization. SimpleLogin's `mode=uuid` produces an address that reveals
+nothing, so the settings screen offers the choice and names the tradeoff:
+`word` is legible in your own inbox, `uuid` tells a reader nothing. Which should
+be the default is a judgement to make in Phase 2, but leaving it implicit is not
+an option, because sending `hostname` at all is what triggers this.
+
 **A `401` does not mean "bad API key".** Forward Email answers a valid key on an
 unverified account with
 `401 {"message":"Please verify your email address to continue."}`. Any client
@@ -369,11 +396,21 @@ that was never the problem. The provider's own `message` is surfaced verbatim,
 and the status only chooses whether the message is treated as an auth failure.
 The same rule catches Addy, whose errors are also `{"message": ...}`.
 
+**Forward Email cannot be reached at all without a domain.** A verified account
+returns `200` with an empty domain array, and there is nothing to create an alias
+under. This is structural: Forward Email has no shared alias domains of its own
+in the way Addy has `anonaddy.me` or DuckDuckGo has `duck.com`, so every alias
+lives under a domain the user owns and whose MX records point there. Its
+onboarding is not "paste an API key" but "already run your mail here", which is a
+different provider in practice from the other two even though the API is the
+simplest of the four.
+
 ### Still open
 
 1. **Fastmail is unverified and postponed** (see the status note in its section).
-2. Does Addy accept a create with `format` omitted, and does Forward Email really
-   generate a random `name`? Both need `--create`, which has not been run.
+2. **Forward Email is unverified past authentication**, and stays that way until
+   a domain is pointed at it. The create path, and whether an omitted `name`
+   really yields a random one, are untested.
 3. What each provider returns at **quota exhaustion**. Addy's limit of 10 makes
    this cheap to provoke deliberately and worth doing before Phase 2 designs the
    error surface.
