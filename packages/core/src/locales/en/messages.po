@@ -274,8 +274,16 @@ msgid "Alias format"
 msgstr "Alias format"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Alias provider"
+msgstr "Alias provider"
+
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias style"
 msgstr "Alias style"
+
+#: packages/core/src/app/screens/Settings/Settings.tsx
+msgid "Aliases"
+msgstr "Aliases"
 
 #: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
 msgid "All"
@@ -1201,8 +1209,8 @@ msgid "Elephant"
 msgstr "Elephant"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
-msgid "Email aliases"
-msgstr "Email aliases"
+#~ msgid "Email aliases"
+#~ msgstr "Email aliases"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
@@ -1749,6 +1757,10 @@ msgstr "Later"
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Leave the credential fields blank to keep the ones you saved."
 msgstr "Leave the credential fields blank to keep the ones you saved."
+
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Leave unset for your account's default domain, or pick one of your own."
+msgstr "Leave unset for your account's default domain, or pick one of your own."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Leave unset to use your provider account's own default."

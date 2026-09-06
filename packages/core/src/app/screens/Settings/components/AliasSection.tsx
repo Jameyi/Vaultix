@@ -65,7 +65,13 @@ export function AliasSection() {
 		return key;
 	};
 	const fieldHint = (key: string): string | undefined => {
-		if (key === "domain") return t`Addy needs a domain before it can create an alias.`;
+		// Both providers have a domain field but they do not mean the same thing: Addy cannot
+		// create without one, while SimpleLogin uses the account default until you pick.
+		if (key === "domain") {
+			return provider === "addy"
+				? t`Addy needs a domain before it can create an alias.`
+				: t`Leave unset for your account's default domain, or pick one of your own.`;
+		}
 		if (key === "format") return t`Leave unset to use your provider account's own default.`;
 		// Stated because it is a privacy choice rather than a cosmetic one: a word alias carries
 		// the site's name, so the address itself discloses where it is used.
@@ -146,7 +152,7 @@ export function AliasSection() {
 	const selectedIsShared = domainList.find((d) => d.domain === options.domain)?.shared ?? true;
 
 	return (
-		<Section icon={<AtSign className="w-4 h-4 text-primary" />} title={t`Email aliases`}>
+		<Section icon={<AtSign className="w-4 h-4 text-primary" />} title={t`Alias provider`}>
 			<p className="text-xs text-muted-foreground">
 				<Trans>
 					Generate a different email address for every site, from an account you already have.
