@@ -2588,7 +2588,6 @@ msgstr "Executa silenciosamente na barra de menus para que os backups agendados 
 msgid "Santa"
 msgstr "Papai Noel"
 
-#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Save"
 msgstr "Salvar"

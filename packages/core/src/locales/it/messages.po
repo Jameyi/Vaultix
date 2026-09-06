@@ -2588,7 +2588,6 @@ msgstr "Resta in esecuzione silenziosamente nella barra dei menu, così i backup
 msgid "Santa"
 msgstr "Babbo Natale"
 
-#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Save"
 msgstr "Salva"

@@ -89,16 +89,54 @@ export function AliasSection() {
 		setProvider(config.provider);
 		setBaseUrl(config.baseUrl ?? "");
 		setOptions(config.options);
+		// Seed the picker with the saved domain, so a stored choice is visible on a revisit.
+		// The list itself only arrives from the account, and asking for it on every visit would
+		// contact the provider without being asked; until then a select with no matching option
+		// renders empty, which reads as "not set" for a setting that is very much set.
+		const saved = config.options.domain;
+		if (saved)
+			setDomainList((list) => (list.length > 0 ? list : [{ domain: saved, shared: true }]));
 	}, [config]);
 
-	const input = useCallback(
-		(): SaveAliasInput => ({
+	const inputWith = useCallback(
+		(patch: Partial<SaveAliasInput> = {}): SaveAliasInput => ({
 			provider,
 			baseUrl: baseUrl.trim() || undefined,
 			options,
 			apiKey: apiKey.trim() || undefined,
+			...patch,
 		}),
 		[provider, baseUrl, options, apiKey],
+	);
+
+	/**
+	 * Write the change straight through, as every other settings control does.
+	 *
+	 * Held back in one case: until a key exists there is nothing to store, and a key belongs to
+	 * the provider it was issued by, so a config is never written with one provider's key under
+	 * another's name. Both cases keep the change in component state, and it is written the moment
+	 * a key for this provider arrives.
+	 */
+	const persist = useCallback(
+		async (patch: Partial<SaveAliasInput>) => {
+			const next = inputWith(patch);
+			if (!next.apiKey && config?.provider !== next.provider) return;
+			try {
+				await save(next);
+			} catch (e) {
+				setStatus({ kind: "error", message: messageFor(e) });
+			}
+		},
+		[save, inputWith, config],
+	);
+
+	const setOption = useCallback(
+		(key: string, value: string) => {
+			const next = { ...options, [key]: value };
+			setOptions(next);
+			void persist({ options: next });
+		},
+		[options, persist],
 	);
 
 	/** Verify the key, and load the choices for any field the account has to answer. Read-only on
@@ -106,33 +144,20 @@ export function AliasSection() {
 	const onVerify = useCallback(async () => {
 		setStatus({ kind: "busy" });
 		try {
-			const account = await verify(input());
+			const account = await verify(inputWith());
 			if (descriptor.fields.some((f) => f.options === "domains")) {
-				const d = await domains(input());
+				const d = await domains(inputWith());
 				setDomainList(d.options);
 				// Preselect the account's own default rather than making someone choose again what
 				// they already chose at the provider. Only when nothing is set: an existing choice,
 				// including a custom domain, is never overwritten.
-				if (d.default) {
-					setOptions((o) => (o.domain ? o : { ...o, domain: d.default as string }));
-				}
+				if (d.default && !options.domain) setOption("domain", d.default);
 			}
 			setStatus({ kind: "ok", account });
 		} catch (e) {
 			setStatus({ kind: "error", message: messageFor(e) });
 		}
-	}, [verify, domains, input, descriptor]);
-
-	const onSave = useCallback(async () => {
-		setStatus({ kind: "busy" });
-		try {
-			await save(input());
-			setApiKey("");
-			setStatus({ kind: "idle" });
-		} catch (e) {
-			setStatus({ kind: "error", message: messageFor(e) });
-		}
-	}, [save, input]);
+	}, [verify, domains, inputWith, descriptor, options.domain, setOption]);
 
 	const onDisconnect = useCallback(async () => {
 		await disconnect();
@@ -143,8 +168,10 @@ export function AliasSection() {
 	}, [disconnect]);
 
 	const busy = status.kind === "busy";
+	// Whether the stored key is this provider's. An Addy key is not a SimpleLogin key, so after a
+	// switch the saved one is not offered as a thing to keep.
+	const savedForThisProvider = config?.provider === provider;
 	const missing = descriptor.fields.filter((f) => f.required && !options[f.key]);
-	const canSave = !busy && Boolean(apiKey.trim() || config) && missing.length === 0;
 
 	const connected = status.kind === "ok" ? status.account : undefined;
 	// Whether the chosen domain is one of the provider's shared ones, which is what decides
@@ -183,12 +210,19 @@ export function AliasSection() {
 
 			<div>
 				<TextField
-					label={config ? t`API key (leave blank to keep the saved one)` : t`API key`}
+					label={savedForThisProvider ? t`API key (leave blank to keep the saved one)` : t`API key`}
 					type="password"
 					autoComplete="off"
 					value={apiKey}
 					disabled={busy}
 					onChange={(e) => setApiKey(e.target.value)}
+					// On blur rather than on change: this is the one field where writing every
+					// keystroke would put a series of half-typed keys through the vault key and into
+					// storage.
+					onBlur={(e) => {
+						const key = e.target.value.trim();
+						if (key) void persist({ apiKey: key });
+					}}
 				/>
 				<a
 					href={descriptor.keyUrl}
@@ -213,7 +247,7 @@ export function AliasSection() {
 							label={fieldLabel(field.key)}
 							value={options[field.key] ?? ""}
 							disabled={busy || choices.length === 0}
-							onChange={(e) => setOptions((o) => ({ ...o, [field.key]: e.target.value }))}
+							onChange={(e) => setOption(field.key, e.target.value)}
 						>
 							{/* An optional field offers "no choice", which is what lets the account's own
 							    default apply rather than one we impose. */}
@@ -246,7 +280,10 @@ export function AliasSection() {
 							autoComplete="off"
 							value={baseUrl}
 							disabled={busy}
-							onChange={(e) => setBaseUrl(e.target.value)}
+							onChange={(e) => {
+								setBaseUrl(e.target.value);
+								void persist({ baseUrl: e.target.value.trim() || undefined });
+							}}
 						/>
 						<p className="text-xs text-muted-foreground mt-1.5">
 							<Trans>
@@ -271,9 +308,6 @@ export function AliasSection() {
 						<RefreshCw className="w-3.5 h-3.5" />
 					)}
 					<Trans>Check key</Trans>
-				</Button>
-				<Button onClick={onSave} disabled={!canSave}>
-					<Trans>Save</Trans>
 				</Button>
 				{config && (
 					<Button variant="ghost" onClick={onDisconnect} disabled={busy}>

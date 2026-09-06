@@ -2588,7 +2588,6 @@ msgstr "Se ejecuta discretamente en la barra de menús para que las copias de se
 msgid "Santa"
 msgstr "Papá Noel"
 
-#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Save"
 msgstr "Guardar"

@@ -2580,7 +2580,6 @@ msgstr "Runs quietly in the menu bar so scheduled backups happen without you ope
 msgid "Santa"
 msgstr "Santa"
 
-#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Save"
 msgstr "Save"

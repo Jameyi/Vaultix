@@ -2600,7 +2600,6 @@ msgstr "Läuft unauffällig in der Menüleiste, damit geplante Backups erfolgen,
 msgid "Santa"
 msgstr "Weihnachtsmann"
 
-#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Save"
 msgstr "Speichern"
