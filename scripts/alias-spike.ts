@@ -19,6 +19,7 @@
  * Usage:
  *   pnpm run spike:aliases              # verify tokens + discovery, no writes
  *   pnpm run spike:aliases --create     # also create ONE alias per configured provider
+ *   pnpm run spike:aliases --create --only=forwardemail   # just one, since a create is not free
  */
 
 // The origins the four targets actually run at. The question is not whether these hosts do CORS
@@ -270,7 +271,24 @@ async function forwardEmail() {
 		headers,
 		body: JSON.stringify({ description: DESCRIPTION, is_enabled: true }),
 	});
-	console.log(`     ${bold("alias:")} ${pick(created.body, "name")}@${domain}`);
+	// Only on success: this provider answers a free plan with a 402, and printing the address
+	// unconditionally reported "undefined@domain" as though something had been made.
+	if (created.status >= 200 && created.status < 300) {
+		console.log(`     ${bold("alias:")} ${pick(created.body, "name")}@${domain}`);
+	}
+}
+
+const PROVIDERS = { addy, simplelogin, fastmail, forwardemail: forwardEmail };
+
+// --only exists because a create is not free. Re-running the whole set to exercise one provider
+// spends an Addy alias out of ten every time.
+const only = process.argv.find((a) => a.startsWith("--only="))?.slice("--only=".length);
+const selected = Object.entries(PROVIDERS).filter(([name]) => !only || name === only);
+if (only && selected.length === 0) {
+	console.log(
+		red(`\nunknown provider ${only}; expected one of ${Object.keys(PROVIDERS).join(", ")}`),
+	);
+	process.exit(1);
 }
 
 console.log(
@@ -281,8 +299,5 @@ console.log(
 		: dim("\nRead-only. Pass --create to also create one alias per configured provider."),
 );
 
-await addy();
-await simplelogin();
-await fastmail();
-await forwardEmail();
+for (const [, run] of selected) await run();
 console.log("");

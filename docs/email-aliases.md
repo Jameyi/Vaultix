@@ -31,9 +31,10 @@ that is stale is indistinguishable from the half that is not.
 
 Each is a single authenticated POST once discovery is done. What differs is the
 auth header, whether anything must be fetched first, and how much configuration
-the user has to supply before the first alias can exist. Addy and SimpleLogin are
-verified against live accounts; Fastmail is postponed and Forward Email is
-pending account verification, both noted in their sections.
+the user has to supply before the first alias can exist. **v1 ships Addy and
+SimpleLogin**, the two verified end to end against live accounts. Fastmail and
+Forward Email are researched and deferred, each for the same reason and noted in
+its own section: neither can be proven without a paid account.
 
 ### Addy.io
 
@@ -396,21 +397,38 @@ that was never the problem. The provider's own `message` is surfaced verbatim,
 and the status only chooses whether the message is treated as an auth failure.
 The same rule catches Addy, whose errors are also `{"message": ...}`.
 
-**Forward Email cannot be reached at all without a domain.** A verified account
-returns `200` with an empty domain array, and there is nothing to create an alias
-under. This is structural: Forward Email has no shared alias domains of its own
-in the way Addy has `anonaddy.me` or DuckDuckGo has `duck.com`, so every alias
-lives under a domain the user owns and whose MX records point there. Its
-onboarding is not "paste an API key" but "already run your mail here", which is a
-different provider in practice from the other two even though the API is the
-simplest of the four.
+**Forward Email needs a domain the user owns AND a paid plan.** Two separate
+walls, found one after the other. A verified account with no domains returns
+`200` and an empty array, because Forward Email has no shared alias domains of
+its own the way Addy has `anonaddy.me`; every alias lives under a domain the user
+owns with MX records pointed there. With a domain added, the create then returns
+`402 {"message":"Please upgrade to a paid plan [...] to unlock this feature."}`,
+so the alias API is gated behind Enhanced Protection.
+
+Its onboarding is therefore "already run your mail here, on a paid plan", not
+"paste an API key". That is a different proposition from the other two despite
+having the simplest API of the four, and it puts Forward Email in the same
+position as Fastmail: researched, reachable, unverifiable without spending money.
+Both are deferred rather than dropped.
+
+**`402` is its own error class, and the provider's message can contain a URL.**
+Payment-required is neither an auth failure nor quota exhaustion, and a client
+that folds every non-2xx into "could not create an alias" tells a user on the
+wrong plan to go check their API key. It joins the list of statuses that mean
+something specific.
+
+The message that came back carries an upgrade link, which sharpens the earlier
+rule about surfacing provider text verbatim: surface it as **plain text, never
+auto-linked**. A password manager that renders a clickable URL supplied by a
+remote server, in a screen where the user has just been asked for a credential,
+is building a phishing surface out of an error path. The message is shown; the
+link is not made clickable.
 
 ### Still open
 
 1. **Fastmail is unverified and postponed** (see the status note in its section).
-2. **Forward Email is unverified past authentication**, and stays that way until
-   a domain is pointed at it. The create path, and whether an omitted `name`
-   really yields a random one, are untested.
+2. **Forward Email is unverified past discovery**, and stays that way without a
+   paid plan. Whether an omitted `name` really yields a random one is untested.
 3. What each provider returns at **quota exhaustion**. Addy's limit of 10 makes
    this cheap to provoke deliberately and worth doing before Phase 2 designs the
    error surface.
@@ -421,7 +439,7 @@ simplest of the four.
 | Phase | Work |
 |---|---|
 | 0 | This document, plus the spike script. |
-| 1 | `core/aliases/`: provider descriptors, the clients (Addy and SimpleLogin, plus Forward Email once its account verifies), zod-validated responses, VEK-wrapped key storage, tests. |
+| 1 | `core/aliases/`: provider descriptors, the Addy and SimpleLogin clients, zod-validated responses, VEK-wrapped key storage, tests. |
 | 2 | Shared UI: the settings section and the entry-form button, in six locales. |
 | 3 | Extension in-page suggestion: the email-field trigger, the picker row, the background round trip, save wiring, `_locales`, dom tests. |
 | 4 | Device testing on both mobile platforms and both browsers, docs, release. |
