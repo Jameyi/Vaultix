@@ -49,6 +49,11 @@ msgstr "{0, plural, one {Supprimer # entrée ?} other {Supprimer # entrées ?}}"
 msgid "{0} · added {1}"
 msgstr "{0} · ajouté {1}"
 
+#. placeholder {0}: d.domain
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "{0} (your domain)"
+msgstr ""
+
 #: packages/core/src/app/bulk-actions/tags.tsx
 msgid "{affected, plural, one {Tag # entry} other {Tag # entries}}"
 msgstr "{affected, plural, one {Étiqueter # entrée} other {Étiqueter # entrées}}"

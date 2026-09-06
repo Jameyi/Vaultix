@@ -53,7 +53,12 @@ export const ALIAS_PROVIDERS: readonly AliasProviderDescriptor[] = [
 		defaultBaseUrl: SIMPLELOGIN_DEFAULT_BASE_URL,
 		selfHostable: true,
 		keyUrl: "https://app.simplelogin.io/dashboard/api_key",
-		fields: [{ key: "mode", options: SIMPLELOGIN_MODES, required: false }],
+		fields: [
+			// Optional: unset means the account's default domain via the random endpoint. Set, it
+			// reaches a domain the user owns, which is the only route to a custom domain here.
+			{ key: "domain", options: "domains", required: false },
+			{ key: "mode", options: SIMPLELOGIN_MODES, required: false },
+		],
 	},
 ];
 

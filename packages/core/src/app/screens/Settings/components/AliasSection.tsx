@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
 	ALIAS_PROVIDERS,
 	type AliasAccount,
+	type AliasDomainOption,
 	AliasError,
 	type AliasProviderId,
 	describeProvider,
@@ -50,7 +51,7 @@ export function AliasSection() {
 	const [baseUrl, setBaseUrl] = useState("");
 	const [apiKey, setApiKey] = useState("");
 	const [options, setOptions] = useState<Record<string, string>>({});
-	const [domainList, setDomainList] = useState<string[]>([]);
+	const [domainList, setDomainList] = useState<AliasDomainOption[]>([]);
 	const [status, setStatus] = useState<Status>({ kind: "idle" });
 
 	const descriptor = describeProvider(provider);
@@ -100,7 +101,14 @@ export function AliasSection() {
 		try {
 			const account = await verify(input());
 			if (descriptor.fields.some((f) => f.options === "domains")) {
-				setDomainList(await domains(input()));
+				const d = await domains(input());
+				setDomainList(d.options);
+				// Preselect the account's own default rather than making someone choose again what
+				// they already chose at the provider. Only when nothing is set: an existing choice,
+				// including a custom domain, is never overwritten.
+				if (d.default) {
+					setOptions((o) => (o.domain ? o : { ...o, domain: d.default as string }));
+				}
 			}
 			setStatus({ kind: "ok", account });
 		} catch (e) {
@@ -132,6 +140,10 @@ export function AliasSection() {
 	const canSave = !busy && Boolean(apiKey.trim() || config) && missing.length === 0;
 
 	const connected = status.kind === "ok" ? status.account : undefined;
+	// Whether the chosen domain is one of the provider's shared ones, which is what decides
+	// whether an allowance applies at all. Unknown domain (nothing chosen yet) reads as shared,
+	// since that is what a provider default is.
+	const selectedIsShared = domainList.find((d) => d.domain === options.domain)?.shared ?? true;
 
 	return (
 		<Section icon={<AtSign className="w-4 h-4 text-primary" />} title={t`Email aliases`}>
@@ -194,7 +206,10 @@ export function AliasSection() {
 			)}
 
 			{descriptor.fields.map((field) => {
-				const choices = field.options === "domains" ? domainList : field.options;
+				const fromAccount = field.options === "domains";
+				const choices: string[] = fromAccount
+					? domainList.map((d) => d.domain)
+					: [...field.options];
 				const hint = fieldHint(field.key);
 				return (
 					<div key={field.key}>
@@ -207,11 +222,19 @@ export function AliasSection() {
 							{/* An optional field offers "no choice", which is what lets the account's own
 							    default apply rather than one we impose. */}
 							<option value="">{field.required ? t`Choose...` : t`Provider default`}</option>
-							{choices.map((c) => (
-								<option key={c} value={c}>
-									{c}
-								</option>
-							))}
+							{fromAccount
+								? domainList.map((d) => (
+										<option key={d.domain} value={d.domain}>
+											{/* A domain the user brought is worth marking: it is usually the one
+											    with no allowance attached. */}
+											{d.shared ? d.domain : t`${d.domain} (your domain)`}
+										</option>
+									))
+								: choices.map((c) => (
+										<option key={c} value={c}>
+											{c}
+										</option>
+									))}
 						</SelectField>
 						{hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
 					</div>
@@ -246,7 +269,9 @@ export function AliasSection() {
 			{connected && (
 				<p className="text-xs text-primary flex items-center gap-1.5">
 					<Check className="w-3.5 h-3.5 shrink-0" />
-					{connected.quota
+					{/* The allowance is counted over the provider's shared domains only, so quoting it
+					    beside a domain of the user's own would claim a limit that does not apply. */}
+					{connected.quota && selectedIsShared
 						? t`Connected. ${connected.quota.used} of ${connected.quota.limit} aliases used.`
 						: t`Connected.`}
 				</p>

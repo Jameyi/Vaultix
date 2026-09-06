@@ -106,13 +106,34 @@ describe("createAddyClient", () => {
 		});
 	});
 
-	it("returns the domain list as given", async () => {
-		route(() => json({ data: ["anonaddy.com", "anonaddy.me", "you.anonaddy.me"] }));
-		await expect(createAddyClient({}, "key").domains?.()).resolves.toEqual([
-			"anonaddy.com",
-			"anonaddy.me",
-			"you.anonaddy.me",
-		]);
+	// The allowance is counted over shared domains only, so a domain the user brought must be
+	// distinguishable or the UI quotes a limit that does not apply to it.
+	it("marks which domains are the provider's and which are the user's own", async () => {
+		route(() =>
+			json({
+				data: ["anonaddy.com", "anonaddy.me", "you.anonaddy.me", "mail.example.com"],
+				sharedDomains: ["anonaddy.com", "anonaddy.me"],
+				defaultAliasDomain: "anonaddy.me",
+			}),
+		);
+		await expect(createAddyClient({}, "key").domains?.()).resolves.toEqual({
+			options: [
+				{ domain: "anonaddy.com", shared: true },
+				{ domain: "anonaddy.me", shared: true },
+				{ domain: "you.anonaddy.me", shared: false },
+				{ domain: "mail.example.com", shared: false },
+			],
+			default: "anonaddy.me",
+		});
+	});
+
+	// An older or self-hosted Addy that does not send sharedDomains: treat every domain as shared,
+	// which is the cautious reading. Claiming a custom domain is unlimited when it is not would
+	// have someone hit a wall with no warning.
+	it("treats every domain as shared when the provider does not say", async () => {
+		route(() => json({ data: ["anonaddy.me", "mail.example.com"] }));
+		const d = await createAddyClient({}, "key").domains?.();
+		expect(d?.options.every((o) => o.shared)).toBe(true);
 	});
 
 	it("strips a trailing slash from a self-hosted base URL", async () => {

@@ -3,6 +3,7 @@ import { request } from "./http";
 import {
 	type AliasAccount,
 	type AliasClient,
+	type AliasDomains,
 	AliasError,
 	type AliasRequest,
 	type AliasResult,
@@ -35,7 +36,13 @@ export interface AddyConfig {
 }
 
 const CreateSchema = z.object({ data: z.object({ email: z.string() }) });
-const DomainsSchema = z.object({ data: z.array(z.string()) });
+// More than `data` comes back, and the rest is what makes a custom domain legible: which of the
+// listed domains Addy owns and shares, and which domain the account already prefers.
+const DomainsSchema = z.object({
+	data: z.array(z.string()),
+	sharedDomains: z.array(z.string()).optional(),
+	defaultAliasDomain: z.string().optional(),
+});
 const AccountSchema = z.object({
 	data: z.object({
 		username: z.string().optional(),
@@ -82,9 +89,16 @@ export function createAddyClient(cfg: AddyConfig, apiKey: string): AliasClient {
 			return { label: d.username, quota };
 		},
 
-		async domains(): Promise<string[]> {
+		async domains(): Promise<AliasDomains> {
 			const res = await request(`${base}/api/v1/domain-options`, { headers: h }, DomainsSchema);
-			return res.data;
+			// `data` is every domain this account may use: Addy's shared ones, the user's own
+			// subdomains, and any custom domain they have added. `sharedDomains` is the subset the
+			// allowance is counted over, so anything absent from it is the user's own and unlimited.
+			const shared = new Set(res.sharedDomains ?? res.data);
+			return {
+				options: res.data.map((domain) => ({ domain, shared: shared.has(domain) })),
+				default: res.defaultAliasDomain,
+			};
 		},
 
 		async create(req: AliasRequest): Promise<AliasResult> {

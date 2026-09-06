@@ -35,6 +35,8 @@ export {
 export {
 	type AliasAccount,
 	type AliasClient,
+	type AliasDomainOption,
+	type AliasDomains,
 	AliasError,
 	type AliasErrorKind,
 	type AliasProviderId,
@@ -62,7 +64,7 @@ export function createAliasClient(
 			);
 		case "simplelogin":
 			return createSimpleLoginClient(
-				{ baseUrl, mode: options.mode as SimpleLoginMode | undefined },
+				{ baseUrl, mode: options.mode as SimpleLoginMode | undefined, domain: options.domain },
 				apiKey,
 			);
 	}

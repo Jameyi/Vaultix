@@ -82,17 +82,37 @@ export class AliasError extends Error {
 	}
 }
 
+/** One domain an account may create aliases under. */
+export interface AliasDomainOption {
+	domain: string;
+	/**
+	 * A domain the provider owns and shares with everyone, rather than one of the user's own.
+	 *
+	 * Worth distinguishing because an allowance is usually counted over shared domains only:
+	 * Addy's limit is literally `active_shared_domain_alias_limit`, and aliases on a domain or
+	 * subdomain the user owns do not touch it. A UI that shows one number for both would tell
+	 * someone with a custom domain they are nearly out when they have no limit at all.
+	 */
+	shared: boolean;
+}
+
+export interface AliasDomains {
+	options: AliasDomainOption[];
+	/** The account's own default, so the settings screen can preselect rather than ask. */
+	default?: string;
+}
+
 /**
  * One provider's API, as the rest of the app sees it.
  *
- * `domains` is optional because only Addy needs one chosen before it can create at all; the
- * descriptor says whether to ask (see descriptors.ts) so no caller switches on provider id.
+ * `domains` is optional because a provider may have nothing to choose; the descriptor says
+ * whether to ask (see descriptors.ts) so no caller switches on provider id.
  */
 export interface AliasClient {
 	/** Check the stored key and report what the account allows. Read-only: never creates. */
 	verify(): Promise<AliasAccount>;
 	/** Create one alias. The call that costs quota, so callers make it on an explicit gesture. */
 	create(req: AliasRequest): Promise<AliasResult>;
-	/** The domains this account may create under, for providers that require a choice. */
-	domains?(): Promise<string[]>;
+	/** The domains this account may create under, including any the user brought themselves. */
+	domains?(): Promise<AliasDomains>;
 }

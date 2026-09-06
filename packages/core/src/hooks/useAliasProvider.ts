@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
 	type AliasAccount,
 	type AliasConfig,
+	type AliasDomains,
 	AliasError,
 	type AliasProviderId,
 	aliasConfigKeyFor,
@@ -115,10 +116,10 @@ export function useAliasProvider() {
 		[clientFrom],
 	);
 
-	/** The domains this account may create under, for a provider that requires a choice. */
+	/** The domains this account may create under, the user's own custom ones included. */
 	const domains = useCallback(
-		async (input: SaveAliasInput): Promise<string[]> =>
-			(await (await clientFrom(input)).domains?.()) ?? [],
+		async (input: SaveAliasInput): Promise<AliasDomains> =>
+			(await (await clientFrom(input)).domains?.()) ?? { options: [] },
 		[clientFrom],
 	);
 

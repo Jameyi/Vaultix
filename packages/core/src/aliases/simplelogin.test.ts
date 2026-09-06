@@ -91,3 +91,118 @@ describe("createSimpleLoginClient", () => {
 		});
 	});
 });
+
+// Custom domains are only reachable through the custom endpoint: the random one always uses the
+// account's default domain. See docs/email-aliases.md.
+describe("createSimpleLoginClient on a chosen domain", () => {
+	const OPTIONS = {
+		can_create: true,
+		prefix_suggestion: "example",
+		suffixes: [
+			{ suffix: ".word123@simplelogin.com", signed_suffix: "shared.sig", is_custom: false },
+			{ suffix: "@mail.example.com", signed_suffix: "custom.sig", is_custom: true },
+		],
+	};
+	const MAILBOXES = {
+		mailboxes: [
+			{ id: 7, default: false },
+			{ id: 42, default: true },
+		],
+	};
+
+	/** Route by path, so the three-call custom flow can be exercised end to end. */
+	function routeAll(): { url: string; init: RequestInit }[] {
+		const calls: { url: string; init: RequestInit }[] = [];
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string | URL, init?: RequestInit) => {
+				const u = String(url);
+				calls.push({ url: u, init: init ?? {} });
+				if (u.includes("/alias/options")) return json(OPTIONS);
+				if (u.includes("/mailboxes")) return json(MAILBOXES);
+				return json({ email: "example-a1b2c3d4@mail.example.com" }, 201);
+			}),
+		);
+		return calls;
+	}
+
+	it("lists every domain the account can use, marking the user's own", async () => {
+		route(() => json(OPTIONS));
+		await expect(createSimpleLoginClient({}, "key").domains?.()).resolves.toEqual({
+			options: [
+				{ domain: "simplelogin.com", shared: true },
+				{ domain: "mail.example.com", shared: false },
+			],
+		});
+	});
+
+	it("creates through the custom endpoint with the signed suffix for that domain", async () => {
+		const calls = routeAll();
+		const c = createSimpleLoginClient({ domain: "mail.example.com" }, "key");
+		await expect(c.create({ site: "example.com" })).resolves.toEqual({
+			address: "example-a1b2c3d4@mail.example.com",
+		});
+		const create = calls.find((x) => x.url.includes("/v3/alias/custom/new"));
+		const body = JSON.parse(create?.init.body as string);
+		expect(body.signed_suffix).toBe("custom.sig");
+		// The default mailbox, not merely the first one the account happens to list.
+		expect(body.mailbox_ids).toEqual([42]);
+	});
+
+	// A custom domain's suffix carries no randomness of its own, so a fixed site-derived prefix
+	// would collide on the second alias for the same site.
+	it("gives a custom-domain prefix entropy of its own", async () => {
+		const calls = routeAll();
+		await createSimpleLoginClient({ domain: "mail.example.com" }, "key").create({
+			site: "example.com",
+		});
+		const body = JSON.parse(calls.find((x) => x.url.includes("/custom/new"))?.init.body as string);
+		expect(body.alias_prefix).toMatch(/^example-[0-9a-f]{8}$/);
+	});
+
+	// A shared suffix already ends in a random word, so the prefix stays the readable site name.
+	it("leaves a shared-domain prefix as the site name", async () => {
+		const calls = routeAll();
+		await createSimpleLoginClient({ domain: "simplelogin.com" }, "key").create({
+			site: "example.com",
+		});
+		const body = JSON.parse(calls.find((x) => x.url.includes("/custom/new"))?.init.body as string);
+		expect(body.alias_prefix).toBe("example");
+	});
+
+	it("uses the random endpoint when no domain is chosen", async () => {
+		const calls = routeAll();
+		await createSimpleLoginClient({}, "key").create({ site: "example.com" });
+		expect(calls.some((x) => x.url.includes("/alias/random/new"))).toBe(true);
+		expect(calls.some((x) => x.url.includes("/custom/new"))).toBe(false);
+	});
+
+	it("names the remedy when the configured domain is gone", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string | URL) =>
+				String(url).includes("/alias/options") ? json(OPTIONS) : json(MAILBOXES),
+			),
+		);
+		const err = await createSimpleLoginClient({ domain: "gone.example" }, "key")
+			.create({})
+			.catch((e) => e);
+		expect(err.kind).toBe("config");
+		expect(err.message).toContain("gone.example");
+	});
+
+	it("reports an account that cannot create as a quota failure", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string | URL) =>
+				String(url).includes("/alias/options")
+					? json({ ...OPTIONS, can_create: false })
+					: json(MAILBOXES),
+			),
+		);
+		const err = await createSimpleLoginClient({ domain: "mail.example.com" }, "key")
+			.create({})
+			.catch((e) => e);
+		expect(err.kind).toBe("quota");
+	});
+});

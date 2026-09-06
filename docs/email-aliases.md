@@ -94,6 +94,29 @@ alias legible in the user's SimpleLogin dashboard later. Always send it.
 
 Also self-hostable, so again: base URL is configuration.
 
+**Custom domains need a different endpoint entirely.** `alias/random/new` always
+uses the account's default domain, so a domain the user owns is unreachable
+through it. Reaching one takes three calls:
+
+1. `GET /api/v5/alias/options[?hostname=]` returns `can_create`, a
+   `prefix_suggestion` derived from the hostname, and `suffixes[]`, each with a
+   `suffix`, a `signed_suffix` and `is_custom`. The signature is the point: it is
+   what stops a client naming an arbitrary domain.
+2. `GET /api/v2/mailboxes` for the default mailbox id, which the create requires
+   and which only the account knows.
+3. `POST /api/v3/alias/custom/new[?hostname=]` with `alias_prefix`,
+   `signed_suffix`, `mailbox_ids` and an optional `note`.
+
+So the random path stays the default and the custom path is used only when a
+domain is chosen. One call against three, for the case most people want.
+
+The prefix needs care. A shared suffix already carries its own randomness
+(`.angriness537@simplelogin.com`), so the site name alone is unique enough and
+the address stays readable. A custom domain's suffix is bare (`@mail.example.com`),
+so the prefix has to supply the uniqueness itself or the second alias for the
+same site collides with the first. Random entropy is therefore appended only when
+`is_custom` is set.
+
 ### Fastmail
 
 **Status: postponed, not cancelled.** Masked Email needs a paid Fastmail account
@@ -347,12 +370,28 @@ September 2026:
 `401`s: `*` from Addy, reflected from SimpleLogin. Forward Email reflects it too,
 on a `401`. So there is no remaining reason to expect a native HTTP path.
 
-**Addy's `domain-options` returns a flat string array** under `data`, mixing
-shared domains with the account's own subdomains
-(`anonaddy.me`, `you.anonaddy.me`). The settings screen can render it directly;
-there is no object shape to unpack, and no separate "is this one shared" flag,
-which means the UI cannot distinguish a quota-bearing shared domain from a free
-subdomain without inferring it from the name. Worth not inferring.
+**Addy's `domain-options` says which domains are Addy's own.** The response is
+not just `data`:
+
+```json
+{
+  "data": ["anonaddy.com", "anonaddy.me", "you.anonaddy.com", "you.anonaddy.me"],
+  "sharedDomains": ["anonaddy.com", "anonaddy.me"],
+  "defaultAliasDomain": "anonaddy.me",
+  "defaultAliasFormat": "random_characters"
+}
+```
+
+`data` is everything the account may create under: Addy's shared domains, the
+user's own subdomains from `/api/v1/usernames`, and any custom domain they have
+added via `/api/v1/domains`. `sharedDomains` is the subset the allowance is
+counted over, so anything in `data` and not in `sharedDomains` is the user's own
+and unlimited. `defaultAliasDomain` is the account's existing preference, which
+is what the settings screen preselects instead of asking someone to choose again.
+
+A self-hosted or older Addy that omits `sharedDomains` is read as "all shared",
+which is the cautious direction: claiming a domain is unlimited when it is not
+would let someone hit a wall with no warning.
 
 **Quota is readable, and small.** `account-details` exposes
 `active_shared_domain_alias_count` and `active_shared_domain_alias_limit`; a free

@@ -38,7 +38,7 @@ describe("alias config storage", () => {
 describe("provider descriptors", () => {
 	it("describes each provider's own settings without the caller switching on id", () => {
 		expect(describeProvider("addy").fields.map((f) => f.key)).toEqual(["domain", "format"]);
-		expect(describeProvider("simplelogin").fields.map((f) => f.key)).toEqual(["mode"]);
+		expect(describeProvider("simplelogin").fields.map((f) => f.key)).toEqual(["domain", "mode"]);
 	});
 
 	// Addy's domain list is only knowable from the account, which is what this marker means.
@@ -51,6 +51,8 @@ describe("provider descriptors", () => {
 	it("names the required fields still missing, so a click is not spent finding out", () => {
 		expect(missingRequiredFields("addy", {})).toEqual(["domain"]);
 		expect(missingRequiredFields("addy", { domain: "anonaddy.me" })).toEqual([]);
+		// SimpleLogin's domain is optional where Addy's is required: unset simply means the
+		// account's default domain, which is a perfectly good answer.
 		expect(missingRequiredFields("simplelogin", {})).toEqual([]);
 	});
 });
