@@ -52,7 +52,7 @@ msgstr "{0} · aggiunto {1}"
 #. placeholder {0}: d.domain
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "{0} (your domain)"
-msgstr ""
+msgstr "{0} (dominio personale)"
 
 #: packages/core/src/app/bulk-actions/tags.tsx
 msgid "{affected, plural, one {Tag # entry} other {Tag # entries}}"
@@ -253,7 +253,7 @@ msgstr "Aggiunto quando si crea una chiave di accesso su un sito con Bramble. Ri
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Addy needs a domain before it can create an alias."
-msgstr ""
+msgstr "Addy necessita di un dominio prima di poter creare un alias."
 
 #: packages/core/src/app/entry-modes/login.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
@@ -267,23 +267,23 @@ msgstr "Aeroplano"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias domain"
-msgstr ""
+msgstr "Dominio alias"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias format"
-msgstr ""
+msgstr "Formato alias"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias provider"
-msgstr ""
+msgstr "Provider di alias"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias style"
-msgstr ""
+msgstr "Stile alias"
 
 #: packages/core/src/app/screens/Settings/Settings.tsx
 msgid "Aliases"
-msgstr ""
+msgstr "Alias"
 
 #: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
 msgid "All"
@@ -328,11 +328,11 @@ msgstr "Ancora"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "API key"
-msgstr ""
+msgstr "Chiave API"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "API key (leave blank to keep the saved one)"
-msgstr ""
+msgstr "Chiave API (lasciare vuoto per mantenere quella salvata)"
 
 #: packages/core/src/app/screens/Settings/components/AppearanceSection.tsx
 msgid "Appearance"
@@ -659,7 +659,7 @@ msgstr "Controllare aggiornamenti"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Check key"
-msgstr ""
+msgstr "Verificare la chiave"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Check passwords for breaches"
@@ -671,7 +671,7 @@ msgstr "Controlli le cifre; non è un numero di carta valido."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Check the key first, to load the choices this provider needs."
-msgstr ""
+msgstr "Verifichi prima la chiave per caricare le opzioni richieste da questo provider."
 
 #: packages/core/src/app/screens/VaultSetup/VaultSetup.tsx
 msgid "Check this matches"
@@ -725,7 +725,7 @@ msgstr "Scegliere dove archiviare il vault crittografato e impostare una passwor
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Choose..."
-msgstr ""
+msgstr "Scegliere..."
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Clear after"
@@ -851,13 +851,13 @@ msgstr "Connesso a {connected}. Sta sincronizzando questo archivio e può compil
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Connected."
-msgstr ""
+msgstr "Connesso."
 
 #. placeholder {0}: connected.quota.used
 #. placeholder {1}: connected.quota.limit
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Connected. {0} of {1} aliases used."
-msgstr ""
+msgstr "Connesso. {0} di {1} alias utilizzati."
 
 #: packages/core/src/app/screens/VaultSetup/VaultSetup.tsx
 msgid "Connecting to your other device…"
@@ -1003,7 +1003,7 @@ msgstr "Crea una chiave di accesso con permessi di lettura e scrittura per un bu
 #. placeholder {0}: descriptor.label
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Create an API key at {0}"
-msgstr ""
+msgstr "Creare una chiave API su {0}"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Create and store passkeys for other sites. While on, Bramble handles all passkey prompts in this browser."
@@ -1214,7 +1214,11 @@ msgstr "Elefante"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
+<<<<<<< HEAD
 msgstr "Se vuoto, viene utilizzato il set standard."
+=======
+msgstr "Se il campo è vuoto, viene utilizzato il set standard."
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1423,7 +1427,7 @@ msgstr "Genera"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Generate a different email address for every site, from an account you already have. Bramble only asks your provider for an address; it never handles the mail."
-msgstr ""
+msgstr "Generare un indirizzo email diverso per ogni sito, a partire da un account già in uso. Bramble chiede al provider solo un indirizzo; non gestisce mai la posta."
 
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
 msgid "Generate a new code"
@@ -1435,11 +1439,15 @@ msgstr "Genera un codice di accoppiamento usa e getta e ascolta i dispositivi ch
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Generate another"
+<<<<<<< HEAD
 msgstr "Generare un'altra"
+=======
+msgstr "Generare un altro"
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Generate email alias"
-msgstr ""
+msgstr "Generare un alias email"
 
 #: packages/core/src/app/components/PasswordGeneratorModal.tsx
 #: packages/core/src/app/entry-modes/login.tsx
@@ -1760,11 +1768,11 @@ msgstr "Lasciare vuoti i campi delle credenziali per mantenere quelli salvati."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Leave unset for your account's default domain, or pick one of your own."
-msgstr ""
+msgstr "Lasci non impostato per usare il dominio predefinito del suo account, oppure scelga un dominio personale."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Leave unset to use your provider account's own default."
-msgstr ""
+msgstr "Lasci non impostato per usare il valore predefinito dell'account del provider."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Length"
@@ -2341,11 +2349,11 @@ msgstr "Private key"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Provider"
-msgstr ""
+msgstr "Provider"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Provider default"
-msgstr ""
+msgstr "Predefinito del provider"
 
 #: packages/core/src/app/entry-modes/ssh-key.tsx
 msgid "Public / private key pair"
@@ -2722,7 +2730,7 @@ msgstr "URL del server"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Server URL (self-hosted only)"
-msgstr ""
+msgstr "URL del server (solo self-hosted)"
 
 #: packages/core/src/app/screens/Settings/components/MasterPasswordSection.tsx
 msgid "Set password"
@@ -3656,7 +3664,7 @@ msgstr "Cancellare le password dopo la copia"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Word aliases include the site's name, which is easier to recognise but tells anyone who sees the address where you used it. UUID aliases reveal nothing."
-msgstr ""
+msgstr "Gli alias di tipo parola includono il nome del sito: sono più facili da riconoscere, ma mostrano a chiunque veda l'indirizzo dove è stato utilizzato. Gli alias UUID non rivelano nulla."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Words"

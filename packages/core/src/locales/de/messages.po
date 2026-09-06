@@ -52,7 +52,7 @@ msgstr "{0} · hinzugefügt am {1}"
 #. placeholder {0}: d.domain
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "{0} (your domain)"
-msgstr ""
+msgstr "{0} (Ihre Domain)"
 
 #: packages/core/src/app/bulk-actions/tags.tsx
 msgid "{affected, plural, one {Tag # entry} other {Tag # entries}}"
@@ -253,7 +253,7 @@ msgstr "Hinzugefügt, wenn Sie auf einer Website mit Bramble ein Passkey erstell
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Addy needs a domain before it can create an alias."
-msgstr ""
+msgstr "Addy benötigt eine Domain, bevor ein Alias erstellt werden kann."
 
 #: packages/core/src/app/entry-modes/login.tsx
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
@@ -267,23 +267,23 @@ msgstr "Flugzeug"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias domain"
-msgstr ""
+msgstr "Alias-Domain"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias format"
-msgstr ""
+msgstr "Alias-Format"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias provider"
-msgstr ""
+msgstr "Alias-Anbieter"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Alias style"
-msgstr ""
+msgstr "Alias-Stil"
 
 #: packages/core/src/app/screens/Settings/Settings.tsx
 msgid "Aliases"
-msgstr ""
+msgstr "Aliasse"
 
 #: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
 msgid "All"
@@ -328,11 +328,11 @@ msgstr "Anker"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "API key"
-msgstr ""
+msgstr "API-Schlüssel"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "API key (leave blank to keep the saved one)"
-msgstr ""
+msgstr "API-Schlüssel (leer lassen, um den gespeicherten zu behalten)"
 
 #: packages/core/src/app/screens/Settings/components/AppearanceSection.tsx
 msgid "Appearance"
@@ -418,7 +418,11 @@ msgstr "Autofill auf Webseiten"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Avoid look-alike characters (0 O l 1)"
+<<<<<<< HEAD
 msgstr "Verwechselbare Zeichen vermeiden (0 O l 1)"
+=======
+msgstr "Ähnlich aussehende Zeichen vermeiden (0 O l 1)"
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Import/components/KdbxUnlock.tsx
 msgid "Back"
@@ -659,7 +663,7 @@ msgstr "Nach Updates suchen"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Check key"
-msgstr ""
+msgstr "Schlüssel prüfen"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Check passwords for breaches"
@@ -671,7 +675,7 @@ msgstr "Überprüfen Sie die Ziffern; das ist keine gültige Kartennummer."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Check the key first, to load the choices this provider needs."
-msgstr ""
+msgstr "Prüfen Sie zuerst den Schlüssel, um die Optionen zu laden, die dieser Anbieter benötigt."
 
 #: packages/core/src/app/screens/VaultSetup/VaultSetup.tsx
 msgid "Check this matches"
@@ -725,7 +729,7 @@ msgstr "Wählen Sie den Speicherort für Ihren verschlüsselten Tresor und legen
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Choose..."
-msgstr ""
+msgstr "Auswählen…"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Clear after"
@@ -851,13 +855,13 @@ msgstr "Verbunden mit {connected}. Er synchronisiert diesen Tresor und kann Date
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Connected."
-msgstr ""
+msgstr "Verbunden."
 
 #. placeholder {0}: connected.quota.used
 #. placeholder {1}: connected.quota.limit
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Connected. {0} of {1} aliases used."
-msgstr ""
+msgstr "Verbunden. {0} von {1} Aliassen verwendet."
 
 #: packages/core/src/app/screens/VaultSetup/VaultSetup.tsx
 msgid "Connecting to your other device…"
@@ -1003,7 +1007,7 @@ msgstr "Erstellen Sie einen Zugangsschlüssel mit Lese- und Schreibzugriff auf e
 #. placeholder {0}: descriptor.label
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Create an API key at {0}"
-msgstr ""
+msgstr "API-Schlüssel erstellen unter {0}"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Create and store passkeys for other sites. While on, Bramble handles all passkey prompts in this browser."
@@ -1214,7 +1218,11 @@ msgstr "Elefant"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
+<<<<<<< HEAD
 msgstr "Bei leerem Feld wird der Standardsatz verwendet."
+=======
+msgstr "Bei leerem Wert wird der Standardsatz verwendet."
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1423,7 +1431,7 @@ msgstr "Generieren"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Generate a different email address for every site, from an account you already have. Bramble only asks your provider for an address; it never handles the mail."
-msgstr ""
+msgstr "Erzeugen Sie für jede Website eine andere E-Mail-Adresse aus einem Konto, das Sie bereits besitzen. Bramble fragt Ihren Anbieter nur nach einer Adresse; es verarbeitet niemals die E-Mails."
 
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
 msgid "Generate a new code"
@@ -1435,11 +1443,15 @@ msgstr "Erstellen Sie einen einmaligen Kopplungscode und warten Sie auf die Verb
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Generate another"
+<<<<<<< HEAD
 msgstr "Weiteres generieren"
+=======
+msgstr "Weiteren erzeugen"
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Generate email alias"
-msgstr ""
+msgstr "E-Mail-Alias erzeugen"
 
 #: packages/core/src/app/components/PasswordGeneratorModal.tsx
 #: packages/core/src/app/entry-modes/login.tsx
@@ -1619,7 +1631,11 @@ msgstr "Öffnen Sie in der Bramble-Erweiterung die Einstellungen → Synchronisa
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Include a number"
+<<<<<<< HEAD
 msgstr "Zahl einschließen"
+=======
+msgstr "Zahl hinzufügen"
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
 #: packages/core/src/app/screens/Settings/components/RecoveryCodeSection.tsx
@@ -1760,11 +1776,11 @@ msgstr "Lassen Sie die Anmeldefelder leer, um Ihre gespeicherten Daten zu behalt
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Leave unset for your account's default domain, or pick one of your own."
-msgstr ""
+msgstr "Lassen Sie den Wert leer, um die Standard-Domain Ihres Kontos zu verwenden, oder wählen Sie eine eigene Domain."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Leave unset to use your provider account's own default."
-msgstr ""
+msgstr "Lassen Sie den Wert leer, um den Standardwert Ihres Anbieterkontos zu verwenden."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Length"
@@ -1988,7 +2004,11 @@ msgstr "Kein Tresor ausgewählt."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "None"
+<<<<<<< HEAD
 msgstr "Keine"
+=======
+msgstr "Keiner"
+>>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/bulk-actions/tags.tsx
 msgid "None of the selected entries have this tag."
@@ -2341,11 +2361,11 @@ msgstr "Privater Schlüssel"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Provider"
-msgstr ""
+msgstr "Anbieter"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Provider default"
-msgstr ""
+msgstr "Anbieterstandard"
 
 #: packages/core/src/app/entry-modes/ssh-key.tsx
 msgid "Public / private key pair"
@@ -2722,7 +2742,7 @@ msgstr "Server-URL"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Server URL (self-hosted only)"
-msgstr ""
+msgstr "Server-URL (nur selbst gehostet)"
 
 #: packages/core/src/app/screens/Settings/components/MasterPasswordSection.tsx
 msgid "Set password"
@@ -3656,7 +3676,7 @@ msgstr "Löschen von kopierten Passwörtern nach"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Word aliases include the site's name, which is easier to recognise but tells anyone who sees the address where you used it. UUID aliases reveal nothing."
-msgstr ""
+msgstr "Wort-Aliasse enthalten den Namen der Website, was die Erkennung erleichtert, aber jedem, der die Adresse sieht, verrät, wo Sie sie verwendet haben. UUID-Aliasse geben nichts preis."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Words"
