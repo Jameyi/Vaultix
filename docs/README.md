@@ -31,7 +31,7 @@ comments point here instead of repeating it.
 | [p2p-sync.md](p2p-sync.md) | Cross-device P2P sync: WebRTC transport, Nostr-subset relay, enrollment + roster-auth, the entry-level merge engine (HLC + tombstones) |
 | [p2p-sync-testing.md](p2p-sync-testing.md) | Exercising device sync locally with two browser profiles + the relay |
 | [cloud-storage-backups.md](cloud-storage-backups.md) | Planned scheduled encrypted backups: why the provider need not be zero-knowledge, and targeting S3 + WebDAV to cover Nextcloud/self-host and the privacy providers |
-| [email-aliases.md](email-aliases.md) | Plan: per-site email aliases from Addy.io / SimpleLogin / Fastmail, why plain `fetch` reaches all three from every platform, and why an alias suggestion cannot be pre-generated the way a password is |
+| [email-aliases.md](email-aliases.md) | Plan: per-site email aliases from Addy.io / SimpleLogin / Fastmail / Forward Email, why plain `fetch` reaches those four from every platform while Firefox Relay and DuckDuckGo cannot be, and why an alias suggestion cannot be pre-generated the way a password is |
 | [firefox-port.md](firefox-port.md) | Firefox MV3 port feasibility and the filesystem-sync gap P2P sync fills |
 | [mobile-port.md](mobile-port.md) | Capacitor mobile port feasibility; native autofill + biometric-unlock constraints |
 | [desktop-port.md](desktop-port.md) | Plan: Tauri 2 desktop app; the spotlight mini app, browser IPC over native messaging, auto-type, SSH agent |

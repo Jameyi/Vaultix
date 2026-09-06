@@ -14,6 +14,7 @@
  *   ADDY_API_KEY, ADDY_BASE_URL (default https://app.addy.io)
  *   SIMPLELOGIN_API_KEY, SIMPLELOGIN_BASE_URL (default https://app.simplelogin.io)
  *   FASTMAIL_API_TOKEN
+ *   FORWARDEMAIL_API_TOKEN, FORWARDEMAIL_DOMAIN (defaults to the first domain on the account)
  *
  * Usage:
  *   pnpm run spike:aliases              # verify tokens + discovery, no writes
@@ -233,6 +234,40 @@ async function fastmail() {
 	);
 }
 
+/**
+ * The candidate fourth provider. Domain-first and more so than Addy: the user must already have a
+ * domain set up here, so what the spike is really measuring is whether that prerequisite is
+ * discoverable enough to build a settings screen around.
+ */
+async function forwardEmail() {
+	const token = process.env.FORWARDEMAIL_API_TOKEN;
+	if (!token) return console.log(dim("\nforwardemail: skipped (no FORWARDEMAIL_API_TOKEN)\n"));
+	console.log(bold("\nforwardemail"));
+
+	const base = "https://api.forwardemail.net";
+	// HTTP Basic with the token as the username and no password.
+	const headers = {
+		Authorization: `Basic ${Buffer.from(`${token}:`).toString("base64")}`,
+		"Content-Type": "application/json",
+	};
+
+	const domains = await call("GET v1/domains", `${base}/v1/domains`, { headers });
+	const names = (domains.body as { name?: string }[] | undefined)?.map((d) => d.name) ?? [];
+	console.log(dim(`     domains: ${JSON.stringify(names)}`));
+	await corsMatrix("v1/domains", `${base}/v1/domains`, headers);
+
+	if (!CREATE) return;
+	const domain = process.env.FORWARDEMAIL_DOMAIN ?? names[0];
+	if (!domain) return console.log(red("     no domain on this account; cannot create"));
+	// `name` omitted on purpose: the server generates a random one, which is the whole ask.
+	const created = await call("POST aliases", `${base}/v1/domains/${domain}/aliases`, {
+		method: "POST",
+		headers,
+		body: JSON.stringify({ description: DESCRIPTION, is_enabled: true }),
+	});
+	console.log(`     ${bold("alias:")} ${pick(created.body, "name")}@${domain}`);
+}
+
 console.log(
 	CREATE
 		? red(
@@ -244,4 +279,5 @@ console.log(
 await addy();
 await simplelogin();
 await fastmail();
+await forwardEmail();
 console.log("");

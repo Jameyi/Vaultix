@@ -194,6 +194,50 @@ Two caveats carried forward:
   cost this repo a day once (1255ab7b, WebDAV uploads authenticating as the
   wrong thing). The token goes in a header, deliberately and only.
 
+## The rest of the field, and why CORS decides it
+
+Bitwarden's generator names six services, and they are effectively the whole
+market: Addy.io, SimpleLogin, Fastmail, Forward Email, Firefox Relay and
+DuckDuckGo. The other three were measured the same way (September 2026,
+preflight with `Access-Control-Request-Method: POST`), and the result splits them
+cleanly:
+
+| Provider | Create | CORS from our origins |
+|---|---|---|
+| Forward Email | `POST {base}/v1/domains/{domain}/aliases`, HTTP Basic with the token as username, `name` omitted for a random one, address at `name@domain` | reflected, all origins |
+| Firefox Relay | `POST https://relay.firefox.com/api/v1/relayaddresses/`, `Authorization: Token {key}`, body `{enabled, generated_for, description}`, address at `full_address` | **none** |
+| DuckDuckGo | `POST https://quack.duckduckgo.com/api/email/addresses`, `Authorization: Bearer {token}`, no body, address is `{address}@duck.com` | **none** |
+
+**Forward Email is the natural fourth** and costs almost nothing beyond a
+descriptor: same transport, same key handling, and its `name` field is optional
+with a random one generated server-side, which is exactly this feature's call.
+The catch is that it is domain-first like Addy, and more so: the user must
+already have a domain set up on Forward Email, so it serves people who bring
+their own domain rather than anyone with an account.
+
+**Firefox Relay and DuckDuckGo return no CORS headers at all**, and that is not a
+detail. It means they cannot be called from the desktop webview or from either
+mobile app, and the only reason they work in a browser extension is that a
+background service worker holding `<all_urls>` bypasses CORS entirely. Adding
+either one re-opens the per-platform HTTP adapter that the four other providers
+let us skip: a Rust command on the desktop, a native HTTP path on mobile.
+
+So they are deliberately out of v1, and the reason is worth stating precisely
+because it is not "we ran out of time". Shipping them extension-only would put a
+"Generate alias" button in the shared entry form that works on one of the four
+targets, which is a worse outcome than not offering the provider. If they are
+wanted later, they arrive together with the adapter, as one piece of work whose
+cost is the adapter and not the two clients.
+
+DuckDuckGo is the tempting one, being free and widely used, so the temptation is
+worth naming: it is the provider most likely to be asked for and the one that
+cannot be served cheaply.
+
+Outside those six there is little. iCloud Hide My Email and Proton Pass aliases
+have no public creation API (Proton owns SimpleLogin, so a Proton user's route in
+is the SimpleLogin client we already have). Self-hosted Addy and SimpleLogin need
+no separate client, only the base URL that is already configuration.
+
 ## Where the key lives
 
 The API key is a bearer secret against the user's account. For Addy and
@@ -303,7 +347,7 @@ a create is a real record on a real account.
 | Phase | Work |
 |---|---|
 | 0 | This document, plus the spike script. |
-| 1 | `core/aliases/`: provider descriptors, the three clients, zod-validated responses, VEK-wrapped key storage, tests. |
+| 1 | `core/aliases/`: provider descriptors, the clients, zod-validated responses, VEK-wrapped key storage, tests. |
 | 2 | Shared UI: the settings section and the entry-form button, in six locales. |
 | 3 | Extension in-page suggestion: the email-field trigger, the picker row, the background round trip, save wiring, `_locales`, dom tests. |
 | 4 | Device testing on both mobile platforms and both browsers, docs, release. |
