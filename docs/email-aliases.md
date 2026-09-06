@@ -6,10 +6,12 @@ a fresh address at signup time so every site gets its own. It records the
 provider surfaces, where the key lives, and which platform can reach which host,
 so the shape is decided before any code.
 
-Fast-moving facts (provider endpoints, CORS behaviour, token scopes) are dated
-**September 2026** and flagged where they may shift. The unverified ones are
-listed under [Open questions](#open-questions-the-spike-answers) and are what
-`scripts/alias-spike.ts` exists to settle.
+Fast-moving facts (provider endpoints, CORS behaviour, quotas) are dated
+**September 2026**. Those measured against live accounts by
+`scripts/alias-spike.ts` are under [What the spike
+measured](#what-the-spike-measured); what remains unproven is listed there too,
+and is unproven because no account exists to prove it against, not because it
+was not tried.
 
 ## What this is, and is not
 
@@ -25,11 +27,13 @@ recipients already live. A password manager that half-mirrors an alias
 inventory is worse than one that does not mirror it at all, because the half
 that is stale is indistinguishable from the half that is not.
 
-## The three providers
+## The providers
 
-All three are a single authenticated POST once discovery is done. What differs
-is the auth header, whether anything must be fetched first, and how much
-configuration the user has to supply before the first alias can exist.
+Each is a single authenticated POST once discovery is done. What differs is the
+auth header, whether anything must be fetched first, and how much configuration
+the user has to supply before the first alias can exist. Addy and SimpleLogin are
+verified against live accounts; Fastmail is postponed and Forward Email is
+pending account verification, both noted in their sections.
 
 ### Addy.io
 
@@ -54,9 +58,10 @@ failure mode is a 302 to an HTML login page whose redirect target has no CORS,
 which surfaces in a browser as an opaque network error rather than "bad key".
 
 **`domain` is required**, and the account's available domains are only knowable
-from `domain-options`. So Addy, alone of the three, cannot generate with zero
-configuration: the settings screen has to fetch the domain list at connect time
-and have the user pick a default. That is a real extra state (fetch, pick,
+from `domain-options`. So Addy cannot generate with zero configuration: the
+settings screen has to fetch the domain list at connect time and have the user
+pick a default. Only SimpleLogin is configuration-free; Forward Email is
+domain-first in a stricter way still, needing a domain the user already owns. That is a real extra state (fetch, pick,
 persist) and it is Addy-specific, which is an argument for the provider
 descriptor owning its own settings fields rather than the settings screen
 switching on provider id.
@@ -89,6 +94,14 @@ alias legible in the user's SimpleLogin dashboard later. Always send it.
 Also self-hostable, so again: base URL is configuration.
 
 ### Fastmail
+
+**Status: postponed, not cancelled.** Masked Email needs a paid Fastmail account
+and there is no account to verify against, so everything below is read from the
+docs and none of it has been seen on the wire. It stays written down because the
+research is done and the shape is unlikely to move, but a client is not written
+from a doc alone: the whole point of the spike is that Addy's quota fields and
+Forward Email's verification `401` were both things no documentation mentioned.
+Ships when an account exists to prove it against.
 
 Two steps, because JMAP discovers before it acts.
 
@@ -138,9 +151,9 @@ session response harvests the token.
 `https://www.fastmail.com/dev/maskedemail` as a distinct scope alongside
 `urn:ietf:params:jmap:core`. Whether a manually created API token can be
 narrowed the same way in Settings > Privacy & Security > Manage API tokens is
-not settled by the public docs and is a spike question. It matters: if it can,
-Fastmail is the only one of the three where the stored key cannot read the
-user's mail, and that is worth saying in the settings copy.
+not settled by the public docs and is unproven. It matters: if it can, Fastmail
+is the only provider here whose stored key cannot read the user's mail, and that
+is worth saying in the settings copy.
 
 ## Transport: plain `fetch`, on every platform
 
@@ -321,33 +334,57 @@ new entry point into `scoreSignupForm`, not a new row in an existing menu. This
 is why Phase 4 is the largest phase despite being the smallest amount of network
 code.
 
-## Open questions (the spike answers)
+## What the spike measured
 
-`pnpm run spike:aliases` (`scripts/alias-spike.ts`) runs against the user's own
-accounts and settles these. It is read-only unless `--create` is passed, because
-a create is a real record on a real account.
+`pnpm run spike:aliases` (`scripts/alias-spike.ts`) runs against real accounts.
+Read-only unless `--create` is passed, because a create is a real record on a
+real account. Run against live Addy, SimpleLogin and Forward Email accounts,
+September 2026:
 
-1. Does an authenticated **2xx** carry `Access-Control-Allow-Origin`? The `401`s
-   already do, on all twelve provider/origin combinations, so this is the last
-   piece of the transport question rather than the whole of it.
-2. Does Addy accept a create without `format`, and what does `domain-options`
-   actually return for a free account?
-3. Is SimpleLogin's `Authentication` header still correct, and does
-   `?hostname=` land in the dashboard where expected?
-4. Fastmail: does a manually created API token carry a masked-email scope, or is
-   it whole-account? Does `state: "enabled"` come back enabled, and what is the
-   real lifetime of a `pending` one?
-5. What does each provider return when the **quota is exhausted**? This is the
-   error path users will actually hit, and it needs a distinguishable message
-   rather than a generic failure.
-6. Rate limits, undocumented on all three.
+**Transport, settled for the two providers with working accounts.** Authenticated
+`200`s carry `Access-Control-Allow-Origin` on all four origins, not just the
+`401`s: `*` from Addy, reflected from SimpleLogin. Forward Email reflects it too,
+on a `401`. So there is no remaining reason to expect a native HTTP path.
+
+**Addy's `domain-options` returns a flat string array** under `data`, mixing
+shared domains with the account's own subdomains
+(`anonaddy.me`, `you.anonaddy.me`). The settings screen can render it directly;
+there is no object shape to unpack, and no separate "is this one shared" flag,
+which means the UI cannot distinguish a quota-bearing shared domain from a free
+subdomain without inferring it from the name. Worth not inferring.
+
+**Quota is readable, and small.** `account-details` exposes
+`active_shared_domain_alias_count` and `active_shared_domain_alias_limit`; a free
+account gets **10**. Two consequences. The settings screen should show remaining
+quota, because it can, and a limit of 10 makes it worth showing. And the
+"regenerate abandons a real address" concern in the section above is not
+theoretical: on a free Addy account, four idle presses of a regenerate button
+consume nearly half the allowance.
+
+**A `401` does not mean "bad API key".** Forward Email answers a valid key on an
+unverified account with
+`401 {"message":"Please verify your email address to continue."}`. Any client
+that maps status to message loses that, and the user is sent to re-check a key
+that was never the problem. The provider's own `message` is surfaced verbatim,
+and the status only chooses whether the message is treated as an auth failure.
+The same rule catches Addy, whose errors are also `{"message": ...}`.
+
+### Still open
+
+1. **Fastmail is unverified and postponed** (see the status note in its section).
+2. Does Addy accept a create with `format` omitted, and does Forward Email really
+   generate a random `name`? Both need `--create`, which has not been run.
+3. What each provider returns at **quota exhaustion**. Addy's limit of 10 makes
+   this cheap to provoke deliberately and worth doing before Phase 2 designs the
+   error surface.
+4. Rate limits, undocumented on all four.
 
 ## Phases
 
 | Phase | Work |
 |---|---|
 | 0 | This document, plus the spike script. |
-| 1 | `core/aliases/`: provider descriptors, the clients, zod-validated responses, VEK-wrapped key storage, tests. |
+| 1 | `core/aliases/`: provider descriptors, the clients (Addy and SimpleLogin, plus Forward Email once its account verifies), zod-validated responses, VEK-wrapped key storage, tests. |
 | 2 | Shared UI: the settings section and the entry-form button, in six locales. |
 | 3 | Extension in-page suggestion: the email-field trigger, the picker row, the background round trip, save wiring, `_locales`, dom tests. |
 | 4 | Device testing on both mobile platforms and both browsers, docs, release. |

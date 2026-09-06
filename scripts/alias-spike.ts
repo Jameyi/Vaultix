@@ -14,7 +14,7 @@
  *   ADDY_API_KEY, ADDY_BASE_URL (default https://app.addy.io)
  *   SIMPLELOGIN_API_KEY, SIMPLELOGIN_BASE_URL (default https://app.simplelogin.io)
  *   FASTMAIL_API_TOKEN
- *   FORWARDEMAIL_API_TOKEN, FORWARDEMAIL_DOMAIN (defaults to the first domain on the account)
+ *   FORWARDEMAIL_API_KEY, FORWARDEMAIL_DOMAIN (defaults to the first domain on the account)
  *
  * Usage:
  *   pnpm run spike:aliases              # verify tokens + discovery, no writes
@@ -240,8 +240,8 @@ async function fastmail() {
  * discoverable enough to build a settings screen around.
  */
 async function forwardEmail() {
-	const token = process.env.FORWARDEMAIL_API_TOKEN;
-	if (!token) return console.log(dim("\nforwardemail: skipped (no FORWARDEMAIL_API_TOKEN)\n"));
+	const token = process.env.FORWARDEMAIL_API_KEY;
+	if (!token) return console.log(dim("\nforwardemail: skipped (no FORWARDEMAIL_API_KEY)\n"));
 	console.log(bold("\nforwardemail"));
 
 	const base = "https://api.forwardemail.net";
@@ -252,7 +252,12 @@ async function forwardEmail() {
 	};
 
 	const domains = await call("GET v1/domains", `${base}/v1/domains`, { headers });
-	const names = (domains.body as { name?: string }[] | undefined)?.map((d) => d.name) ?? [];
+	// An error body is an object, not the array the success path returns. Worth guarding rather
+	// than assuming: this provider answers an unverified account with a 401 whose message is not
+	// about the key at all, which is exactly the case the real client has to render.
+	const names = Array.isArray(domains.body)
+		? (domains.body as { name?: string }[]).map((d) => d.name)
+		: [];
 	console.log(dim(`     domains: ${JSON.stringify(names)}`));
 	await corsMatrix("v1/domains", `${base}/v1/domains`, headers);
 
