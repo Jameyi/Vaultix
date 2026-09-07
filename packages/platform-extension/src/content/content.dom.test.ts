@@ -40,6 +40,7 @@ const removePicker = vi.fn(() => {
 // Captured content-side callbacks for the suggested-password row and the unlock request.
 let onSuggestedCb: (() => void) | null = null;
 let regenerateCb: (() => void) | null = null;
+let useAliasCb: (() => void) | null = null;
 let unlockCb: ((field: HTMLInputElement | null) => void) | null = null;
 let pickCb: ((entryId: string, otpOnly: boolean) => void) | null = null;
 // Models picker.removeDropdown()'s real behavior: on a normal (iframe-mode) site it is a
@@ -73,6 +74,9 @@ vi.mock("./picker", () => ({
 		onRegenerate: (cb: () => void) => {
 			regenerateCb = cb;
 		},
+		onUseAlias: (cb: () => void) => {
+			useAliasCb = cb;
+		},
 	},
 }));
 
@@ -81,6 +85,9 @@ const safeRequest = vi.fn();
 // What the background answers GENERATE_PASSWORD with. A real promise, not the synchronous
 // thenable below: the suggestion path awaits this one.
 let generateResponse: unknown = { ok: true, data: { password: "from-the-background" } };
+// What the background answers ALIAS_CREATE with. A real promise like the generator's: the alias
+// path awaits it and drives the row's state off the result.
+let aliasResponse: unknown = { ok: true, data: { address: "w40myp02@anonaddy.com" } };
 const pendingQueryResponses: Array<(response: unknown) => void> = [];
 const pendingSelectResponses: Array<(response: unknown) => void> = [];
 let submitRevalidationResponder:
@@ -94,6 +101,7 @@ vi.mock("./lifecycle", () => ({
 	safeRequest: (m: { type?: string }) => {
 		safeRequest(m);
 		if (m.type === "GENERATE_PASSWORD") return Promise.resolve(generateResponse);
+		if (m.type === "ALIAS_CREATE") return Promise.resolve(aliasResponse);
 		if (m.type === "AUTOFILL_REVALIDATE_SUBMIT") {
 			const message = m as { sessionGeneration: number };
 			return (
@@ -116,6 +124,7 @@ vi.mock("./lifecycle", () => ({
 }));
 vi.mock("./corner-prompt", () => ({ handleCornerPromptShow: vi.fn(), queryCornerPrompt: vi.fn() }));
 vi.mock("./capture", () => ({ maybeCommitCapture: vi.fn(), onPasswordEnter: vi.fn() }));
+const fillTextField = vi.fn(() => true);
 const fillPasswordFields = vi.fn(() => true);
 const fillForm = vi.fn((): { filled: boolean; passwordField: HTMLInputElement | null } => ({
 	filled: true,
@@ -128,6 +137,7 @@ vi.mock("./fill", () => ({
 	fillForm,
 	fillOtp: vi.fn(),
 	fillPasswordFields,
+	fillTextField,
 	isFilling: () => false,
 	submitFromField,
 }));
@@ -1340,5 +1350,112 @@ describe("content: the autofill master switch", () => {
 		showMatches.mockClear();
 		send({ type: "AUTOFILL_MATCHES", payload: result({ logins: [MATCH] }) });
 		expect(showMatches.mock.calls.at(-1)?.[1]).toBe(user);
+	});
+});
+
+// The alias row is the only suggestion that spends something real and can fail, so what matters
+// is the round trip: it must not fire twice, must not paint a late answer onto a field the user
+// has left, and must surface the provider's own words. See docs/email-aliases.md.
+describe("content: email alias row on signup", () => {
+	beforeEach(() => {
+		// An earlier describe installs fake timers and this one awaits a real reply.
+		vi.useRealTimers();
+		// jsdom has no layout; without a box the email field reads as unrendered and the form
+		// looks like one whose account is already identified.
+		vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+			width: 200,
+			height: 24,
+			top: 0,
+			left: 0,
+			right: 200,
+			bottom: 24,
+			x: 0,
+			y: 0,
+			toJSON: () => ({}),
+		} as DOMRect);
+		showMatches.mockClear();
+		safeRequest.mockClear();
+		fillTextField.mockClear();
+		aliasResponse = { ok: true, data: { address: "w40myp02@anonaddy.com" } };
+		pickerState.host = null;
+		pickerState.anchor = null;
+		pendingQueryResponses.length = 0;
+		window.history.replaceState({}, "", "/signup");
+		document.body.innerHTML = `
+			<form>
+				<input id="user" type="email" name="email" autocomplete="email" />
+				<input id="pass" type="password" name="password" autocomplete="new-password" />
+				<button type="submit">Create account</button>
+			</form>`;
+		invalidatePageFields();
+	});
+
+	afterEach(() => vi.restoreAllMocks());
+
+	const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+	const lastAlias = () =>
+		(showMatches.mock.calls.at(-1)?.[2] as { alias?: { state: string; message?: string } })?.alias;
+	const email = () => document.getElementById("user") as HTMLInputElement;
+
+	function offerRow(): void {
+		email().focus();
+		send({ type: "VAULT_LOCK_STATE", payload: { locked: false } });
+		send({ type: "AUTOFILL_MATCHES", payload: result({ logins: [], aliasReady: true }) });
+	}
+
+	it("offers the row on the email field once the background says a provider exists", () => {
+		offerRow();
+		expect(lastAlias()).toEqual({ state: "idle" });
+	});
+
+	// Availability is the background's to assert. Without it the row must not appear, so a page
+	// cannot conjure one and no request is ever made.
+	it("offers nothing when no provider is configured", () => {
+		email().focus();
+		send({ type: "VAULT_LOCK_STATE", payload: { locked: false } });
+		send({ type: "AUTOFILL_MATCHES", payload: result({ logins: [] }) });
+		expect(lastAlias()).toBeUndefined();
+	});
+
+	it("shows the spinner while the provider is asked, then fills the address", async () => {
+		offerRow();
+		useAliasCb?.();
+		expect(lastAlias()).toEqual({ state: "busy" });
+		await settle();
+		expect(fillTextField).toHaveBeenCalledWith(email(), "w40myp02@anonaddy.com");
+	});
+
+	// One gesture must not buy two aliases.
+	it("ignores a second activation while one is in flight", async () => {
+		offerRow();
+		useAliasCb?.();
+		useAliasCb?.();
+		await settle();
+		const creates = safeRequest.mock.calls.filter(
+			(c) => (c[0] as { type?: string })?.type === "ALIAS_CREATE",
+		);
+		expect(creates).toHaveLength(1);
+	});
+
+	// The provider's words are the only thing that says whether to fix a key, a plan or a quota.
+	it("keeps the row and shows why when the provider refuses", async () => {
+		aliasResponse = { ok: false, error: "This provider's plan does not include alias creation." };
+		offerRow();
+		useAliasCb?.();
+		await settle();
+		expect(lastAlias()).toEqual({
+			state: "error",
+			message: "This provider's plan does not include alias creation.",
+		});
+		expect(fillTextField).not.toHaveBeenCalled();
+	});
+
+	// An address meant for a field the user has left must not be painted onto the one they are on.
+	it("drops an answer that arrives after the anchor moved", async () => {
+		offerRow();
+		useAliasCb?.();
+		pickerState.anchor = document.getElementById("pass") as HTMLInputElement;
+		await settle();
+		expect(fillTextField).not.toHaveBeenCalled();
 	});
 });

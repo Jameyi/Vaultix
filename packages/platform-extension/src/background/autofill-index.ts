@@ -7,6 +7,7 @@ import type {
 	MatchSummary,
 	QueryResult,
 } from "@core/adapters/autofill";
+import { AliasError } from "@core/aliases";
 import { decodeEntriesPayload } from "@core/sync";
 import { parseTotp, totpAt } from "@core/util/totp";
 import { extractHostname } from "@core/vault/autofill-index";
@@ -19,6 +20,7 @@ import {
 } from "../dedupe";
 import { api } from "../platform-api";
 import { isExtensionSender } from "../sender";
+import { aliasAvailable, createAlias } from "./alias";
 import {
 	type DesktopFill,
 	linkIsHeld,
@@ -578,6 +580,10 @@ async function autofillQuery(
 		// moment this response lands, so a separate request for it would race the paint and lose.
 		// Offered locked as well as unlocked, since generating needs no vault.
 		if (hasLogin) result.generated = await generateSuggestion();
+		// Whether an alias row may be offered, decided here for the same reason the master switch
+		// is: a content script is not a trusted context, so the page does not get to assert that a
+		// provider exists. A config read only; nothing is contacted to answer it.
+		if (hasLogin && !result.locked && (await aliasAvailable())) result.aliasReady = true;
 		// Sliding session: any autofill activity extends the timer.
 		if (!result.locked) await scheduleAutoLock();
 		if (!autofillSessionIsStable(generation)) return { ok: false, error: "unavailable" };
@@ -745,6 +751,32 @@ on(
 	}),
 );
 
+/** Create one alias for the page the sender is on. The site comes from the VERIFIED sender, not
+ * from the message: it reaches the provider and lands in the user's dashboard, and a page must
+ * not be able to name a different one. */
+async function aliasCreate(
+	_message: unknown,
+	sender: chrome.runtime.MessageSender,
+): Promise<MessageEnvelope> {
+	const hostname = pageSenderHostname(sender);
+	if (!hostname) return { ok: false, error: "forbidden" };
+	if (!(await getAutofillEnabled())) return { ok: false, error: "forbidden" };
+	try {
+		return { ok: true, data: { address: await createAlias(hostname) } };
+	} catch (e) {
+		// The provider's own words survive to the row, which is the only thing that tells a user
+		// whether to fix a key, a plan or an allowance. Rendered there as text, never linked.
+		const err = e instanceof AliasError ? e : null;
+		return {
+			ok: false,
+			error: err?.providerMessage
+				? `${err.message} ${err.providerMessage}`
+				: (err?.message ?? "unavailable"),
+		};
+	}
+}
+
+on("ALIAS_CREATE", aliasCreate);
 on("AUTOFILL_CLEAR_INDEX", autofillClearIndex);
 on("AUTOFILL_FIND", autofillFind);
 on("AUTOFILL_FETCH", autofillFetch);

@@ -26,10 +26,12 @@ import {
 	fillForm,
 	fillOtp,
 	fillPasswordFields,
+	fillTextField,
 	isFilling,
 	submitFromField,
 } from "./fill";
 import { installFrameRelay, type RelayRect } from "./frame-relay";
+import type { AliasRowState } from "./html/dropdown-alias";
 import { onTeardown, safeRequest, safeSendMessage } from "./lifecycle";
 import {
 	holdGeneratedPassword,
@@ -49,10 +51,12 @@ import { closeRelayHost, showRelayHost } from "./relay-host";
 import {
 	isAccountCreationForm,
 	isOnAccountCreationForm,
+	shouldSuggestAlias,
 	shouldSuggestPassword,
 	signupPasswordFields,
 } from "./signup-detect";
 import type {
+	AliasCreateResponse,
 	AutofillQueryResponse,
 	AutofillSelectResponse,
 	AutofillSubmitRevalidationResponse,
@@ -180,9 +184,9 @@ function removePicker(): void {
 function showMatchesFor(
 	matches: MatchSummary[],
 	field: HTMLInputElement,
-	opts?: { otpOnly?: boolean; suggest?: { password: string } },
+	opts?: { otpOnly?: boolean; suggest?: { password: string }; alias?: AliasRowState },
 ): void {
-	if (matches.length === 0 && !opts?.suggest) return;
+	if (matches.length === 0 && !opts?.suggest && !opts?.alias) return;
 	if (!shouldRelay(field)) {
 		dropRelayed();
 		picker.showMatches(matches, field, opts);
@@ -195,6 +199,7 @@ function showMatchesFor(
 		matches,
 		otpOnly: opts?.otpOnly === true,
 		suggest: opts?.suggest,
+		alias: opts?.alias,
 	});
 }
 
@@ -408,6 +413,11 @@ interface Suggestion {
 // leave the DOM.
 const suggestionFor = new WeakMap<HTMLInputElement, Suggestion>();
 
+// The alias row's state per field. Unlike the password suggestion this is not a decision cached
+// once, it is where a round trip currently stands, and it is per field so leaving a form mid
+// request does not paint the spinner onto the next one.
+const aliasStateFor = new WeakMap<HTMLInputElement, AliasRowState>();
+
 // Whether a field sits on a form that creates an account, decided once per field. Cached
 // for the reason Suggestion is: by the time the picker has anchored, the form no longer
 // describes itself. It also keeps the scoring off the per-keystroke path.
@@ -501,7 +511,15 @@ function showLoginPicker(field: HTMLInputElement, logins: MatchSummary[]): void 
 		showMatchesFor([], field, { suggest: { password: suggest.password } });
 		return;
 	}
-	// Same policy, one field over: the signup form's email box gets nothing either.
+	// The signup form's email box: an alias is the one thing that belongs here. Offered only when
+	// the background says a provider is configured, so a page cannot conjure the row, and kept on
+	// screen while a request is in flight or has failed so the state has somewhere to live.
+	const alias = aliasStateFor.get(field);
+	if (alias || (cachedResult?.aliasReady && shouldSuggestAlias(field))) {
+		showMatchesFor([], field, { alias: alias ?? { state: "idle" } });
+		return;
+	}
+	// Otherwise the same policy as before: the rest of an account-creation form gets nothing.
 	if (isCreationField(field)) return;
 	const visible = visibleLoginsForField(field, logins);
 	if (visible.length === 0) {
@@ -834,6 +852,50 @@ picker.onUseSuggested(() => {
 	silenceAutoOpen = true;
 	picker.remove();
 	dropRelayed();
+});
+/**
+ * Create an alias and put it in the field.
+ *
+ * The only place in the extension that spends the user's allowance, so it is reached only from
+ * this explicit click. The row carries its own state through the round trip because it is the
+ * one suggestion that can fail, and the failure is the only thing that tells someone whether to
+ * fix a key, a plan or an allowance.
+ */
+picker.onUseAlias(() => {
+	cancelOperations();
+	const field = anchorField();
+	if (!field) return;
+	// A click on the busy row is impossible by construction (it carries no hook), but a stale
+	// keyboard activation could still arrive; one gesture must not buy two aliases.
+	if (aliasStateFor.get(field)?.state === "busy") return;
+
+	aliasStateFor.set(field, { state: "busy" });
+	showMatchesFor([], field, { alias: { state: "busy" } });
+
+	void safeRequest<AliasCreateResponse>({ type: "ALIAS_CREATE" }).then((res) => {
+		// The anchor can move (or go) while the provider answers. An address meant for a field the
+		// user has left must not be painted onto the one they are on now, and the state it was
+		// waiting in must not outlive it either.
+		if (anchorField() !== field || !field.isConnected) {
+			aliasStateFor.delete(field);
+			return;
+		}
+		if (!res?.ok || !res.data.address) {
+			// undefined means the extension went away mid-flight; there is nothing to report but
+			// the row still has to leave the spinner.
+			const message = res && !res.ok ? res.error : undefined;
+			aliasStateFor.set(field, { state: "error", message });
+			showMatchesFor([], field, { alias: { state: "error", message } });
+			return;
+		}
+		aliasStateFor.delete(field);
+		fillTextField(field, res.data.address);
+		// The address is now the account's identifier, so the save prompt should carry it: the
+		// user typed nothing, and without this the entry saves with an empty username.
+		silenceAutoOpen = true;
+		picker.remove();
+		dropRelayed();
+	});
 });
 picker.onRegenerate(() => {
 	cancelOperations();
