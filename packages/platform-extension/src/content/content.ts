@@ -27,6 +27,7 @@ import {
 	fillOtp,
 	fillPasswordFields,
 	fillTextField,
+	getLastFilledPassword,
 	isFilling,
 	submitFromField,
 } from "./fill";
@@ -890,8 +891,21 @@ picker.onUseAlias(() => {
 		}
 		aliasStateFor.delete(field);
 		fillTextField(field, res.data.address);
-		// The address is now the account's identifier, so the save prompt should carry it: the
-		// user typed nothing, and without this the entry saves with an empty username.
+		// Refresh the pending capture when a password is already in hand.
+		//
+		// An ordinary submit re-captures from the live form, so the address is picked up there
+		// whatever order the two rows were used in. This covers the other order without a submit:
+		// taking the password suggestion first stashes a capture immediately (so an "Unlock &
+		// Save" prompt survives a navigation that never looks like a submit), and at that moment
+		// the identifier did not exist yet. Left alone, that stash saves the login with an empty
+		// username and the alias is lost, which defeats the point of having made one.
+		const filledPassword = getLastFilledPassword();
+		if (filledPassword) {
+			safeSendMessage({
+				type: "CORNER_PROMPT_CAPTURE",
+				payload: { username: res.data.address, password: filledPassword, newLogin: true },
+			});
+		}
 		silenceAutoOpen = true;
 		picker.remove();
 		dropRelayed();

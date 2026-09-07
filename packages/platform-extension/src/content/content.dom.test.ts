@@ -40,7 +40,7 @@ const removePicker = vi.fn(() => {
 // Captured content-side callbacks for the suggested-password row and the unlock request.
 let onSuggestedCb: (() => void) | null = null;
 let regenerateCb: (() => void) | null = null;
-let useAliasCb: (() => void) | null = null;
+let aliasRowCb: (() => void) | null = null;
 let unlockCb: ((field: HTMLInputElement | null) => void) | null = null;
 let pickCb: ((entryId: string, otpOnly: boolean) => void) | null = null;
 // Models picker.removeDropdown()'s real behavior: on a normal (iframe-mode) site it is a
@@ -75,7 +75,7 @@ vi.mock("./picker", () => ({
 			regenerateCb = cb;
 		},
 		onUseAlias: (cb: () => void) => {
-			useAliasCb = cb;
+			aliasRowCb = cb;
 		},
 	},
 }));
@@ -125,6 +125,9 @@ vi.mock("./lifecycle", () => ({
 vi.mock("./corner-prompt", () => ({ handleCornerPromptShow: vi.fn(), queryCornerPrompt: vi.fn() }));
 vi.mock("./capture", () => ({ maybeCommitCapture: vi.fn(), onPasswordEnter: vi.fn() }));
 const fillTextField = vi.fn(() => true);
+// What fill.ts would report as the password most recently put into the page. Drives the
+// alias path's decision to refresh a capture the suggestion already stashed.
+let lastFilledPassword: string | null = null;
 const fillPasswordFields = vi.fn(() => true);
 const fillForm = vi.fn((): { filled: boolean; passwordField: HTMLInputElement | null } => ({
 	filled: true,
@@ -138,6 +141,7 @@ vi.mock("./fill", () => ({
 	fillOtp: vi.fn(),
 	fillPasswordFields,
 	fillTextField,
+	getLastFilledPassword: () => lastFilledPassword,
 	isFilling: () => false,
 	submitFromField,
 }));
@@ -1419,7 +1423,7 @@ describe("content: email alias row on signup", () => {
 
 	it("shows the spinner while the provider is asked, then fills the address", async () => {
 		offerRow();
-		useAliasCb?.();
+		aliasRowCb?.();
 		expect(lastAlias()).toEqual({ state: "busy" });
 		await settle();
 		expect(fillTextField).toHaveBeenCalledWith(email(), "w40myp02@anonaddy.com");
@@ -1428,8 +1432,8 @@ describe("content: email alias row on signup", () => {
 	// One gesture must not buy two aliases.
 	it("ignores a second activation while one is in flight", async () => {
 		offerRow();
-		useAliasCb?.();
-		useAliasCb?.();
+		aliasRowCb?.();
+		aliasRowCb?.();
 		await settle();
 		const creates = safeRequest.mock.calls.filter(
 			(c) => (c[0] as { type?: string })?.type === "ALIAS_CREATE",
@@ -1441,7 +1445,7 @@ describe("content: email alias row on signup", () => {
 	it("keeps the row and shows why when the provider refuses", async () => {
 		aliasResponse = { ok: false, error: "This provider's plan does not include alias creation." };
 		offerRow();
-		useAliasCb?.();
+		aliasRowCb?.();
 		await settle();
 		expect(lastAlias()).toEqual({
 			state: "error",
@@ -1453,9 +1457,80 @@ describe("content: email alias row on signup", () => {
 	// An address meant for a field the user has left must not be painted onto the one they are on.
 	it("drops an answer that arrives after the anchor moved", async () => {
 		offerRow();
-		useAliasCb?.();
+		aliasRowCb?.();
 		pickerState.anchor = document.getElementById("pass") as HTMLInputElement;
 		await settle();
 		expect(fillTextField).not.toHaveBeenCalled();
+	});
+});
+
+// Taking the password suggestion stashes a capture immediately, before any identifier exists.
+// Making an alias afterwards has to refresh it, or the login saves with an empty username and
+// the alias is lost. An ordinary submit re-captures from the live form, so this covers the case
+// where the page navigates without ever looking like one.
+describe("content: alias refreshes a capture the password suggestion already stashed", () => {
+	beforeEach(() => {
+		vi.useRealTimers();
+		vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+			width: 200,
+			height: 24,
+			top: 0,
+			left: 0,
+			right: 200,
+			bottom: 24,
+			x: 0,
+			y: 0,
+			toJSON: () => ({}),
+		} as DOMRect);
+		showMatches.mockClear();
+		safeSendMessage.mockClear();
+		safeRequest.mockClear();
+		lastFilledPassword = null;
+		aliasResponse = { ok: true, data: { address: "w40myp02@anonaddy.com" } };
+		pickerState.host = null;
+		pickerState.anchor = null;
+		pendingQueryResponses.length = 0;
+		window.history.replaceState({}, "", "/signup");
+		document.body.innerHTML = `
+			<form>
+				<input id="user" type="email" name="email" autocomplete="email" />
+				<input id="pass" type="password" name="password" autocomplete="new-password" />
+				<button type="submit">Create account</button>
+			</form>`;
+		invalidatePageFields();
+	});
+
+	afterEach(() => vi.restoreAllMocks());
+
+	const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+	const captures = () =>
+		safeSendMessage.mock.calls
+			.map((c) => c[0] as { type?: string; payload?: { username?: string; password?: string } })
+			.filter((m) => m?.type === "CORNER_PROMPT_CAPTURE");
+
+	function offerAndUse(): Promise<void> {
+		const email = document.getElementById("user") as HTMLInputElement;
+		email.focus();
+		send({ type: "VAULT_LOCK_STATE", payload: { locked: false } });
+		send({ type: "AUTOFILL_MATCHES", payload: result({ logins: [], aliasReady: true }) });
+		aliasRowCb?.();
+		return settle();
+	}
+
+	it("re-stashes with the alias as the username once a password is in the page", async () => {
+		lastFilledPassword = "correct-horse-battery-staple";
+		await offerAndUse();
+		expect(captures().at(-1)?.payload).toEqual({
+			username: "w40myp02@anonaddy.com",
+			password: "correct-horse-battery-staple",
+			newLogin: true,
+		});
+	});
+
+	// Nothing to save yet: an address on its own is not a credential, and stashing one would
+	// offer to save a login with no password in it.
+	it("stashes nothing when no password has been filled", async () => {
+		await offerAndUse();
+		expect(captures()).toHaveLength(0);
 	});
 });
