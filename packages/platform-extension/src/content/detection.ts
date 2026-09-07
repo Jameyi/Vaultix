@@ -119,6 +119,73 @@ export const USERNAME_HINT_RE = alternation([
 	"로그인",
 ]);
 
+/**
+ * Email-only hints, for the alias suggestion.
+ *
+ * Deliberately NOT a subset of USERNAME_HINT_RE reused: that regex conflates the two on purpose,
+ * matching "user", "login" and "account" because for FILLING they are the same field. An email
+ * alias is only useful in a field that takes an email, so this list is the email half alone, and
+ * a term that could mean either ("account", "конто", "compte") is left out rather than guessed at.
+ */
+const EMAIL_HINT_RE = alternation([
+	// en
+	"email",
+	"e-mail",
+	"\\bmail\\b",
+	// de, nl
+	"e.?mail.?adresse",
+	"mailadres",
+	// sv, da, no, fi
+	"\\be.?post\\b",
+	"mejl",
+	"s(ä|a)hk(ö|o)posti",
+	// fr
+	"courriel",
+	"adresse.?(é|e)lectronique",
+	// es, pt
+	"correo",
+	"correio",
+	"e.?mail",
+	// it
+	"posta.?elettronica",
+	// tr
+	"\\be.?posta\\b",
+	// ru
+	"почта",
+	"эл.?адрес",
+	// ja, zh, ko
+	"メール",
+	"邮箱",
+	"郵箱",
+	"電子郵件",
+	"이메일",
+]);
+
+/**
+ * Whether `el` takes an email address specifically, as opposed to any identifier.
+ *
+ * The alias suggestion uses this and nothing looser. A generated alias typed into a field that
+ * wanted a handle is a broken signup, and one offered on a password field is nonsense, so the
+ * bar here is "this field is for an email" rather than detection's usual "this field identifies
+ * the account". `looksLikeUsername` answers the second question and is wrong for this one.
+ *
+ * Ordered strongest first. `type="email"` is the page telling us outright; `autocomplete="email"`
+ * is the page telling us in the other vocabulary. `autocomplete="username"` is deliberately NOT
+ * accepted on its own, since that is exactly the token a handle field carries, but it does not
+ * veto either: plenty of signup forms put it on a field labelled "Email", and the hint decides.
+ */
+export function looksLikeEmail(el: HTMLInputElement, doc: Document = document): boolean {
+	if (el.type === "password" || el.type === "hidden") return false;
+	if (el.type === "email") return true;
+	const autocomplete = el.autocomplete?.toLowerCase() ?? "";
+	if (autocomplete.split(/\s+/).includes("email")) return true;
+	// A search box called "mail" is still a search box.
+	const hint = `${attrHint(el)} ${labelText(el, doc)}`;
+	if (NEGATIVE_HINT_RE.test(hint)) return false;
+	if (el.getAttribute("inputmode")?.toLowerCase() === "email") return true;
+	return EMAIL_HINT_RE.test(hint);
+}
+
 // Localized search terms matter more than they look: rung 1 picks the password's
 // nearest preceding text input, so an untranslated search box in the header wins
 // and the username gets typed into it.
