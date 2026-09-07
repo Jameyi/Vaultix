@@ -1212,11 +1212,7 @@ msgstr "Éléphant"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
-<<<<<<< HEAD
 msgstr "Si le champ est vide, l’ensemble standard est utilisé."
-=======
-msgstr "Vide : le jeu standard est utilisé."
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1560,11 +1556,7 @@ msgstr "Sablier"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Hyphen (-)"
-<<<<<<< HEAD
 msgstr "Trait d’union (-)"
-=======
-msgstr "Tiret (-)"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Settings/components/RotateSecretSection.tsx
 msgid "I've saved it"

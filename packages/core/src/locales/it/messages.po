@@ -1212,11 +1212,7 @@ msgstr "Elefante"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
-<<<<<<< HEAD
 msgstr "Se vuoto, viene utilizzato il set standard."
-=======
-msgstr "Se il campo è vuoto, viene utilizzato il set standard."
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1437,11 +1433,7 @@ msgstr "Genera un codice di accoppiamento usa e getta e ascolta i dispositivi ch
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Generate another"
-<<<<<<< HEAD
 msgstr "Generare un'altra"
-=======
-msgstr "Generare un altro"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Generate email alias"

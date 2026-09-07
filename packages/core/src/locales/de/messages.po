@@ -416,11 +416,7 @@ msgstr "Autofill auf Webseiten"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Avoid look-alike characters (0 O l 1)"
-<<<<<<< HEAD
 msgstr "Verwechselbare Zeichen vermeiden (0 O l 1)"
-=======
-msgstr "Ähnlich aussehende Zeichen vermeiden (0 O l 1)"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Import/components/KdbxUnlock.tsx
 msgid "Back"
@@ -1216,11 +1212,7 @@ msgstr "Elefant"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
-<<<<<<< HEAD
 msgstr "Bei leerem Feld wird der Standardsatz verwendet."
-=======
-msgstr "Bei leerem Wert wird der Standardsatz verwendet."
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1441,11 +1433,7 @@ msgstr "Erstellen Sie einen einmaligen Kopplungscode und warten Sie auf die Verb
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Generate another"
-<<<<<<< HEAD
 msgstr "Weiteres generieren"
-=======
-msgstr "Weiteren erzeugen"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Generate email alias"
@@ -1629,11 +1617,7 @@ msgstr "Öffnen Sie in der Bramble-Erweiterung die Einstellungen → Synchronisa
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Include a number"
-<<<<<<< HEAD
 msgstr "Zahl einschließen"
-=======
-msgstr "Zahl hinzufügen"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
 #: packages/core/src/app/screens/Settings/components/RecoveryCodeSection.tsx
@@ -2002,11 +1986,7 @@ msgstr "Kein Tresor ausgewählt."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "None"
-<<<<<<< HEAD
 msgstr "Keine"
-=======
-msgstr "Keiner"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/bulk-actions/tags.tsx
 msgid "None of the selected entries have this tag."

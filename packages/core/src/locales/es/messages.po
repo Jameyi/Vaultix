@@ -1212,11 +1212,7 @@ msgstr "Elefante"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Empty falls back to the standard set."
-<<<<<<< HEAD
 msgstr "Si está vacío, se utiliza el conjunto estándar."
-=======
-msgstr "Si se deja vacío, se utiliza el conjunto estándar."
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Enable autofill"
@@ -1437,11 +1433,7 @@ msgstr "Genere un código de emparejamiento único y escuche la conexión de un 
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Generate another"
-<<<<<<< HEAD
 msgstr "Generar otra"
-=======
-msgstr "Generar otro"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "Generate email alias"
@@ -2925,11 +2917,7 @@ msgstr "Apoyar"
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Symbols to use"
-<<<<<<< HEAD
 msgstr "Símbolos a usar"
-=======
-msgstr "Símbolos que usar"
->>>>>>> fb236165 (chore(i18n): translate the alias strings)
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
 #: packages/core/src/app/screens/Settings/Settings.tsx
