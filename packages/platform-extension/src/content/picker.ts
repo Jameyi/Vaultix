@@ -505,7 +505,13 @@ function armReadinessTimeout(): void {
 		destroyIframeHost();
 		if (field && render) {
 			if (render.kind === "matches")
-				buildDropdown(render.matches, field, { otpOnly: render.otpOnly });
+				buildDropdown(render.matches, field, {
+					otpOnly: render.otpOnly,
+					// Carried over, or falling back to the shadow renderer silently drops whichever
+					// extra row was on offer: the suggestion as well as the alias.
+					suggest: render.suggest,
+					alias: render.alias,
+				});
 			else buildLockedDropdown(field);
 		}
 	}, 700);
@@ -518,7 +524,13 @@ function iframeShow(field: HTMLInputElement, render: IframeRender): void {
 	positionHostElement(iframeHostEl, field);
 	startPositionTracking();
 	// Skip a redundant re-post when the same content is already showing here.
-	const key = render.kind === "matches" ? renderKey(render.matches, render.suggest) : "\0locked";
+	// The alias state belongs in this key exactly as it does in the shadow renderer's: without it
+	// idle and busy hash the same, the re-post is skipped as redundant, and the row never leaves
+	// the state it was first drawn in. This is the primary renderer, so that is the whole spinner.
+	const key =
+		render.kind === "matches"
+			? renderKey(render.matches, render.suggest, render.alias)
+			: "\0locked";
 	if (iframeReady && key === iframeMatchesKey) return;
 	iframeMatchesKey = key;
 	pendingRender = render;
