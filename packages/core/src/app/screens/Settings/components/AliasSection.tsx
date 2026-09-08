@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { AtSign, Check, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { AtSign, Check, ExternalLink, Loader2, RefreshCw, Unplug } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import {
 	ALIAS_PROVIDERS,
@@ -233,6 +233,49 @@ export function AliasSection() {
 					<Trans>Create an API key at {descriptor.label}</Trans>
 					<ExternalLink className="w-3 h-3" />
 				</a>
+
+				<div className="mt-3 flex flex-wrap items-center gap-2">
+					<Button
+						variant="secondary"
+						size="sm"
+						onClick={onVerify}
+						disabled={busy}
+						className="gap-1.5"
+					>
+						{busy ? (
+							<Loader2 className="w-3.5 h-3.5 animate-spin" />
+						) : (
+							<RefreshCw className="w-3.5 h-3.5" />
+						)}
+						<Trans>Check key</Trans>
+					</Button>
+					{config && (
+						<Button
+							variant="secondary"
+							size="sm"
+							onClick={onDisconnect}
+							disabled={busy}
+							className="gap-1.5 text-muted-foreground"
+						>
+							<Unplug className="w-3.5 h-3.5" /> <Trans>Disconnect</Trans>
+						</Button>
+					)}
+				</div>
+
+				{connected && (
+					<p className="mt-2 text-xs text-primary flex items-center gap-1.5">
+						<Check className="w-3.5 h-3.5 shrink-0" />
+						{/* The allowance is counted over the provider's shared domains only, so quoting it
+						    beside a domain of the user's own would claim a limit that does not apply. */}
+						{connected.quota && selectedIsShared
+							? t`Connected. ${connected.quota.used} of ${connected.quota.limit} aliases used.`
+							: t`Connected.`}
+					</p>
+				)}
+				{status.kind === "error" && (
+					// Plain text, deliberately: part of this string can come from the provider.
+					<p className="mt-2 text-xs text-destructive">{status.message}</p>
+				)}
 			</div>
 
 			{descriptor.fields.map((field) => {
@@ -271,6 +314,12 @@ export function AliasSection() {
 				);
 			})}
 
+			{missing.length > 0 && domainList.length === 0 && (
+				<p className="text-xs text-muted-foreground">
+					<Trans>Check the key first, to load the choices this provider needs.</Trans>
+				</p>
+			)}
+
 			{descriptor.selfHostable && (
 				<AdvancedDisclosure>
 					<div>
@@ -292,43 +341,6 @@ export function AliasSection() {
 						</p>
 					</div>
 				</AdvancedDisclosure>
-			)}
-
-			{missing.length > 0 && domainList.length === 0 && (
-				<p className="text-xs text-muted-foreground">
-					<Trans>Check the key first, to load the choices this provider needs.</Trans>
-				</p>
-			)}
-
-			<div className="flex items-center gap-2">
-				<Button variant="secondary" onClick={onVerify} disabled={busy}>
-					{busy ? (
-						<Loader2 className="w-3.5 h-3.5 animate-spin" />
-					) : (
-						<RefreshCw className="w-3.5 h-3.5" />
-					)}
-					<Trans>Check key</Trans>
-				</Button>
-				{config && (
-					<Button variant="ghost" onClick={onDisconnect} disabled={busy}>
-						<Trans>Disconnect</Trans>
-					</Button>
-				)}
-			</div>
-
-			{connected && (
-				<p className="text-xs text-primary flex items-center gap-1.5">
-					<Check className="w-3.5 h-3.5 shrink-0" />
-					{/* The allowance is counted over the provider's shared domains only, so quoting it
-					    beside a domain of the user's own would claim a limit that does not apply. */}
-					{connected.quota && selectedIsShared
-						? t`Connected. ${connected.quota.used} of ${connected.quota.limit} aliases used.`
-						: t`Connected.`}
-				</p>
-			)}
-			{status.kind === "error" && (
-				// Plain text, deliberately: part of this string can come from the provider.
-				<p className="text-xs text-destructive">{status.message}</p>
 			)}
 		</Section>
 	);
