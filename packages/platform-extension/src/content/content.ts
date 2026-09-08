@@ -541,8 +541,19 @@ function showLoginPicker(field: HTMLInputElement, logins: MatchSummary[]): void 
  */
 function showLockedPicker(field: HTMLInputElement, hasPotentialMatch: boolean): void {
 	const suggest = maybeSuggest(field, hasPotentialMatch);
-	if (suggest) showMatchesFor([], field, { suggest: { password: suggest.password } });
-	else if (!isCreationField(field)) showLockedFor(field);
+	if (suggest) {
+		showMatchesFor([], field, { suggest: { password: suggest.password } });
+		return;
+	}
+	// A signup form's email field, where an alias could be made if the vault were open. The rest
+	// of a creation form still gets nothing, but this field now has something behind the lock, so
+	// suppressing the unlock row would leave the user no way to reach it from here. Unlocking is
+	// what saving the new login is about to ask for anyway.
+	if (cachedResult?.aliasReady && shouldSuggestAlias(field)) {
+		showLockedFor(field);
+		return;
+	}
+	if (!isCreationField(field)) showLockedFor(field);
 }
 
 /** Fills the suggested password into the new-password field(s) and offers to save the login. */

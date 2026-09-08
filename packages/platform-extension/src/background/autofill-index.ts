@@ -20,7 +20,7 @@ import {
 } from "../dedupe";
 import { api } from "../platform-api";
 import { isExtensionSender } from "../sender";
-import { aliasAvailable, createAlias } from "./alias";
+import { aliasAvailable, aliasConfiguredAnywhere, createAlias } from "./alias";
 import {
 	type DesktopFill,
 	linkIsHeld,
@@ -583,7 +583,13 @@ async function autofillQuery(
 		// Whether an alias row may be offered, decided here for the same reason the master switch
 		// is: a content script is not a trusted context, so the page does not get to assert that a
 		// provider exists. A config read only; nothing is contacted to answer it.
-		if (hasLogin && !result.locked && (await aliasAvailable())) result.aliasReady = true;
+		//
+		// Locked, the active vault is not knowable (its id lives in session storage and is cleared
+		// on lock), so the question softens to whether any vault has one. All it buys there is an
+		// unlock row on a signup form's email field, which is the way to the alias.
+		if (hasLogin) {
+			result.aliasReady = result.locked ? await aliasConfiguredAnywhere() : await aliasAvailable();
+		}
 		// Sliding session: any autofill activity extends the timer.
 		if (!result.locked) await scheduleAutoLock();
 		if (!autofillSessionIsStable(generation)) return { ok: false, error: "unavailable" };

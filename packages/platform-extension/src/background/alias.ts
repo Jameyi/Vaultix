@@ -1,4 +1,5 @@
 import { AliasError, aliasConfigKeyFor, clientForConfig, isAliasConfig } from "@core/aliases";
+import { parseRegistry, VAULT_REGISTRY_KEY } from "@core/vault/vault-registry";
 import { extensionStorage } from "../storage";
 import { sendToOffscreen } from "./offscreen-client";
 import { getActiveVaultId, unlockedVaultIds } from "./session";
@@ -26,6 +27,25 @@ async function activeConfig() {
  */
 export async function aliasAvailable(): Promise<boolean> {
 	return (await activeConfig()) !== null;
+}
+
+/**
+ * Whether ANY vault has a provider configured.
+ *
+ * For the locked case only, where the active vault is not knowable: its id lives in session
+ * storage and is cleared on lock. The answer decides one thing, whether a signup form's email
+ * field is worth offering an unlock row on, so over-reporting on a multi-vault install costs an
+ * unlock prompt and nothing else. Once unlocked the per-vault answer takes over.
+ */
+export async function aliasConfiguredAnywhere(): Promise<boolean> {
+	const reg = parseRegistry(await extensionStorage.getMeta(VAULT_REGISTRY_KEY).catch(() => null));
+	for (const v of reg.vaults) {
+		const stored = await extensionStorage
+			.getMeta<unknown>(aliasConfigKeyFor(v.id))
+			.catch(() => undefined);
+		if (isAliasConfig(stored)) return true;
+	}
+	return false;
 }
 
 /**

@@ -1534,3 +1534,63 @@ describe("content: alias refreshes a capture the password suggestion already sta
 		expect(captures()).toHaveLength(0);
 	});
 });
+
+// Reported from a real browser: on a signup form with a locked vault the email field offered
+// nothing at all, so there was no way to reach the alias from the field that wants one. The rest
+// of a creation form still gets nothing; this field has something behind the lock now.
+describe("content: locked vault on a signup form's email field", () => {
+	beforeEach(() => {
+		vi.useRealTimers();
+		vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+			width: 200,
+			height: 24,
+			top: 0,
+			left: 0,
+			right: 200,
+			bottom: 24,
+			x: 0,
+			y: 0,
+			toJSON: () => ({}),
+		} as DOMRect);
+		showMatches.mockClear();
+		showLocked.mockClear();
+		pickerState.host = null;
+		pickerState.anchor = null;
+		pendingQueryResponses.length = 0;
+		window.history.replaceState({}, "", "/signup");
+		document.body.innerHTML = `
+			<form>
+				<input id="user" type="email" name="email" autocomplete="email" />
+				<input id="pass" type="password" name="password" autocomplete="new-password" />
+				<button type="submit">Create account</button>
+			</form>`;
+		invalidatePageFields();
+	});
+
+	afterEach(() => vi.restoreAllMocks());
+
+	/** Focus the email field, then answer its query with a locked result. The lock-state push is
+	 * what provokes the query; the reply is resolved directly, as the sibling locked tests do. */
+	function focusEmailLocked(aliasReady: boolean): void {
+		const email = document.getElementById("user") as HTMLInputElement;
+		email.focus();
+		send({ type: "VAULT_LOCK_STATE", payload: { locked: false } });
+		showLocked.mockClear();
+		pendingQueryResponses.pop()?.({
+			ok: true,
+			data: result({ logins: [], locked: true, aliasReady }),
+		});
+	}
+
+	it("offers the unlock row when a provider is configured", () => {
+		focusEmailLocked(true);
+		expect(showLocked).toHaveBeenCalled();
+	});
+
+	// Someone with no alias provider keeps the old behaviour: an account-creation form is where
+	// you invent a credential, not fill one, so it gets nothing.
+	it("still offers nothing when no provider is configured", () => {
+		focusEmailLocked(false);
+		expect(showLocked).not.toHaveBeenCalled();
+	});
+});
