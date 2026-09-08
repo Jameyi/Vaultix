@@ -475,13 +475,38 @@ link is not made clickable.
 
 ## Phases
 
-| Phase | Work |
-|---|---|
-| 0 | This document, plus the spike script. |
-| 1 | `core/aliases/`: provider descriptors, the Addy and SimpleLogin clients, zod-validated responses, VEK-wrapped key storage, tests. |
-| 2 | Shared UI: the settings section and the entry-form button, in six locales. |
-| 3 | Extension in-page suggestion: the email-field trigger, the picker row, the background round trip, save wiring, `_locales`, dom tests. |
-| 4 | Device testing on both mobile platforms and both browsers, docs, release. |
+| Phase | Work | State |
+|---|---|---|
+| 0 | This document, plus the spike script. | done |
+| 1 | `core/aliases/`: provider descriptors, the Addy and SimpleLogin clients, zod-validated responses, VEK-wrapped key storage, tests. | done |
+| 2 | Shared UI: the settings section and the entry-form button, in six locales. | done |
+| 3 | Extension in-page suggestion: the email-field trigger, the picker row, the background round trip, save wiring, `_locales`, dom tests. | done, exercised in Chromium |
+| 4 | Firefox, mobile, release. | outstanding |
+
+### What running it in a browser found
+
+Three things, none of which any test would have caught, which is the argument for
+doing it before calling a phase finished.
+
+**The spinner never appeared.** The row's state was in the shadow renderer's cache
+key but not the iframe renderer's, which computed its own from the matches and the
+suggestion alone. Idle and busy hashed the same, the re-post was dropped as
+redundant, and the row sat in whichever state it was first drawn in. The iframe is
+the primary renderer, so that was the whole in-flight state. Addy answers fast
+enough to hide it; SimpleLogin, three calls deep on a custom domain, did not. The
+same line also dropped both extra rows when falling back to the shadow renderer on
+a COEP page, which had silently been true of the suggested-password row since
+before this feature.
+
+**A locked vault offered nothing on the email field.** An account-creation form
+deliberately shows nothing on its non-password fields, which was right until there
+was an alias behind the lock. Fixed by offering the ordinary locked row there.
+Answering "is a provider configured" while locked needed the registry rather than
+the active vault id, which lives in session storage and is cleared on lock.
+
+**Neither renderer had ever been driven in a test.** Both bugs lived in the iframe
+path, which the picker's tests did not exercise at all; they now complete the
+readiness handshake and assert on what is posted.
 
 Phase 1 responses are validated with zod, as the backup OAuth responses are
 (031e84b0): these are third-party JSON shapes that change without warning, and
