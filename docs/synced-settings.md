@@ -169,14 +169,110 @@ container is untouched, exactly as tombstones were when they were added.
 **Keyed by the existing meta key.** A pref that changes scope keeps its name, so
 migration is a move rather than a rename, and a key can never mean two things.
 
+## Compatibility, and what is actually being claimed
+
+Two different claims get confused here, so they are separated.
+
+### The format is safe for released clients
+
+Verified against the current code rather than reasoned about:
+
+- **An unknown field does not crash an old client.** `EntriesPayloadSchema` is a
+  plain `z.object`, so zod strips unknown keys instead of throwing. Confirmed with
+  a throwaway test that ran a payload carrying an extra field through
+  `decodeEntriesPayload`.
+- **An old client damages only its own copy.** It strips on read and on
+  write-back, so its local blob loses the map. Nothing else does.
+- **A stripped payload cannot delete a current device's copy.**
+  `applyRemotePayload` always computes `mergeEntriesPayload(local, remote)` and
+  never replaces local with remote (`sync/apply-remote.ts:69`), and every device
+  writes its own blob.
+- **Enrollment has nothing to lose.** The inviter ships its payload to a joiner
+  that is creating a fresh vault, so the joining side has no prior map.
+- **Background readers are indifferent.** They destructure `.entries`
+  (`background/autofill-index.ts:355`, `background/passkey-store.ts:75`).
+
+### The implementation is where the risk actually is
+
+The point above is about a design that does not exist yet, and it holds only if
+the merge rule and the `VaultEntries` threading are written correctly. That
+threading lives in `buildPayload`, which is the single write path for **every
+entry in the vault**. So the honest statement is not "this cannot harm users":
+
+> The format change is safe for old clients. The implementation touches the most
+> important write path in the app, and a bug there could damage entries, not just
+> settings.
+
+Settings reverting is annoying. A wrong `buildPayload` is data loss. The plan puts
+that work in its own step for this reason, and the tests below exist to make it
+fail loudly rather than quietly.
+
+### Known rough edges, accepted
+
+- **Old devices silently never receive synced settings**, with no signal to the
+  user, because there is no version negotiation to explain it. A gap, not harm.
+- **A backup taken by an old client will not contain them**, so restoring one
+  loses them. True of any state that client did not have.
+- **Migration collision.** Someone who configured the same setting on two devices
+  before this lands will find one wins and the other is silently replaced. Nobody
+  is affected today, because the alias provider is unreleased. That is an argument
+  for doing this now rather than after it ships.
+
+## Confidence tests
+
+These are the ones that decide whether the change is safe, and each targets a
+failure that is otherwise silent. Written before the code they cover, and each one
+confirmed to FAIL with its fix reverted, since a test that cannot fail is worse
+than none.
+
+1. **An old-shaped payload round-trips without touching vault content.** Merge a
+   payload that has no `settings` map with one that does; assert entries and
+   tombstones are byte-identical to the plain two-way merge. This is the one that
+   says the format change cannot damage data.
+
+2. **An entry mutation preserves the settings map.** Add, edit, archive and delete
+   an entry through `EntryMutations`; assert the map survives each. This is the
+   highest-risk seam: `buildPayload` rebuilds the payload from `VaultEntries` on
+   every write, so without threading, every edit wipes every synced setting, and
+   nothing local looks wrong.
+
+3. **A settings-only change is not judged redundant.** Assert
+   `payloadsEquivalent` returns false when only the map differs. Without this the
+   merge is skipped, nothing is written, nothing re-broadcasts, and the setting
+   appears to sync only when it happens to ride along with an entry edit.
+
+4. **Absent is not deleted.** Merge a payload holding a setting with one that has
+   no map at all; assert the setting survives. This is what makes an old client
+   harmless, so it is the property most worth pinning.
+
+5. **Cleared is not absent.** Merge a `value: null` at a higher stamp over a real
+   value; assert the value is gone. Distinguishing these is why clearing is
+   explicit.
+
+6. **Per-key independence.** Two devices change two different settings; assert
+   both survive the merge. A single stamp for the whole map would pass every test
+   above and fail this one.
+
+7. **A future-dated settings stamp is dropped.** Mirror the entry guard: assert
+   `sanitizeRemoteEntriesPayload` discards a settings record stamped years ahead,
+   so a clock-skewed or hostile peer cannot pin a setting nobody can change.
+
+8. **Migration adopts only into an empty slot.** Assert a device-local value is
+   taken up when the map has no entry for that key, and ignored when it does, so a
+   device that never had one cannot write a default that then wins.
+
+The device test in the plan is the one that proves the whole thing: configure on
+one device, confirm it arrives on the other, then edit an entry on each and
+confirm the setting survives both.
+
 ## Plan
 
 | Step | Work | Risk |
 |---|---|---|
-| 1 | `settings` map on the payload schema; the merge rule; `payloadsEquivalent`; `sanitize`. Tests first, including an old-client round trip that must not lose the map. | low, isolated |
-| 2 | Thread through `VaultEntries` and `buildPayload`; a settings mutation in `EntryMutations`. Test: edit an entry, assert the map survives. | **highest**, silent if wrong |
+| 1 | `settings` map on the payload schema; the merge rule; `payloadsEquivalent`; `sanitize`. Confidence tests 1 and 3-7 first. | low, isolated |
+| 2 | Thread through `VaultEntries` and `buildPayload`; a settings mutation in `EntryMutations`. Confidence test 2. | **highest**, silent if wrong |
 | 3 | `PrefScope` gains `"synced"`; `usePrefs` routes reads and writes; per-pref normalizers; the locked-vault rule documented beside the table. | medium |
-| 4 | Move the alias provider onto it, dropping its hand-rolled VEK wrapping, and migrate the existing meta key once. | medium, one-way |
+| 4 | Move the alias provider onto it, dropping its hand-rolled VEK wrapping, and migrate the existing meta key once. Confidence test 8. | medium, one-way |
 | 5 | Settings copy: say it syncs. Locales. | low |
 | 6 | Device test: configure on one device, confirm it lands on the other; then edit an entry on each and confirm it survives. | the one that proves it |
 
