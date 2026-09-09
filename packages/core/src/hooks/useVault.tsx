@@ -192,6 +192,7 @@ import {
 	type Hlc,
 	type HybridClock,
 	makeClock,
+	type SyncedSettings,
 } from "../sync";
 import { PER_VAULT_SYNC_KEYS, syncKeyFor } from "../sync/sync-keys";
 import { base64ToBytes, bytesToBase64 } from "../util/bytes";
@@ -454,6 +455,10 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 	const clockRef = useRef<{ vaultId: string | null; clock: HybridClock } | null>(null);
 	const stampsRef = useRef<Map<string, Hlc>>(new Map());
 	const tombstonesRef = useRef<Map<string, Hlc>>(new Map());
+	// Vault-scoped settings, held here for the same reason the two above are: every mutation
+	// rebuilds the payload from this value, so anything not threaded through is erased by the
+	// next entry edit. See docs/synced-settings.md.
+	const settingsRef = useRef<SyncedSettings | undefined>(undefined);
 
 	/** Lazily load this device's id and build its clock. The device id is per-vault (each vault
 	 * is its own sync group with its own roster membership), so read/write it under the active
@@ -558,6 +563,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		if (blob.entriesCiphertext.length === 0) {
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
+			settingsRef.current = undefined;
 			setEntries([]);
 			await publishIndex([], indexLease);
 			return;
@@ -587,6 +593,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		}
 		stampsRef.current = new Map(payload.entries.map((e) => [e.id, e.hlc]));
 		tombstonesRef.current = new Map(payload.tombstones.map((t) => [t.id, t.hlc]));
+		settingsRef.current = payload.settings;
 		// Advance this device's clock past every stamp it just read, so the next
 		// local write is causally ordered after them.
 		const clock = await ensureClock();
@@ -699,6 +706,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		return crypto.onExternalLock(() => {
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
+			settingsRef.current = undefined;
 			setEntries([]);
 			setIsLocked(true);
 		});
@@ -765,6 +773,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		await autofill.clearIndex();
 		stampsRef.current = new Map();
 		tombstonesRef.current = new Map();
+		settingsRef.current = undefined;
 		setEntries([]);
 		setIsLocked(true);
 		setLockedByUser(true);
@@ -974,6 +983,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			await storage.writeVaultBlob(bytes, newId);
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
+			settingsRef.current = undefined;
 			setHasVault(true);
 			setEntries([]);
 			setIsLocked(false);
@@ -1040,6 +1050,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			entries: latestRef.current.entries,
 			stamps: stampsRef.current,
 			tombstones: tombstonesRef.current,
+			settings: settingsRef.current,
 		}),
 		[],
 	);
@@ -1049,6 +1060,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 	const commitEntries = useCallback((next: VaultEntries) => {
 		stampsRef.current = next.stamps;
 		tombstonesRef.current = next.tombstones;
+		settingsRef.current = next.settings;
 		setEntries(next.entries);
 	}, []);
 
