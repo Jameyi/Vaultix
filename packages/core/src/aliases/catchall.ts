@@ -1,5 +1,4 @@
 import { randomInt } from "../util/password-gen";
-import { effWordlist } from "../util/wordlist-eff";
 import {
 	type AliasAccount,
 	type AliasClient,
@@ -37,7 +36,16 @@ function characterLocalPart(): string {
 	return out;
 }
 
-function wordLocalPart(): string {
+/**
+ * Loaded on demand, exactly as the password generator loads it.
+ *
+ * A static import here would pull 62 KB of wordlist into every bundle that touches aliases and
+ * undo the lazy chunk that generator was careful to arrange. In the extension background, where a
+ * restarted service worker cannot fetch a chunk, the module is statically imported by
+ * background/password-gen.ts and this resolves from the same bundle rather than over the wire.
+ */
+async function wordLocalPart(): Promise<string> {
+	const { effWordlist } = await import("../util/wordlist-eff");
 	const words = effWordlist();
 	const picked: string[] = [];
 	for (let i = 0; i < WORD_COUNT; i++) picked.push(words[randomInt(words.length)] as string);
@@ -77,7 +85,7 @@ export function createCatchAllClient(cfg: CatchAllConfig): AliasClient {
 			const taken = new Set((req.taken ?? []).map((a) => a.trim().toLowerCase()));
 			const make = cfg.style === "characters" ? characterLocalPart : wordLocalPart;
 			for (let i = 0; i < MAX_ATTEMPTS; i++) {
-				const address = `${make()}@${domain}`;
+				const address = `${await make()}@${domain}`;
 				if (!taken.has(address)) return { address };
 			}
 			// Twelve draws all colliding means something is wrong with the inputs rather than with

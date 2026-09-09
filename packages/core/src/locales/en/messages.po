@@ -2999,6 +2999,10 @@ msgstr "Telephone"
 #~ msgid "Test"
 #~ msgstr "Test"
 
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "That does not look like a domain. Enter it on its own, like example.com, with no @ and no https://"
+msgstr "That does not look like a domain. Enter it on its own, like example.com, with no @ and no https://"
+
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
 msgid "That doesn't look like a Bramble backup (.bramble) file."
 msgstr "That doesn't look like a Bramble backup (.bramble) file."
@@ -3742,6 +3746,10 @@ msgstr "Your browser may ask for access to your vault file when you unlock."
 #: packages/core/src/app/screens/Settings/components/BiometricSection.tsx
 msgid "Your device passcode can also unlock this vault."
 msgstr "Your device passcode can also unlock this vault."
+
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Your domain"
+msgstr "Your domain"
 
 #: packages/core/src/app/screens/Settings/components/RecoveryCodeSection.tsx
 msgid "Your new recovery code"

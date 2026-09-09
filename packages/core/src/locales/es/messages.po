@@ -2999,6 +2999,10 @@ msgstr "Teléfono"
 #~ msgid "Test"
 #~ msgstr "Probar"
 
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "That does not look like a domain. Enter it on its own, like example.com, with no @ and no https://"
+msgstr "Eso no parece un dominio. Introdúzcalo solo, como example.com, sin @ y sin https://"
+
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
 msgid "That doesn't look like a Bramble backup (.bramble) file."
 msgstr "Eso no parece un archivo de copia de seguridad de Bramble (.bramble)."
@@ -3742,6 +3746,10 @@ msgstr "Su navegador puede solicitar acceso al archivo de la bóveda cuando uste
 #: packages/core/src/app/screens/Settings/components/BiometricSection.tsx
 msgid "Your device passcode can also unlock this vault."
 msgstr "El código de acceso de su dispositivo también puede desbloquear esta bóveda."
+
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Your domain"
+msgstr "Su dominio"
 
 #: packages/core/src/app/screens/Settings/components/RecoveryCodeSection.tsx
 msgid "Your new recovery code"

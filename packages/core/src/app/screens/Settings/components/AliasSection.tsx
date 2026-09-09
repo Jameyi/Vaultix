@@ -8,6 +8,7 @@ import {
 	AliasError,
 	type AliasProviderId,
 	describeProvider,
+	looksLikeDomain,
 } from "../../../../aliases";
 import { type SaveAliasInput, useAliasProvider } from "../../../../hooks/useAliasProvider";
 import { AdvancedDisclosure } from "../../../components/ui/advanced-disclosure";
@@ -60,7 +61,7 @@ export function AliasSection() {
 	// The copy for each provider-specific field. Here rather than in the descriptor so Lingui can
 	// extract it; the descriptor decides which fields exist, this decides what they say.
 	const fieldLabel = (key: string): string => {
-		if (key === "domain") return t`Alias domain`;
+		if (key === "domain") return provider === "catchall" ? t`Your domain` : t`Alias domain`;
 		if (key === "format") return t`Alias format`;
 		if (key === "mode") return t`Alias style`;
 		if (key === "style") return t`Alias style`;
@@ -180,7 +181,13 @@ export function AliasSection() {
 	// Whether the stored key is this provider's. An Addy key is not a SimpleLogin key, so after a
 	// switch the saved one is not offered as a thing to keep.
 	const savedForThisProvider = config?.provider === provider;
-	const missing = descriptor.fields.filter((f) => f.required && !options[f.key]);
+	// Required AND usable: a text field holding something that cannot be a domain is no more
+	// configured than an empty one, and saving it would arm a generate button that only fails.
+	const missing = descriptor.fields.filter(
+		(f) =>
+			f.required &&
+			(!options[f.key] || (f.options === "text" && !looksLikeDomain(options[f.key] as string))),
+	);
 
 	const connected = status.kind === "ok" ? status.account : undefined;
 	// Whether the chosen domain is one of the provider's shared ones, which is what decides
@@ -314,17 +321,27 @@ export function AliasSection() {
 					: [...(field.options as readonly string[])];
 				const hint = fieldHint(field.key);
 				if (field.options === "text") {
+					const value = options[field.key] ?? "";
+					// Checked here as well as at generation time. The same guard runs before an alias is
+					// made, but discovering a typo on a signup form is far too late: this is the box
+					// where it was typed, and the only place it can be fixed.
+					const invalid = value.length > 0 && !looksLikeDomain(value);
 					return (
 						<div key={field.key}>
 							<TextField
 								label={fieldLabel(field.key)}
 								type="text"
 								autoComplete="off"
-								value={options[field.key] ?? ""}
+								value={value}
 								disabled={busy}
+								error={
+									invalid
+										? t`That does not look like a domain. Enter it on its own, like example.com, with no @ and no https://`
+										: undefined
+								}
 								onChange={(e) => setOption(field.key, e.target.value.trim())}
 							/>
-							{hint && <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>}
+							{hint && !invalid && <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>}
 						</div>
 					);
 				}
@@ -358,11 +375,16 @@ export function AliasSection() {
 				);
 			})}
 
-			{missing.length > 0 && domainList.length === 0 && (
-				<p className="text-xs text-muted-foreground">
-					<Trans>Check the key first, to load the choices this provider needs.</Trans>
-				</p>
-			)}
+			{/* Only for a provider whose choices come FROM the account. The catch-all one has a
+			    domain field too, but it is typed in, so telling someone to check a key they were
+			    never asked for is nonsense. */}
+			{descriptor.fields.some((f) => f.options === "domains") &&
+				missing.length > 0 &&
+				domainList.length === 0 && (
+					<p className="text-xs text-muted-foreground">
+						<Trans>Check the key first, to load the choices this provider needs.</Trans>
+					</p>
+				)}
 
 			{descriptor.selfHostable && (
 				<AdvancedDisclosure>
