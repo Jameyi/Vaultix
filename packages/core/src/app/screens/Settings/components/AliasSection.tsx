@@ -136,13 +136,23 @@ export function AliasSection() {
 			// meant the catch-all one could never be saved at all.
 			const needsKey = describeProvider(next.provider).needsApiKey;
 			if (needsKey && !next.apiKey && config?.provider !== next.provider) return;
+			// A typed field holding something unusable is not stored. Empty is fine, since that is
+			// simply not filled in yet; a domain that cannot work is different, and writing it would
+			// arm the generate button on every entry form for a provider that can only fail.
+			const unusable = descriptor.fields.some(
+				(f) =>
+					f.options === "text" &&
+					(next.options[f.key] ?? "") !== "" &&
+					!looksLikeDomain(next.options[f.key] as string),
+			);
+			if (unusable) return;
 			try {
 				await save(next);
 			} catch (e) {
 				setStatus({ kind: "error", message: messageFor(e) });
 			}
 		},
-		[save, inputWith, config],
+		[save, inputWith, config, descriptor],
 	);
 
 	const setOption = useCallback(
