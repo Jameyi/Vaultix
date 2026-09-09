@@ -231,10 +231,9 @@ Two caveats carried forward:
   cost this repo a day once (1255ab7b, WebDAV uploads authenticating as the
   wrong thing). The token goes in a header, deliberately and only.
 
-## Idea: a catch-all domain, with no provider at all
+## A catch-all domain, with no provider at all
 
-Not built. Recorded because it is the cheapest useful thing left in this space and
-it inverts most of the constraints above.
+Built. It inverts most of the constraints above, which is what makes it cheap.
 
 Plenty of mail hosts let you point a whole domain at one inbox: Migadu, Fastmail,
 Cloudflare Email Routing, and any host with a catch-all rule. Once that is set up,
@@ -253,45 +252,49 @@ forwarding rules. The other providers are scoped that way for v1; this one is
 scoped that way permanently, because there is no API to grow into. Turning an
 alias off means a rule at the user's own host.
 
-### What it would cost
+### What it cost
 
-Small, and mostly in places that already exist:
+Three structural changes, each of which the existing shapes almost anticipated:
 
-- A descriptor with no `keyUrl` and a **free-text** `domain` field. `AliasField`
-  currently only describes a select (fixed options, or fetched from the account),
-  so it needs a text kind. That is the one structural change.
-- `AliasConfig.apiKey` becomes optional, and `isAliasConfig` stops requiring it.
-  Today it demands a non-empty string.
-- A local generator for the part before the `@`. The passphrase generator already
-  produces separated words and a random-character mode
-  (`util/password-gen.ts`), so the shape settings are mostly a reuse: words,
-  characters, length, separator. Local parts have their own rules, though (no
-  leading or trailing dot, a narrower charset, a length cap), so it wants a thin
-  constrained wrapper rather than a direct call.
-- A branch in `createAliasClient` returning a client whose `create` is local.
+- `AliasField` gained a **text** kind. It only described a select before (fixed
+  options, or fetched from the account), and this needs a domain typed by hand.
+- `AliasConfig.apiKey` became **optional**, and `isAliasConfig` asks for one per
+  provider rather than of every config.
+- Descriptors gained `needsApiKey`, so the settings screen hides the key field,
+  the link to create one and the check button without switching on a provider id.
 
-### The two things worth deciding first
+The generator is `aliases/catchall.ts`, reusing the EFF wordlist and the one
+unbiased `randomInt` the password generator already had. Two styles: words
+(`quiet-fox-42`) and characters (`k3f9x2ab7q`), the latter over a charset with
+`l`, `o`, `0` and `1` removed so a hand-copied address is not misread.
 
-**A wrong domain fails silently, and looks fine.** Every other provider answers a
-create, so a typo surfaces immediately. Here a mistyped domain produces a
-plausible address that quietly black-holes, and the user finds out when a password
-reset never arrives. Bramble cannot verify a catch-all without sending mail. It
-could check the domain publishes MX records over DNS-over-HTTPS, which is cheap
-and catches the typo case, but it reintroduces exactly the network egress this
-provider otherwise avoids, so it is a real trade rather than an obvious win.
+### A wrong domain fails silently, so the UI says so
 
-**Collisions are ours to avoid.** No server rejects a duplicate, so the generator
-should check what the vault already holds. That is free: every alias it ever made
-is a username on an entry.
+Every other provider answers a create, so a typo surfaces at once. Here a mistyped
+domain produces a plausible address that quietly black-holes, and the user finds
+out when a password reset never arrives.
 
-### Shape, and the disclosure question again
+Bramble cannot verify a catch-all without sending mail, and an MX lookup over
+DNS-over-HTTPS would reintroduce exactly the egress this provider otherwise
+avoids. So it does not pretend: `looksLikeDomain` catches only the slips someone
+actually makes in that box (an empty field, a whole address pasted in, a URL), and
+the hint under it asks the user to check for themselves.
 
-The obvious styles are random words (`quiet-fox-42@example.com`), random
-characters (`k3f9x2@example.com`), and a site prefix (`github-k3f9@example.com`).
-The third has the same tradeoff SimpleLogin's `word` mode turned out to have,
-measured earlier in this document: an address carrying the site's name is easy to
-recognise in your own inbox and tells anyone who sees it where you used it. If it
-is offered, it should say so, the way the SimpleLogin setting does.
+### Collisions are ours to avoid
+
+No server rejects a duplicate, so `AliasRequest.taken` carries what the vault
+already holds, which is free because every alias it ever made is a username on a
+login. Twelve draws, then a refusal: at that point the inputs are wrong rather than
+luck, and quietly returning an address that already belongs to another login would
+be the worse failure.
+
+### The style not offered
+
+A site prefix (`github-k3f9@example.com`) is the obvious third style and is
+deliberately absent. It carries the tradeoff measured earlier in this document for
+SimpleLogin's `word` mode: an address holding the site's name is easy to recognise
+in your own inbox and tells anyone who sees it where you used it. Worth adding
+only with the same warning the SimpleLogin setting carries.
 
 ## The rest of the field, and why CORS decides it
 

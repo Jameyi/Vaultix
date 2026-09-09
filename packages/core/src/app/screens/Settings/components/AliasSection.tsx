@@ -63,16 +63,25 @@ export function AliasSection() {
 		if (key === "domain") return t`Alias domain`;
 		if (key === "format") return t`Alias format`;
 		if (key === "mode") return t`Alias style`;
+		if (key === "style") return t`Alias style`;
 		return key;
 	};
 	const fieldHint = (key: string): string | undefined => {
-		// Both providers have a domain field but they do not mean the same thing: Addy cannot
-		// create without one, while SimpleLogin uses the account default until you pick.
+		// Three providers have a domain field and none of them mean the same thing by it: Addy
+		// cannot create without one, SimpleLogin uses the account default until you pick, and the
+		// catch-all one is the user's own domain typed in by hand.
 		if (key === "domain") {
+			if (provider === "catchall") {
+				// Bramble cannot tell whether a catch-all actually works without sending mail, and a
+				// typo here produces addresses that look right and quietly go nowhere. So it asks
+				// rather than pretends. See docs/email-aliases.md.
+				return t`Double-check this. Bramble cannot test it, and a wrong domain gives you addresses that quietly go nowhere.`;
+			}
 			return provider === "addy"
 				? t`Addy needs a domain before it can create an alias.`
 				: t`Leave unset for your account's default domain, or pick one of your own.`;
 		}
+		if (key === "style") return t`Words are easier to read aloud; characters are shorter.`;
 		if (key === "format") return t`Leave unset to use your provider account's own default.`;
 		// Stated because it is a privacy choice rather than a cosmetic one: a word alias carries
 		// the site's name, so the address itself discloses where it is used.
@@ -208,48 +217,83 @@ export function AliasSection() {
 				))}
 			</SelectField>
 
-			<div>
-				<TextField
-					label={savedForThisProvider ? t`API key (leave blank to keep the saved one)` : t`API key`}
-					type="password"
-					autoComplete="off"
-					value={apiKey}
-					disabled={busy}
-					onChange={(e) => setApiKey(e.target.value)}
-					// On blur rather than on change: this is the one field where writing every
-					// keystroke would put a series of half-typed keys through the vault key and into
-					// storage.
-					onBlur={(e) => {
-						const key = e.target.value.trim();
-						if (key) void persist({ apiKey: key });
-					}}
-				/>
-				<a
-					href={descriptor.keyUrl}
-					target="_blank"
-					rel="noreferrer"
-					className="mt-1.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-				>
-					<Trans>Create an API key at {descriptor.label}</Trans>
-					<ExternalLink className="w-3 h-3" />
-				</a>
-
-				<div className="mt-3 flex flex-wrap items-center gap-2">
-					<Button
-						variant="secondary"
-						size="sm"
-						onClick={onVerify}
+			{descriptor.needsApiKey ? (
+				<div>
+					<TextField
+						label={
+							savedForThisProvider ? t`API key (leave blank to keep the saved one)` : t`API key`
+						}
+						type="password"
+						autoComplete="off"
+						value={apiKey}
 						disabled={busy}
-						className="gap-1.5"
+						onChange={(e) => setApiKey(e.target.value)}
+						// On blur rather than on change: this is the one field where writing every
+						// keystroke would put a series of half-typed keys through the vault key and into
+						// storage.
+						onBlur={(e) => {
+							const key = e.target.value.trim();
+							if (key) void persist({ apiKey: key });
+						}}
+					/>
+					<a
+						href={descriptor.keyUrl}
+						target="_blank"
+						rel="noreferrer"
+						className="mt-1.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
 					>
-						{busy ? (
-							<Loader2 className="w-3.5 h-3.5 animate-spin" />
-						) : (
-							<RefreshCw className="w-3.5 h-3.5" />
+						<Trans>Create an API key at {descriptor.label}</Trans>
+						<ExternalLink className="w-3 h-3" />
+					</a>
+
+					<div className="mt-3 flex flex-wrap items-center gap-2">
+						<Button
+							variant="secondary"
+							size="sm"
+							onClick={onVerify}
+							disabled={busy}
+							className="gap-1.5"
+						>
+							{busy ? (
+								<Loader2 className="w-3.5 h-3.5 animate-spin" />
+							) : (
+								<RefreshCw className="w-3.5 h-3.5" />
+							)}
+							<Trans>Check key</Trans>
+						</Button>
+						{config && (
+							<Button
+								variant="secondary"
+								size="sm"
+								onClick={onDisconnect}
+								disabled={busy}
+								className="gap-1.5 text-muted-foreground"
+							>
+								<Unplug className="w-3.5 h-3.5" /> <Trans>Disconnect</Trans>
+							</Button>
 						)}
-						<Trans>Check key</Trans>
-					</Button>
-					{config && (
+					</div>
+
+					{connected && (
+						<p className="mt-2 text-xs text-primary flex items-center gap-1.5">
+							<Check className="w-3.5 h-3.5 shrink-0" />
+							{/* The allowance is counted over the provider's shared domains only, so quoting it
+						    beside a domain of the user's own would claim a limit that does not apply. */}
+							{connected.quota && selectedIsShared
+								? t`Connected. ${connected.quota.used} of ${connected.quota.limit} aliases used.`
+								: t`Connected.`}
+						</p>
+					)}
+					{status.kind === "error" && (
+						// Plain text, deliberately: part of this string can come from the provider.
+						<p className="mt-2 text-xs text-destructive">{status.message}</p>
+					)}
+				</div>
+			) : (
+				// Nothing to authenticate and nothing to check, so the only control this provider
+				// needs is a way to stop using it.
+				config && (
+					<div>
 						<Button
 							variant="secondary"
 							size="sm"
@@ -259,31 +303,31 @@ export function AliasSection() {
 						>
 							<Unplug className="w-3.5 h-3.5" /> <Trans>Disconnect</Trans>
 						</Button>
-					)}
-				</div>
-
-				{connected && (
-					<p className="mt-2 text-xs text-primary flex items-center gap-1.5">
-						<Check className="w-3.5 h-3.5 shrink-0" />
-						{/* The allowance is counted over the provider's shared domains only, so quoting it
-						    beside a domain of the user's own would claim a limit that does not apply. */}
-						{connected.quota && selectedIsShared
-							? t`Connected. ${connected.quota.used} of ${connected.quota.limit} aliases used.`
-							: t`Connected.`}
-					</p>
-				)}
-				{status.kind === "error" && (
-					// Plain text, deliberately: part of this string can come from the provider.
-					<p className="mt-2 text-xs text-destructive">{status.message}</p>
-				)}
-			</div>
+					</div>
+				)
+			)}
 
 			{descriptor.fields.map((field) => {
 				const fromAccount = field.options === "domains";
 				const choices: string[] = fromAccount
 					? domainList.map((d) => d.domain)
-					: [...field.options];
+					: [...(field.options as readonly string[])];
 				const hint = fieldHint(field.key);
+				if (field.options === "text") {
+					return (
+						<div key={field.key}>
+							<TextField
+								label={fieldLabel(field.key)}
+								type="text"
+								autoComplete="off"
+								value={options[field.key] ?? ""}
+								disabled={busy}
+								onChange={(e) => setOption(field.key, e.target.value.trim())}
+							/>
+							{hint && <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>}
+						</div>
+					);
+				}
 				return (
 					<div key={field.key}>
 						<SelectField

@@ -1167,6 +1167,10 @@ msgstr "Finalizar selección"
 msgid "Done. Your old recovery code no longer works. Save this one now: it is shown only here, and it is the only way back in if you forget your master password."
 msgstr "Listo. Su código de recuperación antiguo ya no funciona. Guarde este ahora: se muestra únicamente aquí y es la única manera de volver a acceder si olvida su contraseña maestra."
 
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Double-check this. Bramble cannot test it, and a wrong domain gives you addresses that quietly go nowhere."
+msgstr "Compruébelo dos veces. Bramble no puede comprobarlo y un dominio incorrecto le da direcciones que, silenciosamente, no llevan a ninguna parte."
+
 #: packages/core/src/app/components/RecoveryCodeDisplay.tsx
 msgid "Download"
 msgstr "Descargar"
@@ -3664,6 +3668,10 @@ msgstr "Los alias de palabras incluyen el nombre del sitio, lo que facilita su r
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Words"
 msgstr "Palabras"
+
+#: packages/core/src/app/screens/Settings/components/AliasSection.tsx
+msgid "Words are easier to read aloud; characters are shorter."
+msgstr "Las palabras son más fáciles de leer en voz alta; los caracteres son más cortos."
 
 #: packages/core/src/app/screens/Settings/components/RecoveryCodeSection.tsx
 msgid "Working…"
