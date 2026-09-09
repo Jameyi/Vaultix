@@ -130,7 +130,12 @@ export function AliasSection() {
 	const persist = useCallback(
 		async (patch: Partial<SaveAliasInput>) => {
 			const next = inputWith(patch);
-			if (!next.apiKey && config?.provider !== next.provider) return;
+			// Never write one provider's key under another's name: a change to a field before a key
+			// for the NEW provider exists would otherwise save the old provider's key against it.
+			// A provider that authenticates to nobody has no such hazard, and holding it back here
+			// meant the catch-all one could never be saved at all.
+			const needsKey = describeProvider(next.provider).needsApiKey;
+			if (needsKey && !next.apiKey && config?.provider !== next.provider) return;
 			try {
 				await save(next);
 			} catch (e) {

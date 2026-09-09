@@ -100,7 +100,8 @@ export function useAliasProvider() {
 	const resolveKey = useCallback(
 		(input: SaveAliasInput): string => {
 			if (!describeProvider(input.provider).needsApiKey) return "";
-			const key = input.apiKey || config?.apiKey;
+			const stored = config?.provider === input.provider ? config.apiKey : undefined;
+			const key = input.apiKey || stored;
 			if (!key) throw new AliasError("config", "Enter your API key.");
 			return key;
 		},
@@ -118,7 +119,11 @@ export function useAliasProvider() {
 			// An edit that does not restate the key keeps the stored one; the screen never holds it.
 			// A provider with no account to authenticate against carries no key at all.
 			const needsKey = describeProvider(input.provider).needsApiKey;
-			const apiKey = needsKey ? input.apiKey || config?.apiKey : undefined;
+			// The stored key is only a fallback for the provider it belongs to. Reusing it across a
+			// switch would authenticate to Addy with a SimpleLogin key, which fails in a way that
+			// reads as "your key is wrong" rather than "that key is for something else".
+			const storedKey = config?.provider === input.provider ? config.apiKey : undefined;
+			const apiKey = needsKey ? input.apiKey || storedKey : undefined;
 			if (needsKey && !apiKey) throw new AliasError("config", "Enter your API key.");
 			const next: AliasConfig = {
 				provider: input.provider,
