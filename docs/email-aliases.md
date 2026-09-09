@@ -295,6 +295,12 @@ recipients, and delete. It is a vault secret and is treated as one.
   tier**. The reason that tier exists is unattended scheduled runs; alias
   creation is always a user gesture in a foreground window, so there is nothing
   to keep working while locked.
+- **Device-local, for now.** Sync moves only `{ entries, tombstones }`, so the
+  configuration does not travel: each device is set up separately. That is a gap
+  rather than a decision, and closing it is designed in
+  [synced-settings.md](synced-settings.md), which exists because the obvious fix
+  (a new field on the synced payload) is silently stripped by every
+  already-released client.
 
 ## Consent and egress
 
