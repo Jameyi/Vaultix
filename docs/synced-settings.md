@@ -1,164 +1,198 @@
 # Synced settings (planned)
 
 How a setting that belongs to a *vault* rather than a *device* travels between
-devices, and why the obvious ways of doing it are wrong. Written for the email
-alias provider (see [email-aliases.md](email-aliases.md)), which is the first
-setting to need it, but the mechanism is deliberately general.
+devices. The email alias provider is the first one that needs it (see
+[email-aliases.md](email-aliases.md)), but the point of this design is that it is
+the mechanism, not that one setting: hand-picking what goes over the wire should
+be a one-word change in a table the compiler already forces you to fill in.
 
-## The problem
+## Where things stand
 
-Settings today are device-local. Every one of them is a `storage.setMeta` key,
-and sync moves exactly one thing: the `EntriesPayload`, which is
-`{ entries, tombstones }` and nothing else (`sync/entries-payload.ts`). Nothing
-under `core/src/sync/` calls `getMeta` or `setMeta` at all.
+Nothing settings-like syncs today, and precisely so. Sync moves two payloads:
+`EntriesPayload` is `{ entries, tombstones }` and `RosterPayload` is
+`{ devices, revoked }`, which is device membership. Nothing under
+`core/src/sync/` calls `getMeta` or `setMeta` at all.
 
-That is right for almost everything. An auto-lock timeout, a theme, a backup
-target, a relay URL: these describe a device or a machine, and CONTEXT.md's
-device-vs-vault rule already sorts them.
+Every setting is a `storage.setMeta` key, and `usePrefs` already sorts them into
+two kinds through an exhaustive table:
 
-The alias provider is the first setting that is genuinely neither. It is not
-about this browser; it is an account-level fact about the person, and the
-expectation is that configuring it once is enough. Re-pasting an API key on every
-device is friction with no security benefit, since the same vault key protects it
-either way.
+```ts
+type PrefScope = "device" | "vault";
+const PREF_SCOPE: Record<keyof Prefs, PrefScope> = { ... };
+```
 
-## Why the obvious approaches fail
+That table is the reason a new preference does not compile until someone decides
+what it is, which CONTEXT.md calls out as the shape to prefer. This design adds a
+third answer to the same question.
 
-**A field on `EntriesPayload`, added naively.** `EntriesPayloadSchema` is a plain
+## The extension point
+
+```ts
+type PrefScope = "device" | "vault" | "synced";
+```
+
+- **device** — describes this app or this machine. Auto-lock timeout, theme.
+  Stored flat.
+- **vault** — describes one vault on this device. Its unlock gate. Stored at
+  `<key>:<vaultId>`.
+- **synced** — describes the vault itself, wherever it is opened. Stored in the
+  vault's encrypted payload and merged like any other replicated state.
+
+Adding a synced setting is then: add the field to `Prefs`, give it a key in
+`META_KEYS`, and write `"synced"` in `PREF_SCOPE`. `usePrefs` routes the read and
+the write; no consumer of `usePrefs` knows or cares which scope it got, because
+the hook's surface (`prefs`, `loaded`, `update`) does not change.
+
+Everything below exists to make that one word safe.
+
+## Which settings are eligible
+
+Not all of them, and the constraint is not taste. **A synced setting lives in the
+VEK-encrypted payload, so it cannot be read while the vault is locked.** The
+extension background reads several prefs from `chrome.storage.local` precisely
+because it must answer while locked: `getAutoLockMinutes`, `getLockOnScreenLock`,
+`getAutofillEnabled` (`background/prefs.ts`). A setting that decides how the app
+behaves before unlock can never be synced, and the table should not pretend
+otherwise.
+
+The rule, worth stating in the code next to the scope table:
+
+> If anything needs the value while the vault is locked, it is device-scoped.
+> Everything else is a candidate.
+
+That is why the alias provider is a good first one. It is only ever used behind an
+unlock: the entry form, and an in-page row that a locked vault already replaces
+with the unlock prompt.
+
+## Why not the two obvious wire formats
+
+Both were tried on paper and both are wrong, which is worth recording so they are
+not re-proposed.
+
+**A new field on the payload, read naively.** `EntriesPayloadSchema` is a plain
 `z.object`, so zod strips unknown keys, and `encodeEntriesPayload` re-parses on
-every write (`entries-payload.ts:32`). Measured, an older client reading a payload
-that carries a new field drops it on read *and* on write-back. The Chromium
-extension is publicly released, so older builds exist in the wild; a naive field
-would be a format that established clients quietly delete.
+every write (`sync/entries-payload.ts:32`). Measured with a throwaway test: an
+older client drops a new field on read *and* on write-back. The Chromium
+extension is publicly released, so those clients exist.
 
-**A settings-shaped entry in the `entries` array.** Tempting, because entries
-already have stamps, tombstones, per-entry DEKs and a merge that carries sealed
-envelopes verbatim, so an old client could not drop one it did not understand.
-But `getEntryMode` "falls back to login for unrecognised types"
-(`app/entry-modes/index.ts:21`), so on every older device the settings record
-appears in the vault list as a junk login. It would be counted in the stats, land
-in exports, and, worst of all, invite deletion: one confused user tidying up their
-list would tombstone it, and the tombstone would delete the configuration on every
-device, forever. Trading a silent strip for a user-visible booby trap is not an
-improvement.
+**A settings-shaped entry in the `entries` array.** Appealing, because entries
+merge as opaque sealed envelopes an old client cannot drop. But `getEntryMode`
+falls back to login for unrecognised types (`app/entry-modes/index.ts:21`), so on
+every older device it appears as a junk login: counted in the stats, written into
+exports, and one tidy-up away from a tombstone that deletes the configuration on
+every device. That trades a silent strip for a user-visible booby trap.
 
-## The mechanism
+## The wire format
 
-A **stamped settings record** inside `EntriesPayload`, merged by the same
-last-writer-wins rule the entries use, with one rule that makes old clients
-harmless:
+A map of stamped records, keyed by the pref's existing meta key:
 
-> **Absent means "no opinion", never "deleted".**
-
-That single rule is what makes this safe, and it works because of a property of
-the merge path worth stating explicitly: `applyRemotePayload` always computes
-`mergeEntriesPayload(local, remote)` and never replaces local with remote
-(`sync/apply-remote.ts:69`). Each device writes its own blob. So when an old
-client strips the field, it damages only its own copy, and when its stripped
-payload comes back to a current device, the merge sees "they have no opinion" and
-keeps what it has. An old device cannot carry the setting, and cannot destroy it.
-
-Clearing has to be explicit for exactly the same reason. "The user pressed
-Disconnect" must not be encoded as absence, because absence is what an old client
-produces. A cleared setting is a present record with a stamp and a null value.
-
+```ts
+settings?: Record<string, { hlc: Hlc; value: unknown | null }>
 ```
-settings?: {
-  hlc: Hlc,            // stamped like any other write, so LWW resolves conflicts
-  aliases: {...} | null // null = explicitly cleared, absent = never configured
-}
-```
+
+Four properties, each load-bearing:
+
+**Absent means "no opinion", never "deleted".** This is what makes old clients
+harmless. `applyRemotePayload` always computes `mergeEntriesPayload(local, remote)`
+and never replaces local with remote (`sync/apply-remote.ts:69`); each device
+writes its own blob. So an old client that strips the map damages only its own
+copy, and when its stripped payload comes back, the merge sees no opinion and
+keeps what it has. An old device cannot carry a synced setting, and cannot destroy
+one.
+
+**Clearing is an explicit `value: null`.** For the same reason: absence is what an
+old client produces, so it cannot also mean "the user turned this off".
+
+**One stamp per key, not one for the map.** Two devices changing two different
+settings must both win. Per-key stamps get that for free, because
+`mergeReplicas` is already generic over anything carrying an `hlc`
+(`sync/merge.ts:77`).
+
+**The value is validated on read, never trusted.** Exactly as `pref.generator` is
+today: `usePrefs` runs `normalizeGeneratorSettings` on whatever it finds, because
+a stored object may have been written by another build. A synced value has the
+same problem plus a remote writer, so each synced pref declares a normalizer and
+a bad value falls back to the default rather than propagating.
 
 ## Every seam this touches
 
-The mechanism is small; the plumbing is not. Each of these is load-bearing, and
-the first two are the ones that would ship broken without being obvious in review.
+The mechanism is small; the plumbing is not. The first two would ship broken
+without being obvious in review.
 
-1. **`buildPayload` reconstructs the payload from `VaultEntries` on every local
-   write** (`vault/entry-mutations.ts:102`). `VaultEntries` is the triple
-   `{ entries, stamps, tombstones }`. Unless it also carries the settings record
-   and `buildPayload` writes it through, **every ordinary entry edit silently
-   wipes the synced setting**. This is the single biggest hazard in the change:
-   the failure is invisible locally and only shows up as a setting that keeps
-   reverting.
+1. **`buildPayload` rebuilds the payload from `VaultEntries` on every local write**
+   (`vault/entry-mutations.ts:102`), and `VaultEntries` is `{ entries, stamps,
+   tombstones }`. Unless it carries the settings map too, **every ordinary entry
+   edit silently wipes every synced setting.** The failure is invisible locally
+   and surfaces as settings that keep reverting.
 
 2. **`payloadsEquivalent` decides whether a merge is worth writing and
-   re-broadcasting** (`sync/apply-remote.ts:49`), and it compares entries and
+   re-broadcasting** (`sync/apply-remote.ts:49`) and compares entries and
    tombstones only. A settings-only change would compare equal, so the write is
-   skipped and the change never propagates. The setting would appear to sync
-   only when it happened to ride along with an entry edit, which is the kind of
-   bug that looks like flakiness for months.
+   skipped and it never propagates: the setting would appear to sync only when it
+   happened to ride along with an entry edit.
 
 3. **`sanitizeRemoteEntriesPayload` drops future-dated stamps** so a peer cannot
-   pin an un-deletable entry by stamping it years ahead
-   (`sync/entries-payload.ts:43`). The settings stamp needs the same treatment,
-   or a hostile or clock-skewed peer pins a provider configuration nobody can
-   change.
+   pin an un-deletable record (`sync/entries-payload.ts:43`). Settings stamps need
+   the same, or a clock-skewed peer pins a setting nobody can change.
 
-4. **`mergeEntriesPayload`** gains the absent-is-no-opinion rule. The merge engine
-   itself is already generic over anything with an `hlc` (`sync/merge.ts:77`), so
-   the comparison is free; only the "one side has nothing to say" case is new.
+4. **`mergeEntriesPayload`** gains the map merge: per key, higher stamp wins;
+   a key present on one side only is kept.
 
-5. **The read path.** `readEntriesPayload` must surface the record so the app can
-   use it, and `useVault` must expose it the way it exposes entries.
+5. **One writer.** `EntryMutations` owns every local change to the payload, which
+   is what keeps the autofill index from drifting from disk. A settings write is
+   another mutation there, not a second writer racing it.
 
-6. **Migration.** An existing device-local `alias.config:<vaultId>` must become
-   the synced record on first run, once, without a device that has never had one
-   writing an empty record that then wins the merge. Adopt only when the local
-   meta key exists and the synced record does not.
+6. **`usePrefs` routing.** Reads: device and vault as today; synced from the
+   decrypted payload. Synced prefs read as their defaults until the vault is
+   unlocked, and the provider must reset them on a vault switch before the read
+   lands, the way it already does for vault-scoped prefs.
 
-7. **The settings screen** reads and writes through the synced record rather than
-   `setMeta`, and says that it syncs, since the user is now pasting a key that
-   will reach their other devices.
+7. **Migration, once.** A device-local value is adopted into the synced map only
+   when the map has no entry for that key, so a device that never had one cannot
+   write a default that then wins the merge.
 
 ## Decisions taken
 
-**The key is protected by the outer VEK layer only.** Entries get a second layer
-(a per-entry DEK wrapped under the VEK); the settings record, living beside
-`tombstones` in the payload, does not. That is the same protection the vault's
-structure already has, and the threat it drops is an attacker who can read
-decrypted payload bytes but not the VEK, which is not a threat model this vault
-otherwise defends. Stated rather than assumed, because it is a real difference
-from how entries are held.
+**Outer VEK layer only.** Entries carry a second per-entry DEK; this map, sitting
+beside `tombstones`, does not. That is the protection the vault's structure
+already has. It also *simplifies* the alias key, which is VEK-wrapped by hand
+today and would no longer need to be.
 
-**Vault-scoped by construction.** The record lives inside one vault's encrypted
-payload, so it cannot leak into another vault. That is strictly stronger than the
-`<key>:<vaultId>` convention it replaces, and it satisfies CONTEXT.md's MUST
-without depending on anyone keying it correctly.
+**Vault-scoped by construction.** The map lives inside one vault's encrypted
+payload, so it cannot leak into another. Strictly stronger than the
+`<key>:<vaultId>` convention, and it satisfies CONTEXT.md's MUST without anyone
+having to key it correctly.
 
-**No VLT1 change.** The record lives in the encrypted payload, so the binary
-container in `vault-format.ts` is untouched, exactly as tombstones were when they
-were added.
+**No VLT1 change.** The map lives in the encrypted payload, so the binary
+container is untouched, exactly as tombstones were when they were added.
 
-**Not a general settings bag, yet.** Only the alias provider moves. A generic
-"synced settings" object invites everything to move into it, and most settings
-genuinely are device-local. The shape allows a second key later without another
-format change, which is the point of nesting under `settings` rather than adding
-`aliases` at the top level.
+**Keyed by the existing meta key.** A pref that changes scope keeps its name, so
+migration is a move rather than a rename, and a key can never mean two things.
 
 ## Plan
 
 | Step | Work | Risk |
 |---|---|---|
-| 1 | `settings` on the payload schema; merge rule; `payloadsEquivalent`; `sanitize`. Tests first, including an old-client round trip that must not lose the record. | low, isolated |
-| 2 | Thread through `VaultEntries` and `buildPayload`, so an entry edit preserves it. Test: mutate an entry, assert the record survives. | **highest**, silent if wrong |
-| 3 | Read path and `useVault` exposure. | low |
-| 4 | `useAliasProvider` reads and writes the synced record; migrate the meta key once. | medium, one-way |
+| 1 | `settings` map on the payload schema; the merge rule; `payloadsEquivalent`; `sanitize`. Tests first, including an old-client round trip that must not lose the map. | low, isolated |
+| 2 | Thread through `VaultEntries` and `buildPayload`; a settings mutation in `EntryMutations`. Test: edit an entry, assert the map survives. | **highest**, silent if wrong |
+| 3 | `PrefScope` gains `"synced"`; `usePrefs` routes reads and writes; per-pref normalizers; the locked-vault rule documented beside the table. | medium |
+| 4 | Move the alias provider onto it, dropping its hand-rolled VEK wrapping, and migrate the existing meta key once. | medium, one-way |
 | 5 | Settings copy: say it syncs. Locales. | low |
-| 6 | Device test: configure on one device, confirm it lands on the other, then confirm an entry edit on either does not wipe it. | the one that proves it |
+| 6 | Device test: configure on one device, confirm it lands on the other; then edit an entry on each and confirm it survives. | the one that proves it |
 
-Estimated 2 to 3 days, most of it steps 2 and 6.
+Estimated 3 to 4 days, most of it steps 2 and 6. That is a day more than moving
+the alias provider alone would cost, and it buys every later setting for the price
+of a word in a table.
 
 ## What would make this wrong
 
-Worth writing down so it can be checked later rather than argued about. If any of
-these turn out to be true, device-local was the better answer:
-
-- If a user wants **different providers per device** in any real number. Nothing
-  here supports that, and adding it later means per-device records inside a
-  synced structure, which is worse than what we replaced.
-- If the API key turns out to want **rotation on one device only**, for instance
-  because a provider issues per-client keys.
+- If **per-device values** turn out to be wanted for something that looks synced.
+  Nothing here supports that, and retrofitting per-device records inside a synced
+  map is worse than what it replaced.
+- If the eligible set stays at one. A mechanism for a single setting is
+  over-built; the case rests on there being a second and third (a shared alias
+  provider, and plausibly the generator settings, which are device-scoped today
+  for no strong reason).
 - If syncing a third-party credential materially widens a breach. It does not
-  today: the key is already inside the vault on the device that holds it, and
-  sync moves it only between devices that already share the vault key.
+  today: the key is already inside the vault on the device holding it, and sync
+  moves it only between devices that already share the vault key.
