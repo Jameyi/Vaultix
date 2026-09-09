@@ -178,7 +178,7 @@ export type JoinUnlock = { kind: "password"; password: string };
 /** Re-auth for deleting a vault: the master password, or a security-key tap. */
 export type DeleteVaultAuth = { password: string } | { webauthnKey: true };
 
-import { aliasConfigKeyFor, aliasConfiguredHintKeyFor } from "../aliases/config";
+import { aliasConfigKeyFor, aliasConfiguredHintKeyFor, aliasHintValue } from "../aliases/config";
 import { backupTargetsKeyFor } from "../backup/config";
 import { exportToOs } from "../exchange";
 import { toKdbxEntries } from "../export/kdbx";
@@ -234,7 +234,7 @@ import {
 	type WebauthnKeyKind,
 } from "../vault/webauthn-ceremony";
 import { type SyncedSettingsAccess, SyncedSettingsContext } from "./synced-settings";
-import { PER_VAULT_PREF_KEYS } from "./usePrefs";
+import { PER_VAULT_PREF_KEYS, PREF_ALIAS_PROVIDER } from "./usePrefs";
 import { useSyncEnrollment } from "./useSyncEnrollment";
 
 export type { WebauthnKeyMeta };
@@ -1752,6 +1752,22 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			removeDevice,
 		],
 	);
+
+	// The device-local hint that this vault has an alias provider, which is the only thing that can
+	// answer that while the vault is LOCKED (the configuration itself is a synced setting, so it
+	// lives inside the encrypted payload).
+	//
+	// Maintained here rather than in the settings screen, because a vault can acquire a provider
+	// by SYNC and must record that too. The screen only mounts when someone visits it, so a
+	// browser that received the provider from another device never wrote the hint and never
+	// offered the unlock row. Written only while unlocked, since locking resets every synced pref
+	// to its default and a locked vault cannot know the answer.
+	useEffect(() => {
+		if (!activeId) return;
+		const next = aliasHintValue(syncedSettings, isLocked, PREF_ALIAS_PROVIDER);
+		if (next === null) return;
+		void storage.setMeta(aliasConfiguredHintKeyFor(activeId), next).catch(() => {});
+	}, [storage, activeId, isLocked, syncedSettings]);
 
 	// What usePrefs routes a "synced"-scoped pref through. Writing goes via the same mutation
 	// every entry change uses, so there is one writer onto the blob and the settings map cannot

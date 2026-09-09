@@ -6,7 +6,6 @@ import {
 	type AliasDomains,
 	AliasError,
 	type AliasProviderId,
-	aliasConfiguredHintKeyFor,
 	createAliasClient,
 	isAliasConfig,
 	missingRequiredFields,
@@ -57,13 +56,6 @@ export function useAliasProvider() {
 	const { activeId, vaults } = useVaultRegistry();
 	const vaultId = activeId ?? vaults[0]?.id;
 	const config = prefs.aliasProvider;
-
-	// A locked vault cannot read the config at all, so this device remembers whether there is one
-	// to offer the unlock row for. Written whenever the answer is actually known.
-	useEffect(() => {
-		if (!vaultId || !loaded) return;
-		void storage.setMeta(aliasConfiguredHintKeyFor(vaultId), config !== null).catch(() => {});
-	}, [storage, vaultId, loaded, config]);
 
 	// Migrate a value written before the config was synced, once. Only when there is nothing
 	// synced yet, so a device that never had one cannot overwrite what another device set.

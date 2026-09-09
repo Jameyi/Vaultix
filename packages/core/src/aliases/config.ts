@@ -36,6 +36,24 @@ export function aliasConfiguredHintKeyFor(vaultId: string): string {
 	return `${ALIAS_CONFIGURED_HINT_KEY}:${vaultId}`;
 }
 
+/**
+ * What the hint should be set to, or null to leave it alone.
+ *
+ * Two rules, both learned the hard way. Never write while locked: locking resets every synced
+ * pref to its default, so the config reads as absent the moment the vault closes, and writing
+ * from that erases the hint at exactly the point it becomes the only thing that can answer.
+ * And the answer is whatever the vault's settings map says, including when it arrived by SYNC,
+ * which is why this is decided where the vault is rather than where the settings screen is.
+ */
+export function aliasHintValue(
+	settings: Record<string, { value?: unknown }> | undefined,
+	isLocked: boolean,
+	prefKey: string,
+): boolean | null {
+	if (isLocked) return null;
+	return isAliasConfig(settings?.[prefKey]?.value);
+}
+
 /** One vault's alias provider. At most one: the feature is "generate an alias", not "choose a
  * provider each time", and a second configured provider would make every generate a question. */
 export interface AliasConfig {
