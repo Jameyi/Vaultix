@@ -12,11 +12,12 @@ export {
 } from "./addy";
 export {
 	ALIAS_CONFIG_KEY,
+	ALIAS_CONFIGURED_HINT_KEY,
 	type AliasConfig,
 	aliasConfigKeyFor,
+	aliasConfiguredHintKeyFor,
 	isAliasConfig,
 	isAliasConfigKey,
-	type WrappedApiKey,
 } from "./config";
 export {
 	ALIAS_PROVIDERS,

@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { aliasConfigKeyFor, isAliasConfig, isAliasConfigKey } from "./config";
 import { describeProvider, missingRequiredFields } from "./descriptors";
 
+// The key is held in the clear: this config is a synced pref, so it rides inside the vault's
+// encrypted payload and is protected by the vault key like every entry. See docs/synced-settings.md.
 const VALID = {
 	provider: "addy",
 	options: { domain: "anonaddy.me" },
-	key: { iv: "aa", ciphertext: "bb" },
+	apiKey: "sk-live-xxxx",
 };
 
 describe("alias config storage", () => {
@@ -28,8 +30,9 @@ describe("alias config storage", () => {
 		["an unknown provider", { ...VALID, provider: "fastmail" }],
 		["a non-string baseUrl", { ...VALID, baseUrl: 5 }],
 		["no options", { ...VALID, options: undefined }],
-		["no wrapped key", { ...VALID, key: undefined }],
-		["a half-written wrapped key", { ...VALID, key: { iv: "aa" } }],
+		["no api key", { ...VALID, apiKey: undefined }],
+		["an empty api key", { ...VALID, apiKey: "" }],
+		["a non-string api key", { ...VALID, apiKey: { iv: "aa" } }],
 	])("rejects %s", (_why, value) => {
 		expect(isAliasConfig(value)).toBe(false);
 	});

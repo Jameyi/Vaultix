@@ -3,12 +3,10 @@ import type { AliasProviderId } from "./types";
 // Where an alias provider's configuration and API key live. See docs/email-aliases.md.
 
 /**
- * Per vault, at `alias.config:<vaultId>`, mirroring the sync and backup keys.
+ * Where the configuration used to live, per vault, before it became a synced pref.
  *
- * Vault-scoped rather than device-scoped because the key grants a capability: it can spend the
- * user's alias allowance, and on both current providers it can also list and delete the aliases
- * already made. CONTEXT.md settles the arguable cases in this direction, and this one is not
- * especially arguable.
+ * Kept only so an existing value can be migrated once and the key removed. Nothing reads it as a
+ * live setting; see `pref.aliasProvider` in usePrefs and docs/synced-settings.md.
  */
 export const ALIAS_CONFIG_KEY = "alias.config";
 
@@ -22,17 +20,20 @@ export function isAliasConfigKey(key: string): boolean {
 }
 
 /**
- * The API key, sealed under the VEK.
+ * A device-local hint that this vault has an alias provider, so a LOCKED vault can still decide
+ * whether to offer the unlock row on a signup form's email field.
  *
- * Deliberately not backup's `TargetCreds`, which carries a `wrap` discriminant for credentials
- * the desktop hands to the OS credential store. That tier exists so a backup schedule can run
- * unattended while a vault is locked; alias creation is always a user gesture in a foreground
- * window, so there is nothing here to keep working while locked and no reason to put a key
- * anywhere weaker than the vault.
+ * The configuration itself is synced, which means it lives inside the vault's encrypted payload
+ * and cannot be read before unlock. This boolean is the one thing that must be answerable then,
+ * so it is kept beside the vault rather than inside it. It holds no secret and no provider name:
+ * only whether this device has ever seen one configured here. Being a cache it can go stale (a
+ * provider added on another device is not known here until this one unlocks and syncs), and the
+ * cost of being wrong is one unlock row too many or too few. See docs/synced-settings.md.
  */
-export interface WrappedApiKey {
-	iv: string;
-	ciphertext: string;
+export const ALIAS_CONFIGURED_HINT_KEY = "alias.configured";
+
+export function aliasConfiguredHintKeyFor(vaultId: string): string {
+	return `${ALIAS_CONFIGURED_HINT_KEY}:${vaultId}`;
 }
 
 /** One vault's alias provider. At most one: the feature is "generate an alias", not "choose a
@@ -43,7 +44,15 @@ export interface AliasConfig {
 	baseUrl?: string;
 	/** The provider's own settings, keyed by `AliasField.key` (domain, format, mode). */
 	options: Record<string, string>;
-	key: WrappedApiKey;
+	/**
+	 * The provider's API key, in the clear.
+	 *
+	 * Not wrapped by hand any more: this config is a synced pref, so it rides inside the vault's
+	 * VEK-encrypted payload and is protected by the vault key exactly as every entry is. Wrapping
+	 * it again would be a second encryption under the same key, which buys nothing and was only
+	 * ever there because the config used to sit in plaintext meta storage.
+	 */
+	apiKey: string;
 }
 
 /** Whether a stored value is still shaped like a config. Storage is not a trusted input: this
@@ -54,6 +63,5 @@ export function isAliasConfig(v: unknown): v is AliasConfig {
 	if (c.provider !== "addy" && c.provider !== "simplelogin") return false;
 	if (c.baseUrl !== undefined && typeof c.baseUrl !== "string") return false;
 	if (!c.options || typeof c.options !== "object") return false;
-	if (!c.key || typeof c.key !== "object") return false;
-	return typeof c.key.iv === "string" && typeof c.key.ciphertext === "string";
+	return typeof c.apiKey === "string" && c.apiKey.length > 0;
 }

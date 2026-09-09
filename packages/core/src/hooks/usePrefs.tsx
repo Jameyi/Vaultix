@@ -7,6 +7,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { type AliasConfig, isAliasConfig } from "../aliases";
 import { usePlatform } from "../context/PlatformContext";
 import { syncKeyFor } from "../sync/sync-keys";
 import {
@@ -54,6 +55,9 @@ const PREF_AUTOSTART_PROMPT_DISMISSED = "pref.autostartPromptDismissed";
 // The password generator's last-used settings, so the field's one-tap regenerate produces what
 // the user picked in the panel rather than a fixed house style.
 const PREF_GENERATOR = "pref.generator";
+// The email alias provider: which service, its settings, and the API key. Synced, so configuring
+// it on one device reaches the others; see docs/synced-settings.md and docs/email-aliases.md.
+export const PREF_ALIAS_PROVIDER = "pref.aliasProvider";
 
 export const DEFAULT_AUTOLOCK_MINUTES = 15;
 // Off by default: the breach check is the app's only network egress (k-anonymous
@@ -96,6 +100,8 @@ export interface Prefs {
 	autostartPromptDismissed: boolean;
 	// Password generator: the settings last used in the generator panel.
 	generator: GeneratorSettings;
+	// The email alias provider for this vault, or null when none is set up.
+	aliasProvider: AliasConfig | null;
 }
 
 /** Each pref's storage key. A map rather than a ternary chain: the type makes it exhaustive, so
@@ -115,6 +121,7 @@ const META_KEYS: Record<keyof Prefs, string> = {
 	statsCollapsed: PREF_STATS_COLLAPSED,
 	autostartPromptDismissed: PREF_AUTOSTART_PROMPT_DISMISSED,
 	generator: PREF_GENERATOR,
+	aliasProvider: PREF_ALIAS_PROVIDER,
 };
 
 /**
@@ -155,6 +162,9 @@ const PREF_SCOPE: Record<keyof Prefs, PrefScope> = {
 	autostartPromptDismissed: "device",
 	biometricPasscodeFallback: "vault",
 	generator: "device",
+	// Not device-local: an alias provider is an account-level fact about the person, not about
+	// this browser, and only ever used behind an unlock. See docs/synced-settings.md.
+	aliasProvider: "synced",
 };
 
 const VAULT_SCOPED = (Object.keys(PREF_SCOPE) as (keyof Prefs)[]).filter(
@@ -173,7 +183,11 @@ const SYNCED = (Object.keys(PREF_SCOPE) as (keyof Prefs)[]).filter(
  * different build. A pref without an entry here falls back to a type check against its default,
  * which is enough for the scalars and arrays but not for an object with a shape.
  */
-const SYNCED_NORMALIZE: Partial<Record<keyof Prefs, (raw: unknown) => unknown>> = {};
+const SYNCED_NORMALIZE: Partial<Record<keyof Prefs, (raw: unknown) => unknown>> = {
+	// A shaped object with a secret in it, written by a peer that may be on another build: only
+	// something that still parses as a config is taken, and anything else reads as "none".
+	aliasProvider: (raw) => (isAliasConfig(raw) ? raw : null),
+};
 
 /** Coerce a synced value, falling back to the default when it is unusable. */
 function normalizeSynced<K extends keyof Prefs>(key: K, raw: unknown): Prefs[K] {
@@ -205,6 +219,7 @@ const DEFAULT_PREFS: Prefs = {
 	statsCollapsed: DEFAULT_STATS_COLLAPSED,
 	autostartPromptDismissed: DEFAULT_AUTOSTART_PROMPT_DISMISSED,
 	generator: DEFAULT_GENERATOR_SETTINGS,
+	aliasProvider: null,
 };
 
 export interface UsePrefs {
@@ -330,7 +345,11 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
 				storage.getMeta<unknown>(PREF_GENERATOR),
 			]);
 			if (cancelled) return;
-			setPrefs({
+			// Preserved, not rebuilt: this read covers the storage-backed scopes only, and a synced
+			// pref comes from the vault on its own schedule. Replacing the whole object would drop
+			// whatever the synced overlay had already resolved.
+			setPrefs((prev) => ({
+				...prev,
 				autoLockMinutes: typeof a === "number" ? a : DEFAULT_AUTOLOCK_MINUTES,
 				breachCheckEnabled: typeof b === "boolean" ? b : DEFAULT_BREACH_CHECK,
 				clipboardClearSeconds: typeof c === "number" ? c : DEFAULT_CLIPBOARD_SECONDS,
@@ -347,7 +366,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
 				// Field by field: a stored object written by an older or hand-edited build is not
 				// trusted to still match GeneratorSettings.
 				generator: normalizeGeneratorSettings(n),
-			});
+			}));
 			setLoaded(true);
 		})();
 		return () => {

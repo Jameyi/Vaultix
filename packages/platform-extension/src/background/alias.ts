@@ -1,77 +1,91 @@
-import { AliasError, aliasConfigKeyFor, clientForConfig, isAliasConfig } from "@core/aliases";
+import {
+	AliasError,
+	aliasConfiguredHintKeyFor,
+	clientForConfig,
+	isAliasConfig,
+} from "@core/aliases";
+import { decodeEntriesPayload } from "@core/sync";
 import { parseRegistry, VAULT_REGISTRY_KEY } from "@core/vault/vault-registry";
 import { extensionStorage } from "../storage";
 import { sendToOffscreen } from "./offscreen-client";
-import { getActiveVaultId, unlockedVaultIds } from "./session";
+import { getActiveVaultId } from "./session";
+import { bytesToBase64, readAndDecodeVault } from "./vault-io";
 
 // Creating an email alias for the in-page suggestion. The provider is reached from here rather
-// than from the page: the API key is sealed under the vault key, and a content script is not a
-// context that may hold either. See docs/email-aliases.md.
+// than from the page: the configuration lives inside the vault's encrypted payload, and a content
+// script is not a context that may hold either it or the key it carries.
+// See docs/email-aliases.md and docs/synced-settings.md.
 
-/** The active vault's alias configuration, or null when there is none to use. */
+/** Where the configuration sits in the payload's settings map (the pref's own key). */
+const ALIAS_PREF_KEY = "pref.aliasProvider";
+
+/**
+ * The active vault's alias configuration, read out of the decrypted payload.
+ *
+ * Requires an unlocked vault by construction: the configuration is a synced setting, so it lives
+ * in the same ciphertext as the entries. Null for locked, absent, or malformed alike.
+ */
 async function activeConfig() {
 	const vaultId = getActiveVaultId();
 	if (!vaultId) return null;
-	const stored = await extensionStorage
-		.getMeta<unknown>(aliasConfigKeyFor(vaultId))
-		.catch(() => undefined);
-	return isAliasConfig(stored) ? { vaultId, config: stored } : null;
+	try {
+		const blob = await readAndDecodeVault(vaultId);
+		if (blob.entriesCiphertext.length === 0) return null;
+		const outer = await sendToOffscreen({
+			type: "CRYPTO_DECRYPT_OUTER",
+			vaultId,
+			payload: {
+				iv: bytesToBase64(blob.entriesIv),
+				ciphertext: bytesToBase64(blob.entriesCiphertext),
+			},
+		});
+		if (!outer.ok || typeof outer.data !== "string") return null;
+		const stored = decodeEntriesPayload(outer.data).settings?.[ALIAS_PREF_KEY]?.value;
+		return isAliasConfig(stored) ? stored : null;
+	} catch {
+		return null;
+	}
 }
 
 /**
  * Whether an alias row may be offered at all, for the autofill query to carry.
  *
- * A config read and nothing more: no provider is contacted to answer this, so a page asking
- * whether the row exists cannot make Bramble talk to anyone. The row is only ever drawn on an
- * unlocked vault anyway, since a locked one replaces every row with the unlock prompt.
+ * No provider is contacted to answer this, so a page asking whether the row exists cannot make
+ * Bramble talk to anyone.
  */
 export async function aliasAvailable(): Promise<boolean> {
 	return (await activeConfig()) !== null;
 }
 
 /**
- * Whether ANY vault has a provider configured.
+ * Whether any vault on this device is known to have a provider, for the LOCKED case.
  *
- * For the locked case only, where the active vault is not knowable: its id lives in session
- * storage and is cleared on lock. The answer decides one thing, whether a signup form's email
- * field is worth offering an unlock row on, so over-reporting on a multi-vault install costs an
- * unlock prompt and nothing else. Once unlocked the per-vault answer takes over.
+ * A locked vault cannot be read at all now that the configuration is synced, so this consults the
+ * device-local hint the app writes whenever the answer is known. It decides one thing: whether a
+ * signup form's email field is worth offering an unlock row on. Being a cache it can be stale (a
+ * provider added on another device is unknown here until this one unlocks and syncs), and the
+ * cost of being wrong is one unlock row too many or too few.
  */
 export async function aliasConfiguredAnywhere(): Promise<boolean> {
 	const reg = parseRegistry(await extensionStorage.getMeta(VAULT_REGISTRY_KEY).catch(() => null));
 	for (const v of reg.vaults) {
-		const stored = await extensionStorage
-			.getMeta<unknown>(aliasConfigKeyFor(v.id))
+		const hint = await extensionStorage
+			.getMeta<boolean>(aliasConfiguredHintKeyFor(v.id))
 			.catch(() => undefined);
-		if (isAliasConfig(stored)) return true;
+		if (hint === true) return true;
 	}
 	return false;
 }
 
-/**
- * Create one alias for `site`, and return the address.
- *
- * The key is unwrapped against the vault that owns it and no other. Backup's credential path
- * tries every unlocked vault as a fallback, which is documented there as temporary; there is no
- * reason to inherit it, and a key that opens under a different vault's VEK would be a key that
- * vault was never given.
- */
+/** Create one alias for `site`, and return the address. */
 export async function createAlias(site?: string): Promise<string> {
-	const active = await activeConfig();
-	if (!active) throw new AliasError("config", "No alias provider is set up for this vault.");
-	if (!unlockedVaultIds().includes(active.vaultId)) {
-		// Same answer the user already gets when saving a new item into a locked vault.
+	const config = await activeConfig();
+	if (!config) {
+		// Locked and unconfigured are indistinguishable from here, and the remedy for the common
+		// one is what saving a new item already asks for.
 		throw new AliasError("auth", "Unlock Bramble to create an alias.");
 	}
-	const dec = await sendToOffscreen({
-		type: "CRYPTO_DECRYPT_OUTER",
-		vaultId: active.vaultId,
-		payload: { iv: active.config.key.iv, ciphertext: active.config.key.ciphertext },
-	});
-	if (!dec.ok || typeof dec.data !== "string") {
-		throw new AliasError("config", "Could not read the stored API key.");
-	}
-	const client = clientForConfig(active.config, dec.data);
+	const client = clientForConfig(config, config.apiKey);
 	const { address } = await client.create({
 		site,
 		description: site ? `Bramble (${site})` : "Bramble",
