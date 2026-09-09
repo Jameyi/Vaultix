@@ -233,6 +233,7 @@ import {
 	unlockRpIdOrder,
 	type WebauthnKeyKind,
 } from "../vault/webauthn-ceremony";
+import { type SyncedSettingsAccess, SyncedSettingsContext } from "./synced-settings";
 import { PER_VAULT_PREF_KEYS } from "./usePrefs";
 import { useSyncEnrollment } from "./useSyncEnrollment";
 
@@ -459,6 +460,9 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 	// rebuilds the payload from this value, so anything not threaded through is erased by the
 	// next entry edit. See docs/synced-settings.md.
 	const settingsRef = useRef<SyncedSettings | undefined>(undefined);
+	// Mirrored in state so consumers re-render when a value changes, including when a remote
+	// merge lands one. The ref is what mutations thread; this is what the UI reads.
+	const [syncedSettings, setSyncedSettings] = useState<SyncedSettings | undefined>(undefined);
 
 	/** Lazily load this device's id and build its clock. The device id is per-vault (each vault
 	 * is its own sync group with its own roster membership), so read/write it under the active
@@ -564,6 +568,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
 			settingsRef.current = undefined;
+			setSyncedSettings(undefined);
 			setEntries([]);
 			await publishIndex([], indexLease);
 			return;
@@ -594,6 +599,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		stampsRef.current = new Map(payload.entries.map((e) => [e.id, e.hlc]));
 		tombstonesRef.current = new Map(payload.tombstones.map((t) => [t.id, t.hlc]));
 		settingsRef.current = payload.settings;
+		setSyncedSettings(payload.settings);
 		// Advance this device's clock past every stamp it just read, so the next
 		// local write is causally ordered after them.
 		const clock = await ensureClock();
@@ -707,6 +713,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
 			settingsRef.current = undefined;
+			setSyncedSettings(undefined);
 			setEntries([]);
 			setIsLocked(true);
 		});
@@ -774,6 +781,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		stampsRef.current = new Map();
 		tombstonesRef.current = new Map();
 		settingsRef.current = undefined;
+		setSyncedSettings(undefined);
 		setEntries([]);
 		setIsLocked(true);
 		setLockedByUser(true);
@@ -984,6 +992,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			stampsRef.current = new Map();
 			tombstonesRef.current = new Map();
 			settingsRef.current = undefined;
+			setSyncedSettings(undefined);
 			setHasVault(true);
 			setEntries([]);
 			setIsLocked(false);
@@ -1061,6 +1070,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		stampsRef.current = next.stamps;
 		tombstonesRef.current = next.tombstones;
 		settingsRef.current = next.settings;
+		setSyncedSettings(next.settings);
 		setEntries(next.entries);
 	}, []);
 
@@ -1739,9 +1749,26 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		],
 	);
 
+	// What usePrefs routes a "synced"-scoped pref through. Writing goes via the same mutation
+	// every entry change uses, so there is one writer onto the blob and the settings map cannot
+	// be lost to a race with an entry edit. See docs/synced-settings.md.
+	const syncedAccess = useMemo<SyncedSettingsAccess>(
+		() => ({
+			settings: syncedSettings,
+			ready: !isLocked,
+			set: async (key, value) =>
+				commitEntries(await mutations.setSetting(snapshotEntries(), key, value)),
+		}),
+		[syncedSettings, isLocked, mutations, snapshotEntries, commitEntries],
+	);
+
 	return (
 		<VaultActionsContext.Provider value={actions}>
-			<VaultStateContext.Provider value={state}>{children}</VaultStateContext.Provider>
+			<VaultStateContext.Provider value={state}>
+				<SyncedSettingsContext.Provider value={syncedAccess}>
+					{children}
+				</SyncedSettingsContext.Provider>
+			</VaultStateContext.Provider>
 		</VaultActionsContext.Provider>
 	);
 }

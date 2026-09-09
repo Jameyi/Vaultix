@@ -14,6 +14,7 @@ import {
 	type GeneratorSettings,
 	normalizeGeneratorSettings,
 } from "../util/password-gen";
+import { useSyncedSettings } from "./synced-settings";
 import { useVaultRegistry } from "./useVaultRegistry";
 
 // Preference keys persisted via StorageAdapter.getMeta/setMeta. Mirrored in
@@ -125,10 +126,20 @@ const META_KEYS: Record<keyof Prefs, string> = {
  * data is "vault": the two biometric prefs shipped flat, and a second vault then opened with
  * passcode fallback already on, having never been given it.
  *
+ * "synced" describes the vault itself, wherever it is opened, and rides in the vault's encrypted
+ * payload so it reaches the user's other devices (docs/synced-settings.md). One rule decides
+ * eligibility, and it is a constraint rather than a preference:
+ *
+ *   If anything needs the value while the vault is LOCKED, it cannot be synced.
+ *
+ * A synced value lives behind the vault key, so it cannot be read before unlock. The extension
+ * background reads autoLockMinutes, lockOnScreenLock and autofillEnabled from storage precisely
+ * because it must answer while locked, which is why those are device-scoped and must stay so.
+ *
  * Exhaustive over `Prefs`, so a new pref cannot be added without deciding - a compile error
  * rather than a silent device-wide default, which is the direction that leaks a permission.
  */
-type PrefScope = "device" | "vault";
+type PrefScope = "device" | "vault" | "synced";
 const PREF_SCOPE: Record<keyof Prefs, PrefScope> = {
 	autoLockMinutes: "device",
 	breachCheckEnabled: "device",
@@ -149,6 +160,32 @@ const PREF_SCOPE: Record<keyof Prefs, PrefScope> = {
 const VAULT_SCOPED = (Object.keys(PREF_SCOPE) as (keyof Prefs)[]).filter(
 	(k) => PREF_SCOPE[k] === "vault",
 );
+
+const SYNCED = (Object.keys(PREF_SCOPE) as (keyof Prefs)[]).filter(
+	(k) => PREF_SCOPE[k] === "synced",
+);
+
+/**
+ * How a synced pref's stored value is made safe to use.
+ *
+ * Every pref read already distrusts what it finds (`generator` is normalized field by field for
+ * exactly this reason), and a synced one is worse off: the writer may be another device on a
+ * different build. A pref without an entry here falls back to a type check against its default,
+ * which is enough for the scalars and arrays but not for an object with a shape.
+ */
+const SYNCED_NORMALIZE: Partial<Record<keyof Prefs, (raw: unknown) => unknown>> = {};
+
+/** Coerce a synced value, falling back to the default when it is unusable. */
+function normalizeSynced<K extends keyof Prefs>(key: K, raw: unknown): Prefs[K] {
+	const fallback = DEFAULT_PREFS[key];
+	if (raw === null || raw === undefined) return fallback;
+	const custom = SYNCED_NORMALIZE[key];
+	if (custom) return custom(raw) as Prefs[K];
+	// No declared shape: accept only a value of the same primitive kind as the default, so a
+	// peer cannot turn a boolean into an object and surprise a consumer.
+	if (Array.isArray(fallback)) return (Array.isArray(raw) ? raw : fallback) as Prefs[K];
+	return (typeof raw === typeof fallback ? raw : fallback) as Prefs[K];
+}
 
 /** Their storage keys, for whoever has to clean up after a vault. Pairs with PER_VAULT_SYNC_KEYS. */
 export const PER_VAULT_PREF_KEYS = VAULT_SCOPED.map((k) => META_KEYS[k]);
@@ -230,6 +267,7 @@ async function readVaultPref<T>(
 
 export function PrefsProvider({ children }: { children: ReactNode }) {
 	const { storage } = usePlatform();
+	const syncedSettings = useSyncedSettings();
 	const { activeId, vaults, ready } = useVaultRegistry();
 	const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
 	const [loaded, setLoaded] = useState(false);
@@ -319,12 +357,36 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
 		// switch. Without it the second vault kept showing the first one's gate settings.
 	}, [storage, keyFor, ready, vaults.length]);
 
+	// Synced prefs are not read with the others: they come from the vault's payload, arrive only
+	// once it is unlocked, and change again when a peer's merge lands one. Overlaid on top of
+	// whatever the storage read produced, and reset to defaults while there is nothing to read,
+	// so a locked vault shows the default rather than the last vault's answer.
+	useEffect(() => {
+		if (SYNCED.length === 0) return;
+		setPrefs((p) => {
+			const overlay: Partial<Prefs> = {};
+			for (const key of SYNCED) {
+				const rec = syncedSettings.settings?.[META_KEYS[key]];
+				// Written through a Partial rather than assigned per key: `key` is a union here, and
+				// an indexed write with a union key narrows the target to `never`.
+				Object.assign(overlay, { [key]: normalizeSynced(key, rec?.value) });
+			}
+			return { ...p, ...overlay };
+		});
+	}, [syncedSettings.settings]);
+
 	const update = useCallback(
 		async <K extends keyof Prefs>(key: K, value: Prefs[K]) => {
 			setPrefs((p) => ({ ...p, [key]: value }));
+			if (PREF_SCOPE[key] === "synced") {
+				// Straight to the vault, which stamps it and persists through the same write every
+				// entry change uses. Not also to storage: two homes for one value is how they drift.
+				await syncedSettings.set(META_KEYS[key], value);
+				return;
+			}
 			await storage.setMeta(keyFor(key), value);
 		},
-		[storage, keyFor],
+		[storage, keyFor, syncedSettings],
 	);
 
 	const value = useMemo<UsePrefs>(() => ({ prefs, loaded, update }), [prefs, loaded, update]);
