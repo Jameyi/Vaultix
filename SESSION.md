@@ -23,6 +23,15 @@
 - **关键决策**：加密复用 `CryptoAdapter.encryptWithVek`（单一映射，不开新 HKDF 面）；设计原想挂在 secret-text/secret-area 基元内，实测基元无 entryId 上下文，改挂持有 id 的屏幕层（EntryRow）；EntryRow 曾把 usePlatform() 写进异步回调违反 hooks 规则，已修正为组件顶部解构。
 - **遗留事项**：autofill.fill / backup.run / device.enroll / device.revoke 挂点、设置页 Activity 面板（含 takeDroppedCount 的 UI 呈现）为后续增量；PRD 缺口 A（PC 副标题）经核实 tauri.conf.json 已含两行标题，无需改动。
 
+## 2026-09-20 — CI 依赖审计闭环（#2 收官）
+
+- **里程碑**：audit job 在 `f56f2a7d` 上首次全绿；全部 RustSec advisory 处置完毕并经 CI 验证。
+- **完成了什么**：quick-xml 0.37→0.41（kdbx.rs 同步迁移到 `escape::unescape`，0.41 移除了 `BytesText::unescape` 且 `xml_content` 需要 XmlVersion 参数——两次编译错误教出来的）；rkyv/h2 走 CI 内 `cargo update -p` 补丁级升级；rustls 两处 lockfile 均 `--precise 0.23.45` 钉版（普通 update 只拉到 0.23.43，不达标）。JS 侧 `pnpm audit --prod` 本机验证零漏洞。残余 8 条 warning 级（unic-* unmaintained、proc-macro-error、glib unsound、chacha20 yanked）不阻塞，已知悉。
+- **关键决策**：advisory 处置放 CI patch 步骤而非本地改 lockfile（本机无 cargo）；注释标明"committed lockfiles 追上后删除该步骤"。
+- **流程教训**：改名（Bramble→Vautix）波及协议字符串属安全回归，pinned 测试向量抓住了它；rename 时必须 grep HKDF info / room label 这类"看似文案实为契约"的常量。
+- **环境备忘**：本机轮询 GitHub API 直连可用（代理关闭时）；job 日志匿名 403，需用户从 Actions 页复制。
+- **遗留事项**：Desktop (Linux .deb) job 仍红（kdbx.rs 编译错已修，但 Linux 打包链还有未诊断的问题）——下一个候选工作项；主 CI job 同理。
+
 ## 2026-09-20 — 项目接管与 fork 定位（当前状态快照）
 
 - **项目定位确认（用户澄清，决定后续所有取舍）**：本仓库是从上游开源项目 **Bramble**（原作者 flythenimbus）下载后改名 Vautix 的 fork；未来供用户本人使用，可能少量给他人使用。→ 结论：**不需要兼容任何在役 Bramble 构建**，Vautix 内部的协议自洽即为充分条件。上条遗留事项 #16（CI audit）已完成，转为本节清单第 3 项。
