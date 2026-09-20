@@ -139,9 +139,19 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-audit@0.22.2
+      # Transitive deps patched in the runner before the scan (no local cargo in this
+      # project). quick-xml is upgraded in Cargo.toml (direct dep); rkyv/rustls ride
+      # transitive locks, so release a patch-level update here, then audit. Remove this
+      # step once the committed lockfiles have caught up.
+      - name: Patch transitive deps with RustSec advisories
+        run: cargo update -p rkyv -p rustls
+        working-directory: packages/core-rust
       - name: cargo audit (core-rust)
         run: cargo audit
         working-directory: packages/core-rust
+      - name: Patch transitive deps with RustSec advisories (desktop)
+        run: cargo update -p rustls
+        working-directory: packages/platform-desktop/src-tauri
       - name: cargo audit (desktop src-tauri)
         run: cargo audit
         working-directory: packages/platform-desktop/src-tauri
