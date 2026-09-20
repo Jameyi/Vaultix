@@ -196,6 +196,7 @@ import {
 } from "../sync";
 import { PER_VAULT_SYNC_KEYS, syncKeyFor } from "../sync/sync-keys";
 import { base64ToBytes, bytesToBase64 } from "../util/bytes";
+import { appendAuditEvent } from "../vault/audit-log";
 import { toAutofillIndex } from "../vault/autofill-index";
 import {
 	biometricUnlockFlow,
@@ -765,18 +766,32 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 				wrappedVekB64: bytesToBase64(slot.wrappedVek),
 				magicVersion: verifierPrefix(),
 			});
-			if (!ok) throw new Error(t`Incorrect master password`);
+			if (!ok) {
+				void appendAuditEvent(platformStorage, crypto, {
+					kind: "vault.unlockFailed",
+					at: Date.now(),
+					method: "password",
+					outcome: "fail",
+				});
+				throw new Error(t`Incorrect master password`);
+			}
+			void appendAuditEvent(platformStorage, crypto, {
+				kind: "vault.unlock",
+				at: Date.now(),
+				method: "password",
+			});
 			await loadEntries();
 			setIsLocked(false);
 			// Commit any corner-prompt capture parked while locked, now that the VEK is live.
 			void shell.flushPendingCornerCapture().catch(() => {});
 		},
-		[readDecodedBlob, crypto, loadEntries, shell, activeId, t],
+		[readDecodedBlob, crypto, loadEntries, shell, activeId, t, platformStorage],
 	);
 
 	/** Lock the vault: clear the VEK, autofill index, and decrypted state. */
 	const lock = useCallback(async () => {
 		await crypto.lock();
+		void appendAuditEvent(platformStorage, crypto, { kind: "vault.lock", at: Date.now() });
 		await autofill.clearIndex();
 		stampsRef.current = new Map();
 		tombstonesRef.current = new Map();
@@ -785,7 +800,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		setEntries([]);
 		setIsLocked(true);
 		setLockedByUser(true);
-	}, [crypto, autofill]);
+	}, [crypto, autofill, platformStorage]);
 
 	/** Run a get() assertion over the given slots, returning the PRF secret. */
 	// Slot wrapping lives in vault/build-vault (shared with device enrollment); these
@@ -1010,7 +1025,12 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		const bytes = await storage.readVaultBlob();
 		const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 		await shell.exportBytes(`vautix-vault-${stamp}.vautix`, bytes, "application/octet-stream");
-	}, [shell, storage, t]);
+		void appendAuditEvent(platformStorage, crypto, {
+			kind: "entry.export",
+			at: Date.now(),
+			method: "vautix",
+		});
+	}, [shell, storage, t, platformStorage, crypto]);
 
 	/** Export to a KeePass .kdbx under a password the user picks for the file. Reads the
 	 * already-decrypted entries (so it needs an unlocked vault) and re-encrypts them in
@@ -1030,8 +1050,13 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 				base64ToBytes(b64),
 				"application/octet-stream",
 			);
+			void appendAuditEvent(platformStorage, crypto, {
+				kind: "entry.export",
+				at: Date.now(),
+				method: "kdbx",
+			});
 		},
-		[shell, crypto, t],
+		[shell, crypto, t, platformStorage],
 	);
 
 	/** Send the decrypted entries to another app through the OS. The payload is built inside

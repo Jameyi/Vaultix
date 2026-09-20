@@ -39,6 +39,7 @@
 | `normalizeTags` / `tagKey` / `allTags` | `core/vault/tags.ts` | 标签规范化 / 比较 / 词表唯一入口 |
 | `PortableVault`（VLT1）: `seal_portable_vault` / `open_portable_vault` | core-rust 导出，`core/export/portable-vault.ts` 装框 | 加密导出文件唯一封/启路径 |
 | `createVaultSyncPort` | `core/sync/apply-remote.ts` | 远程合并 → 写盘的唯一端口构造 |
+| `AuditEvent` / `AuditEventKind` / `appendAuditEvent` / `readAuditEvents` / `clearAuditLog` / `takeDroppedCount` / `auditLogKey` / `AUDIT_MAX_EVENTS` | `core/vault/audit-log.ts` | 本地审计日志唯一入口（VEK 加密、vault-scoped meta 键 `audit.log:<vaultId>`、fire-and-forget）。事件挂点见 docs/audit-log.md；禁止在业务代码里直接写 meta 键绕过此模块 |
 
 ---
 

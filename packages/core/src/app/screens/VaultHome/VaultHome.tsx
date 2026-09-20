@@ -253,6 +253,7 @@ export function VaultHome({
 											leaked={item.leaked}
 											passkeys={item.passkeys}
 											copyItems={item.copyItems}
+											entryId={item.id}
 											onSelect={() => onSelectEntry(item.id)}
 											onEdit={() => onEditEntry(item.id)}
 											onDelete={() => onDeleteEntry(item.id)}

@@ -12,6 +12,7 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { usePlatform, useSurface } from "../../context/PlatformContext";
 import { useLongPress } from "../../hooks/useLongPress";
+import { appendAuditEvent } from "../../vault/audit-log";
 import type { CopyItem } from "../entry-modes/types";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
@@ -30,6 +31,8 @@ interface EntryRowProps {
 	passkeys?: number;
 	/** Quick-copy actions; empty hides the copy button. */
 	copyItems: CopyItem[];
+	/** Vault entry id, for the audit log's secret.copy event. Optional: tests omit it. */
+	entryId?: string;
 	onSelect: () => void;
 	onEdit: () => void;
 	onDelete: () => Promise<void>;
@@ -57,6 +60,7 @@ export function EntryRow({
 	leaked,
 	passkeys = 0,
 	copyItems,
+	entryId,
 	onSelect,
 	onEdit,
 	onDelete,
@@ -67,7 +71,7 @@ export function EntryRow({
 	onToggleSelect,
 	onLongPress,
 }: EntryRowProps) {
-	const { clipboard } = usePlatform();
+	const { clipboard, storage, crypto } = usePlatform();
 	const { t } = useLingui();
 	// Touch has no hover, so the row's controls can't hide behind it.
 	const touch = useSurface() === "touch";
@@ -109,6 +113,9 @@ export function EntryRow({
 			setCopied(label);
 			setCopyOpen(false);
 			onUse?.();
+			if (entryId) {
+				void appendAuditEvent(storage, crypto, { kind: "secret.copy", at: Date.now(), entryId });
+			}
 		} catch {
 			// Best-effort: clipboard write can fail if unfocused or permission revoked.
 		}
