@@ -1,0 +1,2 @@
+- 本机（DESKTOP-O7OGQAO）无独立 pnpm，所有 pnpm 命令须用 `npx --yes pnpm@10`；git pre-commit 钩子同样依赖 pnpm，提交前需 `PATH="/tmp/pnpmshim:$PATH"`（shim 内容：exec npx --yes pnpm@10 "$@"，须先重建）。
+- git push / 远端仓库操作（新建仓库、改 remote、推送）一律由用户本人手动执行，AI 只提供具体步骤，不代劳。

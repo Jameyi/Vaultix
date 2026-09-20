@@ -22,3 +22,24 @@
 - **完成了什么**：VEK 加密、vault-scoped（`audit.log:<vaultId>` meta 键）、fire-and-forget 的本地审计日志；挂点：unlock 成败/lock（useVault）、secret.copy（EntryRow，新增可选 entryId）、entry.export（exportVault/exportKdbx）。锁定态事件丢弃并计数，不缓冲明文。typecheck + Biome + vitest 全过。
 - **关键决策**：加密复用 `CryptoAdapter.encryptWithVek`（单一映射，不开新 HKDF 面）；设计原想挂在 secret-text/secret-area 基元内，实测基元无 entryId 上下文，改挂持有 id 的屏幕层（EntryRow）；EntryRow 曾把 usePlatform() 写进异步回调违反 hooks 规则，已修正为组件顶部解构。
 - **遗留事项**：autofill.fill / backup.run / device.enroll / device.revoke 挂点、设置页 Activity 面板（含 takeDroppedCount 的 UI 呈现）为后续增量；PRD 缺口 A（PC 副标题）经核实 tauri.conf.json 已含两行标题，无需改动。
+
+## 2026-09-20 — 项目接管与 fork 定位（当前状态快照）
+
+- **项目定位确认（用户澄清，决定后续所有取舍）**：本仓库是从上游开源项目 **Bramble**（原作者 flythenimbus）下载后改名 Vautix 的 fork；未来供用户本人使用，可能少量给他人使用。→ 结论：**不需要兼容任何在役 Bramble 构建**，Vautix 内部的协议自洽即为充分条件。上条遗留事项 #16（CI audit）已完成，转为本节清单第 3 项。
+- **完成/已确认**：
+  1. core-rust 侧 `WEBAUTHN_KDF_INFO = "titanpass/webauthn/v1"` 保留旧名，属正确状态（持久化数据契约，见 `lib.rs:167` 的 "DO NOT fix" 注释），**禁止改名**。
+  2. 改名提交 `24740e73` 触及的 7 处 TS 协议字符串（`nostr.ts` ×3、`pairing-sas.ts` ×1、`roster-sync.ts` roomLabel ×1、`enroll-host.ts` ×3）判定为**在线协议契约**（不落盘），新名 `vautix/...` 在 Vautix 内部自洽，**无需回退**。
+  3. 三端/加密/同步/autofill/passkey/审计日志等 15/17 项功能此前已确认存在；当前无任何未提交的代码改动，工作树干净（HEAD = `2b3cb5de`）。
+- **待完成任务清单**：
+  1. **修 core 套件唯一失败测试**：`packages/core/src/sync/pairing-sas.test.ts`（pinned SAS 向量）是用旧字符串 `bramble/sync/sas/v1` 算出的，需按新 `SAS_INFO = "vautix/sync/sas/v1"` 重新生成预期值。改的是测试期望值，**不动协议代码**。
+  2. **推送到自己仓库**：`git push origin main` 报 403（本机缓存账号 Jameyi 对 flythenimbus/bramble 无写权限，属预期）。需用户手动新建空仓库（不勾选 README/gitignore/license）→ `git remote set-url origin https://github.com/Jameyi/<新仓库>.git` → 推送。**所有 git 写操作由用户自己执行，AI 只提供步骤，不代跑。**
+  3. **首跑 CI 后处置 audit job**：推送触发新仓库 CI，观察新增 `audit` job 是否有存量 advisory，按 job 注释的"带日期定向 ignore"策略逐条处置。
+  4. 审计日志后续增量：autofill.fill / backup.run / device.enroll / device.revoke 四个挂点、设置页 Activity 面板。
+- **阻塞 / 卡点**：
+  - 任务 2 与 3 依赖用户手动推送完成，AI 无法代劳（用户明确要求）。
+  - 本机未安装 pnpm，无法本地预跑 `pnpm test` / `pnpm audit`，测试与依赖审计结论只能靠 CI 或用户本机执行验证。
+  - 任务 1 的测试修复需跑 vitest 确认，本机 pnpm 缺失同样影响验证，需用户执行或补齐 pnpm。
+- **下一会话明确下一步**：
+  1. 确认用户是否已完成推送（问一句即可）；已推送则先看 CI 的 `audit` job 首跑结果。
+  2. 执行任务 1：重新生成 `pairing-sas` 测试的 pinned 向量，跑 core 套件确认 1310/1310 通过。
+  3. 随后按用户意向决定是否继续任务 4 的挂点补齐。

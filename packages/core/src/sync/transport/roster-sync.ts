@@ -185,7 +185,7 @@ export async function startRosterSync(opts: RosterSyncOptions): Promise<MeshSess
 		relayUrl: opts.relayUrl,
 		iceUrl: opts.iceUrl,
 		groupKeyB64: opts.groupKeyB64,
-		roomLabel: "vautix/sync",
+		roomLabel: "bramble/sync",
 		wasm: opts.wasm,
 		report: opts.report,
 		epochRooms: true, // rotate the (long-lived, high-traffic) sync room per epoch
