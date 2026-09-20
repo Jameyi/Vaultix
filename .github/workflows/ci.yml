@@ -150,7 +150,7 @@ jobs:
         run: cargo audit
         working-directory: packages/core-rust
       - name: Patch transitive deps with RustSec advisories (desktop)
-        run: cargo update -p rustls
+        run: cargo update -p rustls -p h2
         working-directory: packages/platform-desktop/src-tauri
       - name: cargo audit (desktop src-tauri)
         run: cargo audit
