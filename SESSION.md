@@ -32,6 +32,17 @@
 - **环境备忘**：本机轮询 GitHub API 直连可用（代理关闭时）；job 日志匿名 403，需用户从 Actions 页复制。
 - **遗留事项**：Desktop (Linux .deb) job 仍红（kdbx.rs 编译错已修，但 Linux 打包链还有未诊断的问题）——下一个候选工作项；主 CI job 同理。
 
+## 2026-09-21 — 会话结束快照（下次会话从此恢复）
+
+- **本地领先远端 1 个提交**：`b7c53ced`（本文件的上一个里程碑），待用户下次推送时一并上去。
+- **工作状态**：任务清单 5/5 完成；audit job 全绿（`f56f2a7d`）；core 单测 1310 全绿；工作区干净。
+- **遗留事项（按优先级）**：
+  1. Desktop (Linux .deb) job 仍红——kdbx.rs 编译错已修，Linux 打包链（疑似系统依赖或 keyring 相关）未诊断；主 CI job 同红，需一并看日志。
+  2. 审计日志第二阶段：autofill.fill / backup.run / device.enroll / device.revoke 挂点 + 设置页 Activity 面板（设计见 docs/audit-log.md §6）。
+  3. Roster phase-2 flip（安全价值最高）：先做五端 backfill 覆盖核查 + admissionKey pinning 确认，flip 决策须用户批准（威胁模型 §3 唯一"已知开口"）。
+  4. VEK residency 硬化 #1（约 1 小时，停止返回未使用的 VEK，碰 FFI 契约面须谨慎）。
+- **环境备忘**：推送由用户手动执行（项目记忆约定）；本机轮询 GitHub API 直连可用；job 日志匿名 403，需用户从 Actions 页复制；pre-commit 需 pnpm shim。
+
 ## 2026-09-20 — 项目接管与 fork 定位（当前状态快照）
 
 - **项目定位确认（用户澄清，决定后续所有取舍）**：本仓库是从上游开源项目 **Bramble**（原作者 flythenimbus）下载后改名 Vautix 的 fork；未来供用户本人使用，可能少量给他人使用。→ 结论：**不需要兼容任何在役 Bramble 构建**，Vautix 内部的协议自洽即为充分条件。上条遗留事项 #16（CI audit）已完成，转为本节清单第 3 项。
