@@ -138,7 +138,7 @@ jobs:
       - name: Install cargo-audit
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-audit@0.21.2
+          tool: cargo-audit@0.22.2
       - name: cargo audit (core-rust)
         run: cargo audit
         working-directory: packages/core-rust
