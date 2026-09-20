@@ -1,7 +1,7 @@
 # Cloud storage backups (planned)
 
 Design note for the "scheduled cloud backups" feature flagged in the README:
-Bramble periodically writes an encrypted backup to a storage provider the user
+Vautix periodically writes an encrypted backup to a storage provider the user
 chooses, on a schedule the user sets. It records the mechanism (how and when a
 backup runs, and why it needs no multi-device coordination) and which providers
 to target, so the surface is decided before any code.
@@ -11,12 +11,12 @@ Fast-moving facts (provider API availability, SDK maturity) are dated **July
 
 ## The insight that shapes everything
 
-A Bramble backup is already client-side-encrypted ciphertext: the backed-up
-`.bramble` blob is the vault's own bytes, so it only opens with the master password
+A Vautix backup is already client-side-encrypted ciphertext: the backed-up
+`.vautix` blob is the vault's own bytes, so it only opens with the master password
 (see `vault-format.md`). The storage provider never sees plaintext, whatever
 provider it is.
 
-Note that `.bramble` now covers two things. A **backup** is the whole vault blob,
+Note that `.vautix` now covers two things. A **backup** is the whole vault blob,
 copied byte for byte, and opens with the master password. A **portable vault** is a
 selection exported from the vault list, sealed under a password chosen for that file
 and holding no other key. Both are VLT1, so a reader takes either apart the same
@@ -57,7 +57,7 @@ synced settings record.
 Per vault, not per device, because a shared list made every vault back up to one
 place: configuring Nextcloud in a personal vault silently configured a work vault
 with the same server, credentials and folder, with no way to separate them
-([issue #49](https://github.com/flythenimbus/bramble/issues/49)). See
+([issue #49](https://github.com/flythenimbus/vautix/issues/49)). See
 [Config and state](#config-and-state-device-local-per-vault) for the keys and the
 one-time migration off the old shared list.
 
@@ -93,12 +93,12 @@ key (VEK), so decrypting them to upload needs an unlocked vault or a cached
 session VEK. This keeps cloud credentials encrypted under the master password at
 rest, and matches how P2P sync already behaves (unlocked and foregrounded only).
 
-The vault blob itself needs no unlock: the at-rest `.bramble` bytes are readable
+The vault blob itself needs no unlock: the at-rest `.vautix` bytes are readable
 while locked (`readVaultBlob` requires no VEK). Only the credentials gate on
 unlock.
 
 The consequence, stated plainly in the UI: effective frequency is capped by how
-often the user opens Bramble on the backup device. Headless-while-locked
+often the user opens Vautix on the backup device. Headless-while-locked
 backups, where credentials sit under a device key instead of the VEK so the
 extension's background worker can upload while locked, are a possible later
 upgrade if best-effort proves too loose. Deferred for now.
@@ -221,21 +221,21 @@ the next window.
 
 Any vault edit re-randomizes the whole ciphertext, so a backup is a whole opaque
 blob with no byte-level delta to sync. Objects are named
-`<prefix>/bramble-<ISO-timestamp>-<shorthash>.bramble`. Retention is keep-last-N,
+`<prefix>/vautix-<ISO-timestamp>-<shorthash>.vautix`. Retention is keep-last-N,
 computed deterministically from the sorted listing; deletes are idempotent.
 
 `<prefix>` is the user's own folder field (`prefix` on S3, `path` on WebDAV),
-defaulting to `bramble`. WebDAV's folder is deliberately *not* baked into the base
-URL: doing so nested snapshots one level deeper than asked (a `path` of `bramble`
-produced `bramble/bramble/`). Dropbox is the exception, since its `path` is a
-container folder inside the app folder and keeps the `bramble` subfolder.
+defaulting to `vautix`. WebDAV's folder is deliberately *not* baked into the base
+URL: doing so nested snapshots one level deeper than asked (a `path` of `vautix`
+produced `vautix/vautix/`). Dropbox is the exception, since its `path` is a
+container folder inside the app folder and keeps the `vautix` subfolder.
 Grandfather-father-son retention (hourly / daily / weekly / monthly) is a
 possible later refinement.
 
 ### Restore
 
-Restore already exists: creating a new vault lets the user select a `.bramble`
-file, and a backup `.bramble` is the raw vault blob, so opening one is a full
+Restore already exists: creating a new vault lets the user select a `.vautix`
+file, and a backup `.vautix` is the raw vault blob, so opening one is a full
 restore. No new restore flow is needed for this feature.
 
 Restore replaces the vault on the device; it is not the same path as importing a
@@ -248,12 +248,12 @@ the file.
 Shown under the frequency selector (Lingui `<Trans>` in the shared Settings UI,
 so run `pnpm i18n:extract` after wiring it):
 
-> Backups are best-effort, not a fixed time. Bramble backs up at most once per
+> Backups are best-effort, not a fixed time. Vautix backs up at most once per
 > {frequency}, the next time you unlock the extension after one is due, so how
-> often backups actually happen depends on how often you open Bramble on this
+> often backups actually happen depends on how often you open Vautix on this
 > device. Unchanged vaults are skipped. Need one right now? Use Back up now.
 
-Mobile swaps "unlock the extension" and "open Bramble on this device" for "open
+Mobile swaps "unlock the extension" and "open Vautix on this device" for "open
 the app".
 
 ## Desktop: the one platform that can keep a schedule
@@ -416,7 +416,7 @@ vault file it could already read, and running up a storage bill is an
 inconvenience. Deleting is the one that costs something irreplaceable: it is not
 bounded by the master password the way everything else is, it survives wiping
 the machine, and destroying backups before encrypting anything is the documented
-ransomware playbook. Bramble asks for `DELETE` for exactly one reason, keep-N
+ransomware playbook. Vautix asks for `DELETE` for exactly one reason, keep-N
 retention, so **Keep everything** gives it up: `selectForPruning` returns nothing
 and `runBackup` never lists or deletes, which lets the user hand over a
 credential with neither permission.
@@ -447,7 +447,7 @@ so it is a speed bump rather than a barrier.
 The schedule is a timer in this process, so every claim above is conditional on the app running.
 On a machine that gets rebooted and then used through the browser extension all week, a daily
 backup is not a daily backup. So the desktop app can start at login, and Settings, General carries
-a toggle for it: **Start Bramble at login**, phrased by what it buys rather than by what it does.
+a toggle for it: **Start Vautix at login**, phrased by what it buys rather than by what it does.
 
 `tauri-plugin-autostart` over the `auto-launch` crate, which means a login item
 (`~/Library/LaunchAgents`) on macOS, a `Run` registry value on Windows, and an XDG
@@ -501,7 +501,7 @@ of the process. What that costs and what follows:
   nothing else, which is what full-disk encryption already does better. Worth
   noting the company it would keep: `~/.aws/credentials`, `rclone.conf`, and
   restic and borg password files are all exactly this, so a user's realistic
-  alternative to Bramble is weaker. Still not something to ship as a default.
+  alternative to Vautix is weaker. Still not something to ship as a default.
 - **Presigned URLs instead of a stored credential.** SigV4 can presign a PUT
   valid for up to seven days, so an unlocked session could mint capabilities a
   locked scheduler spends, and nothing reusable would sit at rest. It dies on our
@@ -554,12 +554,12 @@ The card says "Backs up on schedule" on the strength of that. Check it on a real
 a target, log out, log back in, confirm the scheduler still runs before a reboot.
 
 *(The other one, where `externalBin` lands in a Debian package, is settled: `test:apt` asserts
-`/usr/bin/bramble-proxy` on Debian 12 and Ubuntu 22.04, `test:nix` asserts the same sibling in the
-Nix store, and the shipped macOS disk image carries it at `Contents/MacOS/bramble-proxy`.)*
+`/usr/bin/vautix-proxy` on Debian 12 and Ubuntu 22.04, `test:nix` asserts the same sibling in the
+Nix store, and the shipped macOS disk image carries it at `Contents/MacOS/vautix-proxy`.)*
 
 **Run at last, and both pass.** Bring the stack up with `docker compose up -d`, then:
 
-- `BRAMBLE_IT=1 pnpm --filter @vault/core exec vitest run providers.integration` — 6 passing.
+- `VAUTIX_IT=1 pnpm --filter @vault/core exec vitest run providers.integration` — 6 passing.
   The round trip, keep-N against the server's own listing, and **two vaults sharing one folder
   staying out of each other's retention**, against real Nextcloud and real MinIO. That last one is
   the finding from the security review, now covered against servers rather than a fake.
@@ -595,7 +595,7 @@ due immediately, close the app (it rewrites `meta.json` on exit) and clear both 
 ```bash
 python3 - <<'EOF'
 import json
-p = "~/.local/share/app.bramble.desktop/meta.json"  # expand it
+p = "~/.local/share/app.vautix.desktop/meta.json"  # expand it
 m = json.load(open(p))
 for k, v in m.items():
     if k.startswith("backup.targets"):
@@ -614,17 +614,17 @@ bucket count makes a passing prune look like a failure.
 
 ```bash
 docker run --rm --network host --entrypoint sh minio/mc -c \
-  'mc alias set l http://localhost:9000 bramble bramble-test-secret >/dev/null && mc ls -r l/bramble-test' \
-  | awk '{print $NF}' | sed 's/.*-v/v/;s/\.bramble//' | sort | uniq -c
+  'mc alias set l http://localhost:9000 vautix vautix-test-secret >/dev/null && mc ls -r l/vautix-test' \
+  | awk '{print $NF}' | sed 's/.*-v/v/;s/\.vautix//' | sort | uniq -c
 ```
 
 Finally, every tick now writes one line to the app log
-(`~/.local/share/app.bramble.desktop/logs/bramble.log`), including the ticks that do nothing.
+(`~/.local/share/app.vautix.desktop/logs/vautix.log`), including the ticks that do nothing.
 Before that, the run happened in the webview and reported only to a console nobody could read, so
 "nothing was due" and "the scheduler never ran" were indistinguishable from outside — which is a
 bad property for a feature whose whole promise is that it works while you are not looking.
 
-*(`apt install bramble` from `apt.bramble.sh` on a clean machine is done, and is now
+*(`apt install vautix` from `apt.vautix.sh` on a clean machine is done, and is now
 `pnpm run test:apt`.)*
 
 **Mobile is untouched** (`cloudBackup: false`). Enabling it needs an answer to the same question
@@ -760,14 +760,14 @@ worth it yet, for reasons independent of effort:
   hierarchy** yourself, i.e. users typing their Proton *account* password into a
   password manager. That's the bulk of the work and a trust problem.
 - **The terms forbid shipping it.** "Not yet ready for third-party production
-  use"; personal / non-commercial only. Bramble is a public product (CWS / App
+  use"; personal / non-commercial only. Vautix is a public product (CWS / App
   Store / Play), so it's out of bounds regardless of the MIT code license.
 - **Pre-release + a breaking crypto migration** at end-2026 / early-2027, after
   which clients on older SDK releases stop interoperating.
 
 Revisit once it's production-ready for third parties, the migration has landed,
 and the terms permit public distribution (~2027). Until then Proton users can
-manually drop an exported `.bramble` into Proton Drive.
+manually drop an exported `.vautix` into Proton Drive.
 
 ## Recommendation and phasing
 

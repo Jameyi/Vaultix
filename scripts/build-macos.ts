@@ -46,8 +46,8 @@ function loadNotarization(): void {
 		console.error("note: local-update build, skipping notarization.");
 		return;
 	}
-	if (process.env.BRAMBLE_SKIP_NOTARIZE) {
-		console.error("note: BRAMBLE_SKIP_NOTARIZE set, skipping notarization.");
+	if (process.env.VAUTIX_SKIP_NOTARIZE) {
+		console.error("note: VAUTIX_SKIP_NOTARIZE set, skipping notarization.");
 		return;
 	}
 
@@ -128,7 +128,7 @@ execFileSync("pnpm", args, {
 		// than built by the bundler, so without it a universal app ships an Apple-Silicon-only
 		// proxy and the browser link is dead on Intel.
 		...(universal || forwarded.some((a) => a.includes("universal-apple-darwin"))
-			? { BRAMBLE_UNIVERSAL: "1" }
+			? { VAUTIX_UNIVERSAL: "1" }
 			: {}),
 		TAURI_SIGNING_PRIVATE_KEY: key,
 		TAURI_SIGNING_PRIVATE_KEY_PASSWORD: process.env.TAURI_SIGNING_PRIVATE_KEY_PASSWORD ?? "",

@@ -1,7 +1,7 @@
-# AMO source-code submission: building Bramble for Firefox
+# AMO source-code submission: building Vautix for Firefox
 
 addons.mozilla.org requires the buildable source for any add-on whose shipped code is bundled or
-compiled. Bramble is Vite/Rollup-bundled and ships Rust compiled to WebAssembly, so a reviewer must
+compiled. Vautix is Vite/Rollup-bundled and ships Rust compiled to WebAssembly, so a reviewer must
 be able to rebuild the extension from source and diff it against the uploaded package.
 
 The `pnpm run release firefox` flow attaches this source automatically (web-ext `uploadSourceCode`);

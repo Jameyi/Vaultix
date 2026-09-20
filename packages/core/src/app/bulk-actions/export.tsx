@@ -15,7 +15,7 @@ function ExportDialog({ open, onClose, onDone, entries, hiddenCount }: BulkActio
 		const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 		if (!shell.exportBytes) throw new Error("Saving a file isn't available here.");
 		await shell.exportBytes(
-			`bramble-selection-${stamp}.bramble`,
+			`vautix-selection-${stamp}.vautix`,
 			bytes,
 			"application/octet-stream",
 		);
@@ -26,7 +26,7 @@ function ExportDialog({ open, onClose, onDone, entries, hiddenCount }: BulkActio
 		<FilePasswordDialog
 			open={open}
 			onClose={onClose}
-			title={<Trans>Export selection (.bramble)</Trans>}
+			title={<Trans>Export selection (.vautix)</Trans>}
 			description={
 				<Trans>
 					Pick a password for the exported file. It's separate from your master password, and it's

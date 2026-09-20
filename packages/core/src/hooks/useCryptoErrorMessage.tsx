@@ -21,7 +21,7 @@ export function useCryptoErrorMessage(): (error: unknown) => string {
 				return t`The vault was locked or switched while that was in progress. Try again.`;
 			}
 			if (message.startsWith(CRYPTO_PERSISTENCE_FAILED)) {
-				return t`Bramble couldn't safely update this device's key storage, so the vault stayed locked. Try again.`;
+				return t`Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again.`;
 			}
 			return message;
 		},

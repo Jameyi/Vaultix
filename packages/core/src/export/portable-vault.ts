@@ -1,9 +1,9 @@
-// Frame a sealed portable vault as a .bramble file, and take one apart again.
+// Frame a sealed portable vault as a .vautix file, and take one apart again.
 //
 // The crypto lives in core-rust (`seal_portable_vault`), which returns the pieces rather
 // than a finished file so the VLT1 container keeps exactly one implementation: the encode
 // and decode below go through vault-format.ts, the same code the real vault uses. A reader
-// therefore cannot tell a portable vault from any other .bramble, which is the point: the
+// therefore cannot tell a portable vault from any other .vautix, which is the point: the
 // existing restore path already understands it.
 
 import type { CryptoAdapter } from "../adapters/crypto";
@@ -39,7 +39,7 @@ function withoutId(entry: EntryData & { id?: string }): EntryData {
 	return data as EntryData;
 }
 
-/** Seal `entries` into .bramble bytes under a password chosen for the file. */
+/** Seal `entries` into .vautix bytes under a password chosen for the file. */
 export async function sealPortableVaultFile(
 	crypto: Pick<CryptoAdapter, "sealPortableVault">,
 	// Takes entries WITH their ids, because that is what the vault holds, and strips them here
@@ -48,7 +48,7 @@ export async function sealPortableVaultFile(
 	entries: readonly (EntryData & { id?: string })[],
 	password: string,
 ): Promise<Uint8Array> {
-	if (!crypto.sealPortableVault) throw new Error("Exporting a .bramble isn't available here.");
+	if (!crypto.sealPortableVault) throw new Error("Exporting a .vautix isn't available here.");
 	const payload: PortableVaultPayload = { entries: entries.map(withoutId) };
 	const sealed = await crypto.sealPortableVault({
 		entriesJson: JSON.stringify(payload),
@@ -71,7 +71,7 @@ export async function sealPortableVaultFile(
 	});
 }
 
-/** Split .bramble bytes into the pieces the core needs, or null if it isn't one. */
+/** Split .vautix bytes into the pieces the core needs, or null if it isn't one. */
 export function readPortableVaultFile(bytes: Uint8Array): PortableVaultBlob | null {
 	let blob: ReturnType<typeof decodeVaultBlob>;
 	try {
@@ -95,7 +95,7 @@ export function readPortableVaultFile(bytes: Uint8Array): PortableVaultBlob | nu
 }
 
 /**
- * The entries in a .bramble, or null for a wrong password. Accepts a full vault backup as
+ * The entries in a .vautix, or null for a wrong password. Accepts a full vault backup as
  * well as a portable export: a backup's payload is an `EntriesPayload` of ENCRYPTED entries,
  * which this cannot read, so it reports that distinctly rather than pretending it is empty.
  */
@@ -104,7 +104,7 @@ export async function openPortableVaultFile(
 	file: PortableVaultBlob,
 	password: string,
 ): Promise<EntryData[] | null> {
-	if (!crypto.openPortableVault) throw new Error("Opening a .bramble isn't available here.");
+	if (!crypto.openPortableVault) throw new Error("Opening a .vautix isn't available here.");
 	const json = await crypto.openPortableVault({
 		file,
 		password,
@@ -113,7 +113,7 @@ export async function openPortableVaultFile(
 	if (json === null) return null;
 	const parsed = JSON.parse(json) as PortableVaultPayload | EntriesPayload;
 	const entries = parsed.entries;
-	if (!Array.isArray(entries)) throw new Error("That .bramble file has no entries in it.");
+	if (!Array.isArray(entries)) throw new Error("That .vautix file has no entries in it.");
 	// A full-vault backup's entries are `{ id, ciphertext, ... }` records still sealed under
 	// their own DEKs. Importing those would silently produce garbage entries.
 	if (entries.some((e) => "ciphertext" in e)) {

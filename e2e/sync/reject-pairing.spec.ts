@@ -28,7 +28,7 @@ test("rejecting the prompt sends nothing and kills the code", async ({ ext, mobi
 
 	const code = await ext.page.locator("input[readonly]").inputValue();
 	const decoded = JSON.parse(
-		Buffer.from(code.replace("bramble-pair-1.", ""), "base64").toString("utf8"),
+		Buffer.from(code.replace("vautix-pair-1.", ""), "base64").toString("utf8"),
 	) as { relay: string };
 	expect(decoded.relay).toContain(LOCAL_RELAY_HOST);
 

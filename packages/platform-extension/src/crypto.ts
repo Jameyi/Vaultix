@@ -181,7 +181,7 @@ function makeCrypto(vaultId?: string): CryptoAdapter {
 		// Reply is the .kdbx as base64; the message channel wouldn't preserve raw bytes.
 		saveKdbx: (input: SaveKdbxInput) => send<string>("CRYPTO_SAVE_KDBX", input),
 
-		// Portable vault (.bramble). Everything is already base64 except magicVersion, which
+		// Portable vault (.vautix). Everything is already base64 except magicVersion, which
 		// goes as number[] like the slot ops: sendMessage mangles a Uint8Array.
 		sealPortableVault: (input: SealPortableVaultInput) =>
 			send<PortableVaultBlob>("CRYPTO_SEAL_PORTABLE_VAULT", {

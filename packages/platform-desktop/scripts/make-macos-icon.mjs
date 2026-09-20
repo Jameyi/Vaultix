@@ -74,7 +74,7 @@ const shaped = await sharp({
 	.png()
 	.toBuffer();
 
-const staging = mkdtempSync(join(tmpdir(), "bramble-icns-"));
+const staging = mkdtempSync(join(tmpdir(), "vautix-icns-"));
 const iconset = join(staging, "icon.iconset");
 try {
 	execFileSync("mkdir", ["-p", iconset]);

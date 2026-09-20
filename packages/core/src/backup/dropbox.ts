@@ -20,7 +20,7 @@ export function createDropboxTarget(cfg: DropboxConfig): BackupTarget {
 	const prefix = folderPrefix(cfg.path);
 	let accessToken = cfg.accessToken ?? "";
 
-	// Full Dropbox path for a backup key (keys already start with the prefix folder, e.g. "bramble/...").
+	// Full Dropbox path for a backup key (keys already start with the prefix folder, e.g. "vautix/...").
 	const fullPath = (key: string) => `${prefix}/${key.replace(/^\/+/, "")}`;
 
 	async function token(): Promise<string> {
@@ -66,7 +66,7 @@ export function createDropboxTarget(cfg: DropboxConfig): BackupTarget {
 			return new Uint8Array(await res.arrayBuffer());
 		},
 		async list(prefixArg) {
-			// prefixArg is the object-key prefix with a trailing slash, e.g. "bramble/".
+			// prefixArg is the object-key prefix with a trailing slash, e.g. "vautix/".
 			const folder = `${prefix}/${prefixArg.replace(/\/+$/, "")}`;
 			const res = await call(`${API}/files/list_folder`, {
 				method: "POST",

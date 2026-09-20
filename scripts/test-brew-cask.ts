@@ -28,7 +28,7 @@ import { dockerProblem } from "./docker-available.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const IMAGE = "homebrew/brew:latest";
-const CASK = "packages/platform-desktop/homebrew/bramble.rb";
+const CASK = "packages/platform-desktop/homebrew/vautix.rb";
 const SCRIPT = "e2e/brew/cask-test.sh";
 const MANIFEST = "website/public/desktop/latest.json";
 
@@ -76,7 +76,7 @@ try {
 			// Read-only: the script copies the cask into a throwaway tap inside the container, and
 			// nothing it does should be able to reach back into the checkout.
 			"-v",
-			`${ROOT}/${CASK}:/cask/bramble.rb:ro`,
+			`${ROOT}/${CASK}:/cask/vautix.rb:ro`,
 			"-v",
 			`${ROOT}/${SCRIPT}:/cask-test.sh:ro`,
 			IMAGE,

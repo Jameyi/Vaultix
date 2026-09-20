@@ -13,7 +13,7 @@ import {
 // the feature switch; see resolveExchange below. docs/credential-exchange.md.
 const mobileExchange: CredentialExchangeAdapter = {
 	// The bundle id we present to the importer as the source of the export.
-	exporterId: "app.bramble.mobile",
+	exporterId: "app.vautix.mobile",
 	availability: exchangeAvailability,
 	exportToApp,
 	hasPendingImport,

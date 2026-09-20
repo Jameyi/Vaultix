@@ -114,9 +114,9 @@ jobs:
       - name: Assert the APT index verifies against the published key
         run: |
           set -euo pipefail
-          curl -fsSL https://apt.bramble.sh/keys.asc | gpg --dearmor > /tmp/bramble.gpg
-          curl -fsSL https://apt.bramble.sh/dists/stable/InRelease > /tmp/InRelease
-          gpgv --keyring /tmp/bramble.gpg /tmp/InRelease
+          curl -fsSL https://apt.vautix.sh/keys.asc | gpg --dearmor > /tmp/vautix.gpg
+          curl -fsSL https://apt.vautix.sh/dists/stable/InRelease > /tmp/InRelease
+          gpgv --keyring /tmp/vautix.gpg /tmp/InRelease
           echo "ok: InRelease verifies"
 
       # The index names packages by path and checksum; a pool file that is missing (or was
@@ -124,9 +124,9 @@ jobs:
       - name: Assert every package the index names is actually there
         run: |
           set -euo pipefail
-          curl -fsSL https://apt.bramble.sh/dists/stable/main/binary-amd64/Packages > /tmp/Packages
+          curl -fsSL https://apt.vautix.sh/dists/stable/main/binary-amd64/Packages > /tmp/Packages
           grep '^Filename:' /tmp/Packages | awk '{print $2}' | while read -r path; do
-            code="$(curl -s -o /dev/null -w '%{http_code}' -I "https://apt.bramble.sh/$path")"
+            code="$(curl -s -o /dev/null -w '%{http_code}' -I "https://apt.vautix.sh/$path")"
             [ "$code" = "200" ] || { echo "::error::$path is $code"; exit 1; }
             echo "ok: $path"
           done

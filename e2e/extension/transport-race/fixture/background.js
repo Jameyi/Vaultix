@@ -44,7 +44,7 @@ extension.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			);
 		}
 		void poll();
-		return true; // exactly the primitive Bramble uses: async sendResponse.
+		return true; // exactly the primitive Vautix uses: async sendResponse.
 	}
 
 	return false;
@@ -57,7 +57,7 @@ async function poll() {
 			if (response.ok && (await response.text()) === "release") {
 				const reply = pending;
 				pending = undefined;
-				reply.sendResponse({ sentinel: "BRAMBLE_TRANSPORT_SENTINEL" });
+				reply.sendResponse({ sentinel: "VAUTIX_TRANSPORT_SENTINEL" });
 				void report(reply.reportUrl, {
 					kind: "reply-sent",
 					role: "a",

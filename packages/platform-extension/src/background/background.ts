@@ -66,7 +66,7 @@ void hydrated.then(() => {
 // is lost. See docs/passkey-provider.md and docs/firefox-port.md.
 void hydrated.then(() => {
 	if (isProviderEnabled())
-		void initWebauthnProxy().catch((e) => console.warn("[bramble:bg] passkey proxy", e));
+		void initWebauthnProxy().catch((e) => console.warn("[vautix:bg] passkey proxy", e));
 });
 
 api.runtime.onInstalled.addListener(() => {
@@ -90,7 +90,7 @@ async function lockFromBackground(source: string): Promise<void> {
 	try {
 		await clearSession();
 	} catch (error) {
-		console.error(`[bramble:bg] ${source} session cleanup failed`, error);
+		console.error(`[vautix:bg] ${source} session cleanup failed`, error);
 	} finally {
 		await sendToOffscreen({ type: "CRYPTO_LOCK" }).catch(() => {});
 	}

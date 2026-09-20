@@ -21,7 +21,7 @@ export async function launchExtensionContext(reuseProfileDir?: string): Promise<
 }> {
 	// Pass an existing dir to relaunch the SAME profile - a real browser restart (persisted
 	// chrome.storage.local carries over). Omit it for a fresh throwaway "device".
-	const profileDir = reuseProfileDir ?? mkdtempSync(path.join(tmpdir(), "bramble-e2e-"));
+	const profileDir = reuseProfileDir ?? mkdtempSync(path.join(tmpdir(), "vautix-e2e-"));
 	const context = await chromium.launchPersistentContext(profileDir, {
 		// `channel: "chromium"` runs Chromium's NEW headless, which (unlike the default/old headless)
 		// actually loads MV3 extensions and starts their service worker. HEADED=1 shows the window.

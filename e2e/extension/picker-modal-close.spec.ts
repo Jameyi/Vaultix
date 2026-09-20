@@ -16,7 +16,7 @@ const COEP = {
 	"cross-origin-opener-policy": "same-origin",
 };
 
-const HOST = "#bramble-autofill-dropdown";
+const HOST = "#vautix-autofill-dropdown";
 
 const MODAL = `<!doctype html><html><head><title>login</title></head><body>
 	<p>Page content behind the modal.</p>

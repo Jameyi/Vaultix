@@ -122,7 +122,7 @@ test("decodes XML entities from a KeePass XML export (#79)", async ({ context, e
 // fixture would exercise a case few users have.
 //
 // Fixture provenance, since it is not obvious: `keepassxc-cli import` writes an AES-KDF database,
-// which our reader refuses by design, so keepass-passkeys.kdbx was produced by Bramble's own
+// which our reader refuses by design, so keepass-passkeys.kdbx was produced by Vautix's own
 // KDBX exporter (Argon2id) from the same attributes as the .xml. KeePassXC opens it, which is
 // the cross-check that it is a real KDBX4.
 const PASSKEY_LABEL = /webauthn\.io \(Passkey\)/;
@@ -202,7 +202,7 @@ test("imports a passkey from a database KeePassXC itself wrote", async ({
 	context,
 	extensionId,
 }) => {
-	// The fixtures above were written by Bramble's own KDBX exporter, so alone they cannot show
+	// The fixtures above were written by Vautix's own KDBX exporter, so alone they cannot show
 	// that we read a real KeePassXC file rather than one shaped the way we happen to write them.
 	// This one is genuine KeePassXC 2.7.12 output: stock Argon2d benchmark settings (64 MiB, 106
 	// rounds, which the pre-#78 ceiling rejected), a Recycle Bin copy that must be skipped, and an

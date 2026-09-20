@@ -38,8 +38,8 @@ export function UpdatesSection() {
 			<Section icon={<RefreshCw className="w-4 h-4 text-primary" />} title={t`Updates`}>
 				<p className="text-sm text-muted-foreground">
 					<Trans>
-						This copy of Bramble is kept up to date by your system's package manager. Updating your
-						system updates Bramble with it.
+						This copy of Vautix is kept up to date by your system's package manager. Updating your
+						system updates Vautix with it.
 					</Trans>
 				</p>
 			</Section>
@@ -90,12 +90,12 @@ export function UpdatesSection() {
 				}
 				subtitle={
 					downloading
-						? t`Bramble restarts by itself once this finishes.`
+						? t`Vautix restarts by itself once this finishes.`
 						: found
-							? t`Downloads and restarts Bramble. Your vault is untouched.`
+							? t`Downloads and restarts Vautix. Your vault is untouched.`
 							: current
-								? t`Bramble is up to date.`
-								: t`Bramble is installed directly, so updates are checked here.`
+								? t`Vautix is up to date.`
+								: t`Vautix is installed directly, so updates are checked here.`
 				}
 			>
 				{downloading ? (

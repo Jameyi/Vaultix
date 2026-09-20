@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Serve a fake update to a locally built Bramble, so the update path can be exercised without
+// Serve a fake update to a locally built Vautix, so the update path can be exercised without
 // publishing anything.
 //
 // What this proves is the whole chain that matters: the app asks, the manifest is read, the
@@ -27,11 +27,11 @@ const TARGET = join(ROOT, "packages/platform-desktop/src-tauri/target");
 // Builds are universal by default and land under the triple; --aarch64 ones do not. Whichever is
 // there is the one to serve, since this only ever feeds a build on this machine.
 const MACOS =
-	process.env.BRAMBLE_SMOKE_BUNDLE ??
+	process.env.VAUTIX_SMOKE_BUNDLE ??
 	[
 		join(TARGET, "universal-apple-darwin/release/bundle/macos"),
 		join(TARGET, "release/bundle/macos"),
-	].find((dir) => existsSync(join(dir, "Bramble.app"))) ??
+	].find((dir) => existsSync(join(dir, "Vautix.app"))) ??
 	join(TARGET, "universal-apple-darwin/release/bundle/macos");
 const CONF = join(ROOT, "packages/platform-desktop/src-tauri/tauri.conf.json");
 const PATCH = join(ROOT, "packages/platform-desktop/src-tauri/tauri.local-update.conf.json");

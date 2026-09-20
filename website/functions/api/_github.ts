@@ -29,10 +29,10 @@ type Release = {
 	assets?: Array<{ name?: string; download_count?: number }>;
 };
 
-export const REPO = "flythenimbus/bramble";
+export const REPO = "flythenimbus/vautix";
 export const RELEASES_URL = `https://github.com/${REPO}/releases`;
 
-// Installers only: no SHA256SUMS, no .sig, no Bramble.app.tar.gz (the auto-updater artifact).
+// Installers only: no SHA256SUMS, no .sig, no Vautix.app.tar.gz (the auto-updater artifact).
 const INSTALLERS: Record<DownloadPlatform, RegExp> = {
 	android: /\.apk$/i,
 	macos: /\.dmg$/i,
@@ -51,7 +51,7 @@ const TAGS: Record<ReleasePlatform, RegExp> = {
 // Refetch after an hour; keep the last good numbers for a month to serve if GitHub is unhappy.
 const FRESH_MS = 60 * 60 * 1000;
 const STALE_SECONDS = 30 * 24 * 60 * 60;
-const CACHE_KEY = "https://bramble.sh/__cache/releases";
+const CACHE_KEY = "https://vautix.sh/__cache/releases";
 
 /** Edge-cached, refreshed hourly, falling back to the stale copy when GitHub fails. */
 export async function snapshot(env: Env): Promise<Snapshot | null> {
@@ -80,7 +80,7 @@ async function readReleases(env: Env): Promise<Snapshot> {
 	const headers: Record<string, string> = {
 		Accept: "application/vnd.github+json",
 		"X-GitHub-Api-Version": "2022-11-28",
-		"User-Agent": "bramble-website-badges",
+		"User-Agent": "vautix-website-badges",
 	};
 	if (env.GITHUB_TOKEN) headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
 

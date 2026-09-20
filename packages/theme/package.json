@@ -3,7 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"description": "Shared Bramble design tokens (Tailwind v4 theme layer) for the extension, mobile app, and website.",
+	"description": "Shared Vautix design tokens (Tailwind v4 theme layer) for the extension, mobile app, and website.",
 	"exports": {
 		"./theme.css": "./theme.css"
 	},

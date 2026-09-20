@@ -21,11 +21,11 @@ export interface UpdatePromptCopy {
 export function upToDateCopy(version: string): { title: string; body: string } {
 	if (!i18n.locale)
 		return {
-			title: "Bramble is up to date",
+			title: "Vautix is up to date",
 			body: `You are running the latest version (${version}).`,
 		};
 	return {
-		title: i18n._(msg`Bramble is up to date`),
+		title: i18n._(msg`Vautix is up to date`),
 		body: i18n._(msg`You are running the latest version (${version}).`),
 	};
 }
@@ -38,18 +38,18 @@ export function updatePromptCopy(version: string): UpdatePromptCopy {
 	// that shows no dialog at all is not, since nothing else tells anyone a fix exists.
 	if (!i18n.locale) {
 		return {
-			title: "Update Bramble",
-			body: `Bramble ${version} is available. Updating downloads it and restarts the app. Your vault is not touched.`,
+			title: "Update Vautix",
+			body: `Vautix ${version} is available. Updating downloads it and restarts the app. Your vault is not touched.`,
 			ok: "Update now",
 			cancel: "Later",
 		};
 	}
 	return {
-		title: i18n._(msg`Update Bramble`),
+		title: i18n._(msg`Update Vautix`),
 		// Says what accepting does, because it restarts the app, and says what it does not do,
 		// because "update" over a password vault reads as risk to anyone who has not been told.
 		body: i18n._(
-			msg`Bramble ${version} is available. Updating downloads it and restarts the app. Your vault is not touched.`,
+			msg`Vautix ${version} is available. Updating downloads it and restarts the app. Your vault is not touched.`,
 		),
 		ok: i18n._(msg`Update now`),
 		cancel: i18n._(msg`Later`),

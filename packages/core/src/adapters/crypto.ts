@@ -36,7 +36,7 @@ export interface PasskeyRegistration {
 	publicKey: string;
 }
 
-/** PKCS#8 key material converted to Bramble's stored representation. All base64. */
+/** PKCS#8 key material converted to Vautix's stored representation. All base64. */
 export interface PasskeyImportResult {
 	/** 32 bytes either way: a P-256 scalar for ES256, an Ed25519 seed for EdDSA. */
 	privateKey: string;

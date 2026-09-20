@@ -18,7 +18,7 @@ import { yubiKeyIdentity } from "./age-yubikey-identity.ts";
 import { notifyYubiKeyTouch } from "./yubikey-notify.ts";
 
 export const KEY_AGE =
-	process.env.DESKTOP_UPDATER_KEY_AGE ?? join(homedir(), ".config/bramble/desktop-updater-key.age");
+	process.env.DESKTOP_UPDATER_KEY_AGE ?? join(homedir(), ".config/vautix/desktop-updater-key.age");
 
 const has = (bin: string): boolean => {
 	try {
@@ -46,7 +46,7 @@ export function signingKey(onError: (message: string) => never): string | undefi
 
 	// 0700 scratch dir for the identity stub, which points at the YubiKey slot and is not key
 	// material. The key itself is read from stdout and never lands in it.
-	const tmp = mkdtempSync(join(tmpdir(), "bramble-updater-"));
+	const tmp = mkdtempSync(join(tmpdir(), "vautix-updater-"));
 	try {
 		const idFile = join(tmp, "id.txt");
 		try {

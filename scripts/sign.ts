@@ -21,9 +21,9 @@ const argv = process.argv.slice(2);
 const optional = argv.includes("--optional");
 const distArg = argv.find((a) => !a.startsWith("--"));
 const DIST = resolve(distArg ?? "packages/platform-extension/dist-chromium");
-const OUT = resolve("packages/platform-extension/bramble.crx");
+const OUT = resolve("packages/platform-extension/vautix.crx");
 const KEY_AGE =
-	process.env.CWS_KEY_AGE ?? join(process.env.HOME ?? "", ".config/bramble/cws-signing-key.age");
+	process.env.CWS_KEY_AGE ?? join(process.env.HOME ?? "", ".config/vautix/cws-signing-key.age");
 // A pre-decrypted plaintext key (release.ts decrypts both CWS secrets in one YubiKey touch; CI can
 // also provide it). When set, skip the age/YubiKey decrypt entirely.
 const KEY_PEM = process.env.CWS_KEY_PEM;
@@ -65,7 +65,7 @@ if (KEY_PEM) {
 	for (const bin of ["age", "age-plugin-yubikey"])
 		if (!has(bin)) need(`${bin} not found; see docs/release-signing.md for setup`);
 	// 0700 scratch dir; the plaintext key never leaves it and is wiped in finally.
-	const tmp = mkdtempSync(join(tmpdir(), "bramble-sign-"));
+	const tmp = mkdtempSync(join(tmpdir(), "vautix-sign-"));
 	cleanup = () => rmSync(tmp, { recursive: true, force: true });
 	const idFile = join(tmp, "id.txt");
 	keyPath = join(tmp, "key.pem");

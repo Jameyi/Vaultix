@@ -119,7 +119,7 @@ validates `entry.publicKey === sess.remoteStatic` *before sending anything*. Bot
 derive 12 decimal digits and the user confirms they match before the bundle moves.
 
 ```
-sas = HKDF-SHA256(ikm = psk, salt = sorted(pubA, pubB), info = "bramble/sync/sas/v1")
+sas = HKDF-SHA256(ikm = psk, salt = sorted(pubA, pubB), info = "vautix/sync/sas/v1")
       -> 8 bytes -> BigInt mod 10^12 -> "NNNN NNNN NNNN"
 ```
 
@@ -156,7 +156,7 @@ alongside the SAS as context only; it is attacker-controlled and is not proof of
 
 |  | old inviter | new inviter |
 | --- | --- | --- |
-| **old joiner** | unchanged | the inviter's bounded wait expires and it aborts, telling the user to update Bramble on the other device |
+| **old joiner** | unchanged | the inviter's bounded wait expires and it aborts, telling the user to update Vautix on the other device |
 | **new joiner** | the joiner's entry queues (`channel.ts` queues inbound); the old inviter sends the bundle and then reads that entry as its ack, so this works unchanged | full gate |
 
 This is why the joiner sends **the existing ack frame, up front** rather than a new envelope: an
@@ -184,7 +184,7 @@ flow. The cost is that un-updated devices can no longer pair with updated ones; 
 explicit update prompt.
 
 `exp` is purely additive: zod's `z.object` strips unknown keys, so an old client parsing a code
-that carries it silently ignores it. The `v: 1` literal and the `bramble-pair-1.` prefix are
+that carries it silently ignores it. The `v: 1` literal and the `vautix-pair-1.` prefix are
 therefore kept, since bumping either would make old joiners fail with a raw zod error instead of a
 readable message.
 
@@ -444,7 +444,7 @@ change, not a check moved around.
   Union would be valid if implemented (all slots wrap the same VEK), and the absence has real
   consequences: a key added on one device is invisible to the others, and revoking one there does
   not propagate. The only way a vault gains another device's slots today is **restoring that
-  device's backup**, since a `.bramble` backup is the sealed blob (`backup/run.ts`).
+  device's backup**, since a `.vautix` backup is the sealed blob (`backup/run.ts`).
 
 ### Conflict loser
 
@@ -590,7 +590,7 @@ device management). Notes on how it maps to code:
   revoke (roster tombstone) with the roster gossiped alongside entries in `roster-sync` (the
   `{entries, roster}` envelope) so revocations converge; see "Device management & revocation".
 - **Separate rooms.** `deriveRoomId(groupKey, label)`: enrollment uses
-  `bramble/enroll`, ongoing sync uses `bramble/sync`, so the enroll handshake never
+  `vautix/enroll`, ongoing sync uses `vautix/sync`, so the enroll handshake never
   collides with running sync meshes.
 - **Enrollment** seals `{vek, roster, entries}` Noise-only; the joiner rebuilds its
   vault entirely in the offscreen via `core/vault/build-vault` (the VEK never reaches

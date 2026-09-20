@@ -14,7 +14,7 @@ export function notifyYubiKeyTouch(reason: string): void {
 			"osascript",
 			[
 				"-e",
-				`display notification "${body}" with title "Bramble release" subtitle "YubiKey" sound name "Submarine"`,
+				`display notification "${body}" with title "Vautix release" subtitle "YubiKey" sound name "Submarine"`,
 			],
 			{ stdio: "ignore" },
 		);

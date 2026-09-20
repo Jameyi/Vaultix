@@ -46,7 +46,7 @@ export function registerOpenSetup(fn: OpenSetupHandler): () => void {
 export const mobileTarget: Target = Capacitor.getPlatform() === "ios" ? "ios" : "android";
 
 export const mobileShell: ShellAdapter = {
-	appName: "Bramble",
+	appName: "Vautix",
 	// Fallback; resolveAppVersion() overwrites from the native bundle before first render.
 	version: "0.0.0-mobile",
 

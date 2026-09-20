@@ -10,7 +10,7 @@ export interface AliasRequest {
 	 * The site the alias is being made for, as a hostname.
 	 *
 	 * Passed through as given rather than reduced to a registrable domain here, because the
-	 * providers do their own reduction: SimpleLogin turned `bramble-spike.example.com` into an
+	 * providers do their own reduction: SimpleLogin turned `vautix-spike.example.com` into an
 	 * `example.` prefix server-side. Reducing it first would need a public-suffix list in `core`
 	 * to arrive at the same answer.
 	 */

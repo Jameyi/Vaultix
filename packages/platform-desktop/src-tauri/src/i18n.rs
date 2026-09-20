@@ -12,14 +12,14 @@
 //! `scripts/i18n/tauri-menus.mjs` alongside every other native surface (Android XML, the iOS string
 //! catalog, the extension's `_locales`) and gated by `scripts/i18n-check.mjs`. `{app}` and
 //! `{author}` are the only placeholders, so word order stays the translator's to choose: German
-//! wants "Bramble beenden" where Spanish wants "Salir de Bramble".
+//! wants "Vautix beenden" where Spanish wants "Salir de Vautix".
 
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
 type Catalog = HashMap<String, String>;
 
-pub const APP_NAME: &str = "Bramble";
+pub const APP_NAME: &str = "Vautix";
 pub const AUTHOR: &str = "flythenimbus";
 
 const EN: &str = include_str!("../locales/en.json");
@@ -188,7 +188,7 @@ mod tests {
 
     #[test]
     fn fills_placeholders() {
-        assert_eq!(fill("Open {app}"), "Open Bramble");
+        assert_eq!(fill("Open {app}"), "Open Vautix");
         assert_eq!(fill("By {author}"), "By flythenimbus");
         assert_eq!(fill("Quick Access"), "Quick Access");
     }

@@ -1,4 +1,4 @@
-//! Bramble desktop shell.
+//! Vautix desktop shell.
 //!
 //! The webview renders `@vault/core`; this process owns everything the webview must not:
 //! the VEK (see `crypto`), the vault files (see `storage`), and later the sync hub, the
@@ -120,7 +120,7 @@ pub fn run() {
                     .targets([
                         Target::new(TargetKind::Stdout),
                         Target::new(TargetKind::LogDir {
-                            file_name: Some("bramble".into()),
+                            file_name: Some("vautix".into()),
                         }),
                     ])
                     .build(),

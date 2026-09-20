@@ -14,7 +14,7 @@ const saved: { name: string; body: string }[] = [];
 
 const platform = {
 	shell: {
-		appName: "Bramble",
+		appName: "Vautix",
 		exportBytes: async (name: string, bytes: Uint8Array) => {
 			saved.push({ name, body: new TextDecoder().decode(bytes) });
 		},
@@ -46,8 +46,8 @@ it("saves the code under the app's own name, not a retired one", async () => {
 
 	await waitFor(() => expect(saved).toHaveLength(1));
 	const file = saved[0] as { name: string; body: string };
-	expect(file.name).toBe("bramble-recovery-code.txt");
-	expect(file.body).toContain("Bramble recovery code");
+	expect(file.name).toBe("vautix-recovery-code.txt");
+	expect(file.body).toContain("Vautix recovery code");
 	expect(file.body).toContain("ABCD-EFGH-IJKL");
 	expect(`${file.name}\n${file.body}`.toLowerCase()).not.toContain("titanpass");
 });

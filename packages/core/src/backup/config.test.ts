@@ -33,9 +33,9 @@ describe("backupPrefix", () => {
 		expect(backupPrefix(cfg)).toBe("backups");
 	});
 
-	it("falls back to bramble when the WebDAV folder is blank", () => {
+	it("falls back to vautix when the WebDAV folder is blank", () => {
 		const cfg: BackupTargetConfig = { ...TARGET, provider: "webdav", path: "  " };
-		expect(backupPrefix(cfg)).toBe("bramble");
+		expect(backupPrefix(cfg)).toBe("vautix");
 	});
 
 	it("still uses prefix for S3 and ignores path", () => {
@@ -50,9 +50,9 @@ describe("backupPrefix", () => {
 
 	// Dropbox keeps `path` as a container folder inside the app folder, so it must
 	// not become the key prefix the way WebDAV's does.
-	it("leaves Dropbox on the bramble subfolder", () => {
+	it("leaves Dropbox on the vautix subfolder", () => {
 		const cfg: BackupTargetConfig = { ...TARGET, provider: "dropbox", path: "Sub" };
-		expect(backupPrefix(cfg)).toBe("bramble");
+		expect(backupPrefix(cfg)).toBe("vautix");
 	});
 });
 
@@ -185,11 +185,11 @@ describe("normalizeS3", () => {
 		expect(
 			normalizeS3({
 				endpoint: "https://<account-id>.r2.cloudflarestorage.com",
-				bucket: "https://abc123.r2.cloudflarestorage.com/bramble-backup-tests",
+				bucket: "https://abc123.r2.cloudflarestorage.com/vautix-backup-tests",
 			}),
 		).toEqual({
 			endpoint: "https://abc123.r2.cloudflarestorage.com",
-			bucket: "bramble-backup-tests",
+			bucket: "vautix-backup-tests",
 			prefix: undefined,
 		});
 	});

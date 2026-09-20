@@ -9,7 +9,7 @@ const noPasskeys = {
 };
 
 /** Export then re-import through the real KDBX import path, which is what a user
- * moving a file between Bramble installs actually goes through. */
+ * moving a file between Vautix installs actually goes through. */
 const roundTrip = async (e: EntryData): Promise<EntryData> => {
 	const [back] = (await kdbxEntriesToResult(toKdbxEntries([e]), noPasskeys)).imported;
 	if (!back) throw new Error("nothing re-imported");

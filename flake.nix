@@ -1,4 +1,4 @@
-# A Nix package for the desktop app, so NixOS users can install Bramble without waiting on
+# A Nix package for the desktop app, so NixOS users can install Vautix without waiting on
 # nixpkgs.
 #
 # Deliberately a flake in this repository rather than a nixpkgs submission, at least first:
@@ -7,13 +7,13 @@
 # same package to the same users on our own schedule, and CI can build it so it cannot rot.
 # Upstreaming later is a strict addition. See docs/desktop-port.md.
 #
-#   nix build github:flythenimbus/bramble
-#   nix run   github:flythenimbus/bramble
+#   nix build github:flythenimbus/vautix
+#   nix run   github:flythenimbus/vautix
 #
 # Or in a system configuration, via the overlay this exposes.
 
 {
-  description = "Bramble: an offline-first password manager with direct device-to-device sync";
+  description = "Vautix: an offline-first password manager with direct device-to-device sync";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -32,20 +32,20 @@
     in
     {
       packages = forEachSystem (pkgs: rec {
-        bramble = pkgs.callPackage ./packages/platform-desktop/nix/package.nix {
+        vautix = pkgs.callPackage ./packages/platform-desktop/nix/package.nix {
           # `self` rather than a relative path, so the build sees the flake's own source and a
           # dirty tree is caught rather than silently built from the checkout.
           src = self;
         };
-        default = bramble;
+        default = vautix;
       });
 
       overlays.default = final: _prev: {
-        bramble = final.callPackage ./packages/platform-desktop/nix/package.nix { src = self; };
+        vautix = final.callPackage ./packages/platform-desktop/nix/package.nix { src = self; };
       };
 
       # `nix flake check` builds the package, which is the only check worth having here: the
       # failure this guards against is the derivation drifting away from the repository.
-      checks = forEachSystem (pkgs: { bramble = self.packages.${pkgs.system}.bramble; });
+      checks = forEachSystem (pkgs: { vautix = self.packages.${pkgs.system}.vautix; });
     };
 }

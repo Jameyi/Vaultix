@@ -39,7 +39,7 @@ type Status =
 	| { kind: "error"; message: string };
 
 /**
- * Email alias provider: the account Bramble asks for a fresh address per site.
+ * Email alias provider: the account Vautix asks for a fresh address per site.
  *
  * Configuring a provider is the opt-in for this network egress, so there is no separate master
  * switch. Nothing is contacted until a key is saved, and the host contacted is the one named on
@@ -73,10 +73,10 @@ export function AliasSection() {
 		// catch-all one is the user's own domain typed in by hand.
 		if (key === "domain") {
 			if (provider === "catchall") {
-				// Bramble cannot tell whether a catch-all actually works without sending mail, and a
+				// Vautix cannot tell whether a catch-all actually works without sending mail, and a
 				// typo here produces addresses that look right and quietly go nowhere. So it asks
 				// rather than pretends. See docs/email-aliases.md.
-				return t`Double-check this. Bramble cannot test it, and a wrong domain gives you addresses that quietly go nowhere.`;
+				return t`Double-check this. Vautix cannot test it, and a wrong domain gives you addresses that quietly go nowhere.`;
 			}
 			return provider === "addy"
 				? t`Addy needs a domain before it can create an alias.`
@@ -215,7 +215,7 @@ export function AliasSection() {
 			<p className="text-xs text-muted-foreground">
 				<Trans>
 					Generate a different email address for every site, from an account you already have.
-					Bramble only asks your provider for an address; it never handles the mail.
+					Vautix only asks your provider for an address; it never handles the mail.
 				</Trans>
 			</p>
 

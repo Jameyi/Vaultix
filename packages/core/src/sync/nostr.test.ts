@@ -33,14 +33,14 @@ describe("room id", () => {
 
 	it("rotates per epoch: deterministic within, distinct across, and vs unrotated", async () => {
 		const k = new Uint8Array(32).fill(7);
-		expect(await deriveRoomId(k, "bramble/sync", 100)).toBe(
-			await deriveRoomId(k, "bramble/sync", 100),
+		expect(await deriveRoomId(k, "vautix/sync", 100)).toBe(
+			await deriveRoomId(k, "vautix/sync", 100),
 		);
-		expect(await deriveRoomId(k, "bramble/sync", 100)).not.toBe(
-			await deriveRoomId(k, "bramble/sync", 101),
+		expect(await deriveRoomId(k, "vautix/sync", 100)).not.toBe(
+			await deriveRoomId(k, "vautix/sync", 101),
 		);
-		expect(await deriveRoomId(k, "bramble/sync", 100)).not.toBe(
-			await deriveRoomId(k, "bramble/sync"),
+		expect(await deriveRoomId(k, "vautix/sync", 100)).not.toBe(
+			await deriveRoomId(k, "vautix/sync"),
 		);
 	});
 });

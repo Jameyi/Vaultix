@@ -7,9 +7,9 @@
 // protocol, so this suite drives Nextcloud and MinIO out of `docker compose`.
 //
 //   docker compose up -d          # then wait for Nextcloud's first-boot install
-//   BRAMBLE_IT=1 pnpm --filter @vault/core exec vitest run providers.integration
+//   VAUTIX_IT=1 pnpm --filter @vault/core exec vitest run providers.integration
 //
-// Skipped unless BRAMBLE_IT is set, so a normal `pnpm test` on a machine with no containers stays
+// Skipped unless VAUTIX_IT is set, so a normal `pnpm test` on a machine with no containers stays
 // green rather than failing for a reason that is not about the code.
 
 import { describe, expect, it } from "vitest";
@@ -23,23 +23,23 @@ import { createWebdavTarget } from "./webdav";
 const env: Record<string, string | undefined> =
 	(globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
 
-const ENABLED = Boolean(env.BRAMBLE_IT);
+const ENABLED = Boolean(env.VAUTIX_IT);
 const suite = ENABLED ? describe : describe.skip;
 
 const WEBDAV = {
 	kind: "webdav",
-	serverUrl: env.BRAMBLE_IT_WEBDAV ?? "http://localhost:8080/remote.php/dav/files/admin/",
-	username: env.BRAMBLE_IT_WEBDAV_USER ?? "admin",
-	password: env.BRAMBLE_IT_WEBDAV_PASS ?? "Bramble-test-123",
+	serverUrl: env.VAUTIX_IT_WEBDAV ?? "http://localhost:8080/remote.php/dav/files/admin/",
+	username: env.VAUTIX_IT_WEBDAV_USER ?? "admin",
+	password: env.VAUTIX_IT_WEBDAV_PASS ?? "Vautix-test-123",
 } as const;
 
 const S3 = {
 	kind: "s3",
-	endpoint: env.BRAMBLE_IT_S3 ?? "http://localhost:9000",
+	endpoint: env.VAUTIX_IT_S3 ?? "http://localhost:9000",
 	region: "us-east-1",
-	bucket: env.BRAMBLE_IT_S3_BUCKET ?? "bramble-test",
-	accessKeyId: env.BRAMBLE_IT_S3_KEY ?? "bramble",
-	secretAccessKey: env.BRAMBLE_IT_S3_SECRET ?? "bramble-test-secret",
+	bucket: env.VAUTIX_IT_S3_BUCKET ?? "vautix-test",
+	accessKeyId: env.VAUTIX_IT_S3_KEY ?? "vautix",
+	secretAccessKey: env.VAUTIX_IT_S3_SECRET ?? "vautix-test-secret",
 } as const;
 
 // A fresh folder per run, so a failed run cannot poison the next one and two runs can overlap.

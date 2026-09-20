@@ -611,7 +611,7 @@ mod tests {
     #[test]
     fn export_writes_the_bytes_verbatim() {
         let d = root();
-        let out = d.path().join("export.bramble");
+        let out = d.path().join("export.vautix");
         ops::export_bytes(&out, b"encrypted").unwrap();
         assert_eq!(fs::read(&out).unwrap(), b"encrypted");
     }

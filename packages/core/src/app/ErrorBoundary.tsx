@@ -1,7 +1,7 @@
 import { i18n } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { BrambleGlyph } from "./components/BrambleGlyph";
+import { VautixGlyph } from "./components/VautixGlyph";
 import { Button } from "./components/ui/button";
 
 interface Props {
@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<Props, State> {
 	}
 
 	override componentDidCatch(error: Error, info: ErrorInfo) {
-		console.error("Bramble crashed:", error, info.componentStack);
+		console.error("Vautix crashed:", error, info.componentStack);
 	}
 
 	override render() {
@@ -37,12 +37,12 @@ export class ErrorBoundary extends Component<Props, State> {
 			<div className="min-h-screen flex items-center justify-center bg-background p-6 text-foreground">
 				<div className="w-full max-w-md text-center">
 					<div className="flex justify-center mb-4">
-						<BrambleGlyph className="w-12 h-12 text-foreground" />
+						<VautixGlyph className="w-12 h-12 text-foreground" />
 					</div>
 					<h1 className="text-lg mb-2">{i18n._(msg`Something went wrong`)}</h1>
 					<p className="text-sm text-muted-foreground mb-5">
 						{i18n._(
-							msg`Bramble hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app.`,
+							msg`Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app.`,
 						)}
 					</p>
 					<Button

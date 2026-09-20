@@ -97,7 +97,7 @@ function colorForName(name: string): string {
 }
 
 // Colours reference the local --tp-* tokens below, never literals. The tokens mirror the
-// @vault/theme scale (packages/theme/theme.css); this iframe has no Bramble app shell to read a
+// @vault/theme scale (packages/theme/theme.css); this iframe has no Vautix app shell to read a
 // `.dark` class, so light/dark follows the OS via prefers-color-scheme. Byte-identical to the
 // shadow renderer's copy (content/html/dropdown-styles.ts); keep both in sync with theme.css.
 const STYLE = `

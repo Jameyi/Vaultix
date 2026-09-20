@@ -13,7 +13,7 @@ import { check } from "@tauri-apps/plugin-updater";
 /**
  * Whether this install is allowed to replace itself.
  *
- * False for a .deb or .rpm from apt.bramble.sh: the updater cannot replace a dpkg-managed binary,
+ * False for a .deb or .rpm from apt.vautix.sh: the updater cannot replace a dpkg-managed binary,
  * and an app that keeps offering an update it cannot apply is worse than one that says nothing,
  * because the user is told they are out of date and handed no way to act on it. The shell reports
  * no updater at all in that case and the launch nudge stays quiet. Resolved from Rust, which is

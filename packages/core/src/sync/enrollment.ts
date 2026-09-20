@@ -9,7 +9,7 @@ import { bytesToBase64 } from "../util/bytes";
 import { EntriesPayloadSchema } from "./entries-payload";
 import { RosterPayloadSchema } from "./roster";
 
-const PAIRING_PREFIX = "bramble-pair-1.";
+const PAIRING_PREFIX = "vautix-pair-1.";
 
 /** 32 random bytes, base64. Used for the group key and the one-time pairing PSK. */
 export function randomKeyB64(len = 32): string {
@@ -66,7 +66,7 @@ export function encodePairingCode(code: PairingCode): string {
 /** Parse a pairing code; throws on a wrong prefix or malformed body. */
 export function decodePairingCode(text: string): PairingCode {
 	const trimmed = text.trim();
-	if (!trimmed.startsWith(PAIRING_PREFIX)) throw new Error("not a bramble pairing code");
+	if (!trimmed.startsWith(PAIRING_PREFIX)) throw new Error("not a vautix pairing code");
 	const body = trimmed.slice(PAIRING_PREFIX.length);
 	const json = new TextDecoder().decode(Uint8Array.from(atob(body), (c) => c.charCodeAt(0)));
 	return PairingCodeSchema.parse(JSON.parse(json));

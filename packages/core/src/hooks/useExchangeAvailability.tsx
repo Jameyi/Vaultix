@@ -8,7 +8,7 @@ import { usePlatform } from "../context/PlatformContext";
  * Whether this device can actually do an OS credential transfer, and why not when it can't.
  *
  * The platform adapter's presence only says the build has the plugin; the answer is per-device
- * (iOS 26+) and per-user (Bramble enabled as a credential provider). Null while the native
+ * (iOS 26+) and per-user (Vautix enabled as a credential provider). Null while the native
  * probe is in flight. See docs/credential-exchange.md.
  */
 export function useExchangeAvailability(): ExchangeAvailability | null {

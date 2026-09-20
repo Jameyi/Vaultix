@@ -81,7 +81,7 @@ dependencies and whatever is C-compiled underneath, so treat it as cheap insuran
 Confirming it engages needs a Pixel 8 or newer.
 
 `allowBackup` is currently `true`. Flipping it is one line but a product decision: it also
-disables device-to-device transfer of app data, so users rely on Bramble's own backup and sync,
+disables device-to-device transfer of app data, so users rely on Vautix's own backup and sync,
 which is arguably right for a password manager. Decide it in the same change.
 
 ### 3. Pin the slot page

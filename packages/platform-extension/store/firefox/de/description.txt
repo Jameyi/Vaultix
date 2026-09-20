@@ -1,4 +1,4 @@
-Bramble ist ein Passwort-Manager, der in Ihrem Browser lebt und Ihre Geheimnisse auf Ihrem eigenen Gerät speichert. Kein Konto, kein Server, der Ihren Tresor verwahrt, kein Unternehmen, das gehackt werden kann und alles preisgibt. Sie halten den Tresor, Sie haben das Passwort – und das war's.
+Vautix ist ein Passwort-Manager, der in Ihrem Browser lebt und Ihre Geheimnisse auf Ihrem eigenen Gerät speichert. Kein Konto, kein Server, der Ihren Tresor verwahrt, kein Unternehmen, das gehackt werden kann und alles preisgibt. Sie halten den Tresor, Sie haben das Passwort – und das war's.
 
 Funktioniert in Firefox, LibreWolf, Waterfox, Zen und anderen Firefox-Browsern. Installieren Sie es und in etwa einer Minute läuft es.
 
@@ -6,7 +6,7 @@ WAS ES TUT
 
 Ihre Passwörter werden auf Ihrem Gerät verschlüsselt und in der browser-eigenen Erweiterungsspeicherung auf Ihrem Rechner abgelegt. Es gibt kein Konto und keinen Server, der Ihren Tresor verwahrt. Einmal eingerichtet, füllen Sie Logins automatisch aus, speichern neue und generieren sofort Passwörter.
 
-Haben Sie mehr als ein Gerät? Koppeln Sie sie und Bramble hält Ihren Tresor über einen Ende-zu-Ende-verschlüsselten Kanal synchron. Der Relay-Server, der Ihre Geräte verbindet, sieht nur Chiffretext und speichert nichts – Ihre Geheimnisse landen nie auf einem fremden Server.
+Haben Sie mehr als ein Gerät? Koppeln Sie sie und Vautix hält Ihren Tresor über einen Ende-zu-Ende-verschlüsselten Kanal synchron. Der Relay-Server, der Ihre Geräte verbindet, sieht nur Chiffretext und speichert nichts – Ihre Geheimnisse landen nie auf einem fremden Server.
 
 FUNKTIONEN
 
@@ -19,7 +19,7 @@ FUNKTIONEN
 - Integrierter Passwort-Generator.
 - Verschlüsselte Backups. Exportieren Sie jederzeit Ihren gesamten Tresor in eine verschlüsselte Datei für eine lokale Offline-Kopie. Sie benötigt weiterhin Ihr Master-Passwort zum Öffnen.
 - Wiederherstellungscodes. Jeder Tresor erhält bei der Einrichtung einen sicheren Wiederherstellungscode: ein druckbares Backup, das ihn unabhängig von Ihrem Master-Passwort entsperrt.
-- TOTP / 2FA-Codes. Fügen Sie einen otpauth://-URI oder ein Geheimnis ein, und Bramble generiert die Codes.
+- TOTP / 2FA-Codes. Fügen Sie einen otpauth://-URI oder ein Geheimnis ein, und Vautix generiert die Codes.
 - Optionaler Datenleck-Check. Have I Been Pwned-Abfrage mittels k-Anonymität, sodass nichts über Ihr Passwort Ihr Gerät verlässt. Standardmäßig deaktiviert.
 - Automatische Sperre nach 15 Minuten Inaktivität (konfigurierbar).
 - Import von KeePass, Bitwarden, Proton Pass und 1Password.
@@ -28,7 +28,7 @@ WARUM LOCAL-FIRST
 
 Cloud-Manager speichern die Tresore aller Nutzer auf ihren Servern – ein riesiges Angriffsziel. Wird einer gehackt, leckt nicht nur ein Tresor, sondern Millionen auf einmal, oft erst Monate später bekannt gegeben.
 
-Bramble dreht das um:
+Vautix dreht das um:
 - Kein Server, der gehackt werden kann. Ihr Tresor verlässt nie Ihre Kontrolle.
 - Kein Konto, kein Abonnement, keine Telemetrie. Nichts, wofür Sie sich anmelden müssten.
 - Ihre Geräte, Ihre Daten. Synchronisieren Sie ihn über Ihre eigenen Geräte, behalten Sie ihn offline auf einem Rechner oder exportieren Sie ein verschlüsseltes Backup, das Sie selbst verwahren. Nichts liegt jemals auf einem fremden Server.
@@ -36,8 +36,8 @@ Bramble dreht das um:
 
 WIE DIE VERSCHLÜSSELUNG FUNKTIONIERT
 
-Bramble verwendet LUKS-artige Schlüsselslots und Envelope-Verschlüsselung. Ein zufälliger Tresorschlüssel schützt Ihre Daten. Jede Entsperrmethode (Master-Passwort, Wiederherstellungscode) leitet ihren eigenen Schlüsselverschlüsselungsschlüssel ab, der eine Kopie desselben Tresorschlüssels entschlüsselt. Das Hinzufügen oder Entfernen einer Entsperrmethode verschlüsselt nie einen einzelnen Eintrag neu. Der Tresorschlüssel entschlüsselt dann für jedes Element einen frischen, eintragsspezifischen Schlüssel. Alles ist AES-256-GCM.
+Vautix verwendet LUKS-artige Schlüsselslots und Envelope-Verschlüsselung. Ein zufälliger Tresorschlüssel schützt Ihre Daten. Jede Entsperrmethode (Master-Passwort, Wiederherstellungscode) leitet ihren eigenen Schlüsselverschlüsselungsschlüssel ab, der eine Kopie desselben Tresorschlüssels entschlüsselt. Das Hinzufügen oder Entfernen einer Entsperrmethode verschlüsselt nie einen einzelnen Eintrag neu. Der Tresorschlüssel entschlüsselt dann für jedes Element einen frischen, eintragsspezifischen Schlüssel. Alles ist AES-256-GCM.
 
 SIE KOMMEN VON KEEPASS?
 
-Sie werden sich wie zu Hause fühlen: Ihr verschlüsselter Tresor, Ihre Kontrolle, kein Cloud-Zwischenhändler, und Bramble importiert Ihre KDBX4-Dateien. Die Unterschiede: Es lebt in Ihrem Browser (keine separate Desktop-App oder Plugin-Brücke), Autofill ist mit Domain-Matching und einem Dropdown-Menü auf der Seite integriert, und es liefert einen modernen Build mit Argon2id und AES-256-GCM statt einer Vielzahl von Plugins. Saubere Benutzeroberfläche, inklusive Dunkelmodus.
+Sie werden sich wie zu Hause fühlen: Ihr verschlüsselter Tresor, Ihre Kontrolle, kein Cloud-Zwischenhändler, und Vautix importiert Ihre KDBX4-Dateien. Die Unterschiede: Es lebt in Ihrem Browser (keine separate Desktop-App oder Plugin-Brücke), Autofill ist mit Domain-Matching und einem Dropdown-Menü auf der Seite integriert, und es liefert einen modernen Build mit Argon2id und AES-256-GCM statt einer Vielzahl von Plugins. Saubere Benutzeroberfläche, inklusive Dunkelmodus.

@@ -22,7 +22,7 @@ source application actually writes.
 database, password `qwerty`, holding a passkey that really does authenticate to webauthn.io as
 `testy`. It is committed on purpose:
 
-- It is the only fixture KeePassXC itself wrote. `keepass-passkeys.kdbx` came from Bramble's own
+- It is the only fixture KeePassXC itself wrote. `keepass-passkeys.kdbx` came from Vautix's own
   KDBX exporter, so on its own it cannot show that we read a real KeePassXC file rather than one
   shaped the way we happen to write them.
 - Its KDF settings are a stock KeePassXC benchmark result (Argon2d, 64 MiB, 106 rounds), which is
@@ -36,7 +36,7 @@ from somewhere that matters.
 
 ## Provenance notes
 
-`keepass-passkeys.kdbx` was written by Bramble's own KDBX exporter, not by `keepassxc-cli`. The
+`keepass-passkeys.kdbx` was written by Vautix's own KDBX exporter, not by `keepassxc-cli`. The
 CLI's `import` subcommand produces an AES-KDF database, which our reader refuses by design, and it
 exposes no way to choose Argon2. KeePassXC opens the result, which is the cross-check that it is a
 real KDBX4 file and not merely one we can read.

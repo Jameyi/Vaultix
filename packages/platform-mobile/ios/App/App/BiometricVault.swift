@@ -32,9 +32,9 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 	// present. One such block starves every plugin in the app: a stalled arm-the-gate write is
 	// what made an unrelated exportVek time out in Settings. Our own queue contains the damage.
 	private static let keychainQueue = DispatchQueue(
-		label: "app.bramble.biometric-vault", qos: .userInitiated)
+		label: "app.vautix.biometric-vault", qos: .userInitiated)
 
-	// service / account / accessGroup live in BrambleVault (shared with the AutoFill
+	// service / account / accessGroup live in VautixVault (shared with the AutoFill
 	// extension and the keychain-access-groups entitlement). See docs/mobile-port.md.
 
 	// The biometric VEK item identity for one vault (service + per-vault account, no access group).
@@ -43,8 +43,8 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 	private static func identity(_ vaultId: String) -> [String: Any] {
 		[
 			kSecClass as String: kSecClassGenericPassword,
-			kSecAttrService as String: BrambleVault.biometricService,
-			kSecAttrAccount as String: "\(BrambleVault.vekAccount):\(vaultId)",
+			kSecAttrService as String: VautixVault.biometricService,
+			kSecAttrAccount as String: "\(VautixVault.vekAccount):\(vaultId)",
 		]
 	}
 
@@ -56,8 +56,8 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 	private static func legacySharedIdentity() -> [String: Any] {
 		[
 			kSecClass as String: kSecClassGenericPassword,
-			kSecAttrService as String: BrambleVault.biometricService,
-			kSecAttrAccount as String: BrambleVault.vekAccount,
+			kSecAttrService as String: VautixVault.biometricService,
+			kSecAttrAccount as String: VautixVault.vekAccount,
 		]
 	}
 
@@ -66,8 +66,8 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 	private static func legacySharedSessionIdentity() -> [String: Any] {
 		[
 			kSecClass as String: kSecClassGenericPassword,
-			kSecAttrService as String: BrambleVault.sessionService,
-			kSecAttrAccount as String: BrambleVault.vekAccount,
+			kSecAttrService as String: VautixVault.sessionService,
+			kSecAttrAccount as String: VautixVault.vekAccount,
 		]
 	}
 
@@ -85,12 +85,12 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 			for identity in [legacySharedIdentity(), legacySharedSessionIdentity()] {
 				for q in groupVariants(identity) { SecItemDelete(q as CFDictionary) }
 			}
-			let defaults = UserDefaults(suiteName: BrambleVault.appGroup)
+			let defaults = UserDefaults(suiteName: VautixVault.appGroup)
 			// The mirror's vault stamp, needed only while a shared item had to be told apart from
 			// the bundle. Keying by vault retired the comparison and the constant with it.
 			defaults?.removeObject(forKey: "autofill.biometricVaultId")
 			// The un-suffixed flag, replaced by one per vault.
-			defaults?.removeObject(forKey: BrambleVault.biometricPasscodeFallbackKey)
+			defaults?.removeObject(forKey: VautixVault.biometricPasscodeFallbackKey)
 		}
 	}
 
@@ -101,7 +101,7 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 			return query
 		#else
 			var q = query
-			q[kSecAttrAccessGroup as String] = BrambleVault.accessGroup
+			q[kSecAttrAccessGroup as String] = VautixVault.accessGroup
 			return q
 		#endif
 	}
@@ -243,8 +243,8 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 			// passcode the Keychain will refuse. Written here rather than through AutofillBridge so
 			// it can't drift from the access control it describes, and keyed by vault like the item:
 			// with two vaults armed at once a single flag names only the one armed last.
-			UserDefaults(suiteName: BrambleVault.appGroup)?
-				.set(allowPasscode, forKey: "\(BrambleVault.biometricPasscodeFallbackKey):\(vaultId)")
+			UserDefaults(suiteName: VautixVault.appGroup)?
+				.set(allowPasscode, forKey: "\(VautixVault.biometricPasscodeFallbackKey):\(vaultId)")
 			if status == errSecSuccess {
 				call.resolve()
 			} else {
@@ -333,8 +333,8 @@ public class BiometricVaultPlugin: CAPPlugin, CAPBridgedPlugin {
 	private static func purge(_ vaultId: String) -> (ok: Bool, status: OSStatus) {
 		// Clear what described this vault's gate too. Left behind, it tells the extension a gate
 		// is armed with a passcode route that no longer exists.
-		UserDefaults(suiteName: BrambleVault.appGroup)?
-			.removeObject(forKey: "\(BrambleVault.biometricPasscodeFallbackKey):\(vaultId)")
+		UserDefaults(suiteName: VautixVault.appGroup)?
+			.removeObject(forKey: "\(VautixVault.biometricPasscodeFallbackKey):\(vaultId)")
 		var lastStatus: OSStatus = errSecItemNotFound
 		var ok = false
 		for identity in [identity(vaultId), legacySharedIdentity()] {

@@ -12,9 +12,9 @@ website/.astro/
 # Wrangler local state
 .wrangler/
 web-ext-artifacts/
-bramble*.zip
-bramble*.crx
-bramble*.xpi
+vautix*.zip
+vautix*.crx
+vautix*.xpi
 *.log
 .DS_Store
 
@@ -33,7 +33,7 @@ packages/platform-extension/public/wasm/
 # Google / Chrome Web Store service-account keys (secret JSON private keys)
 *-service-account.json
 *.iam.gserviceaccount.com.json
-bramble-502002-*.json
+vautix-502002-*.json
 
 # Pre-disclosure security notes. A writeup of an unfixed vulnerability in a released
 # build is a public disclosure the moment it lands here, so it stays out of the tree

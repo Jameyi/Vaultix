@@ -20,13 +20,13 @@ msgstr "...und noch {0} weitere"
 
 #. placeholder {0}: unsigned.length
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
-msgid "{0, plural, one {# device has not signed its roster entry yet. Each device signs itself the next time Bramble opens on it; until then the others cannot tell it from an impostor.} other {# devices have not signed their roster entries yet. Each device signs itself the next time Bramble opens on it; until then the others cannot tell them from an impostor.}}"
-msgstr "{0, plural, one {# Gerät hat seinen Roster-Eintrag noch nicht signiert. Jedes Gerät signiert sich selbst, wenn Bramble das nächste Mal darauf geöffnet wird; bis dahin können die anderen es nicht von einem Betrüger unterscheiden.} other {# Geräte haben ihre Roster-Einträge noch nicht signiert. Jedes Gerät signiert sich selbst, wenn Bramble das nächste Mal darauf geöffnet wird; bis dahin können die anderen sie nicht von einem Betrüger unterscheiden.}}"
+msgid "{0, plural, one {# device has not signed its roster entry yet. Each device signs itself the next time Vautix opens on it; until then the others cannot tell it from an impostor.} other {# devices have not signed their roster entries yet. Each device signs itself the next time Vautix opens on it; until then the others cannot tell them from an impostor.}}"
+msgstr "{0, plural, one {# Gerät hat seinen Roster-Eintrag noch nicht signiert. Jedes Gerät signiert sich selbst, wenn Vautix das nächste Mal darauf geöffnet wird; bis dahin können die anderen es nicht von einem Betrüger unterscheiden.} other {# Geräte haben ihre Roster-Einträge noch nicht signiert. Jedes Gerät signiert sich selbst, wenn Vautix das nächste Mal darauf geöffnet wird; bis dahin können die anderen sie nicht von einem Betrüger unterscheiden.}}"
 
 #. placeholder {0}: unsigned.length
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
-#~ msgid "{0, plural, one {# device has not signed its roster entry yet. Open Bramble on it once to finish; a signature is how the others tell it apart from an impostor.} other {# devices have not signed their roster entries yet. Open Bramble on each once to finish; a signature is how the others tell them apart from an impostor.}}"
-#~ msgstr "{0, plural, one {# Gerät hat seinen Roster-Eintrag noch nicht signiert. Öffnen Sie Bramble einmal auf diesem Gerät, um den Vorgang abzuschließen; anhand der Signatur können die anderen es von einem Betrüger unterscheiden.} other {# Geräte haben ihre Roster-Einträge noch nicht signiert. Öffnen Sie Bramble einmal auf jedem Gerät, um den Vorgang abzuschließen; anhand der Signatur können die anderen sie von einem Betrüger unterscheiden.}}"
+#~ msgid "{0, plural, one {# device has not signed its roster entry yet. Open Vautix on it once to finish; a signature is how the others tell it apart from an impostor.} other {# devices have not signed their roster entries yet. Open Vautix on each once to finish; a signature is how the others tell them apart from an impostor.}}"
+#~ msgstr "{0, plural, one {# Gerät hat seinen Roster-Eintrag noch nicht signiert. Öffnen Sie Vautix einmal auf diesem Gerät, um den Vorgang abzuschließen; anhand der Signatur können die anderen es von einem Betrüger unterscheiden.} other {# Geräte haben ihre Roster-Einträge noch nicht signiert. Öffnen Sie Vautix einmal auf jedem Gerät, um den Vorgang abzuschließen; anhand der Signatur können die anderen sie von einem Betrüger unterscheiden.}}"
 
 #. placeholder {0}: entries.length
 #: packages/core/src/app/bulk-actions/export.tsx
@@ -248,8 +248,8 @@ msgid "Added tag {added}. {0} tags."
 msgstr "Tag {added} hinzugefügt. {0} Tags."
 
 #: packages/core/src/app/entry-modes/login.tsx
-msgid "Added when you create a passkey on a site with Bramble. Remove to delete."
-msgstr "Hinzugefügt, wenn Sie auf einer Website mit Bramble ein Passkey erstellen. Entfernen zum Löschen."
+msgid "Added when you create a passkey on a site with Vautix. Remove to delete."
+msgstr "Hinzugefügt, wenn Sie auf einer Website mit Vautix ein Passkey erstellen. Entfernen zum Löschen."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
 msgid "Addy needs a domain before it can create an alias."
@@ -460,8 +460,8 @@ msgid "Backups"
 msgstr "Sicherungskopien"
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Backups are best-effort, not a fixed time. Each target backs up at most as often as you pick, the next time you unlock Bramble after one is due, so real frequency depends on how often you open it on this device. Unchanged vaults are skipped."
-msgstr "Backups erfolgen nach bestem Bemühen, nicht zu einem festgelegten Zeitpunkt. Jedes Ziel wird höchstens so oft gesichert, wie Sie es festlegen, und zwar beim nächsten Entsperren von Bramble nach Fälligkeit. Die tatsächliche Häufigkeit hängt also davon ab, wie oft Sie die App auf diesem Gerät öffnen. Unveränderte Tresore werden übersprungen."
+msgid "Backups are best-effort, not a fixed time. Each target backs up at most as often as you pick, the next time you unlock Vautix after one is due, so real frequency depends on how often you open it on this device. Unchanged vaults are skipped."
+msgstr "Backups erfolgen nach bestem Bemühen, nicht zu einem festgelegten Zeitpunkt. Jedes Ziel wird höchstens so oft gesichert, wie Sie es festlegen, und zwar beim nächsten Entsperren von Vautix nach Fälligkeit. Die tatsächliche Häufigkeit hängt also davon ab, wie oft Sie die App auf diesem Gerät öffnen. Unveränderte Tresore werden übersprungen."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
 msgid "Backups on this computer run when you unlock a vault, because this session has no keyring to keep the connection details in. Starting GNOME Keyring or KWallet, or turning on KeePassXC's Secret Service integration, lets them run on schedule instead."
@@ -504,56 +504,56 @@ msgid "Book"
 msgstr "Buch"
 
 #: packages/core/src/app/update-prompt-copy.tsx
-msgid "Bramble {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
-msgstr "Bramble {version} ist verfügbar. Die Aktualisierung lädt sie herunter und startet die App neu. Ihr Tresor bleibt unberührt."
+msgid "Vautix {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
+msgstr "Vautix {version} ist verfügbar. Die Aktualisierung lädt sie herunter und startet die App neu. Ihr Tresor bleibt unberührt."
 
 #: packages/core/src/hooks/useCryptoErrorMessage.tsx
-msgid "Bramble couldn't safely update this device's key storage, so the vault stayed locked. Try again."
-msgstr "Bramble konnte den Schlüsselspeicher dieses Geräts nicht sicher aktualisieren, daher blieb der Tresor gesperrt. Versuchen Sie es erneut."
+msgid "Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again."
+msgstr "Vautix konnte den Schlüsselspeicher dieses Geräts nicht sicher aktualisieren, daher blieb der Tresor gesperrt. Versuchen Sie es erneut."
 
 #: packages/core/src/app/ErrorBoundary.tsx
-msgid "Bramble hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
-msgstr "Bramble ist auf einen unerwarteten Fehler gestoßen. Ihr Tresor ist sicher – er bleibt auf diesem Gerät verschlüsselt. Versuchen Sie, die Seite neu zu laden; sollte dies weiterhin passieren, öffnen Sie die Anwendung erneut."
+msgid "Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
+msgstr "Vautix ist auf einen unerwarteten Fehler gestoßen. Ihr Tresor ist sicher – er bleibt auf diesem Gerät verschlüsselt. Versuchen Sie, die Seite neu zu laden; sollte dies weiterhin passieren, öffnen Sie die Anwendung erneut."
 
 #: packages/core/src/app/screens/Settings/components/SupportSection.tsx
-msgid "Bramble is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
-msgstr "Bramble ist kostenlos und Open Source. Falls es für Sie nützlich ist, hilft ein Trinkgeld, es am Laufen zu halten. Scannen Sie einen Code mit Ihrer Wallet oder kopieren Sie die Adresse. Vielen Dank."
+msgid "Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
+msgstr "Vautix ist kostenlos und Open Source. Falls es für Sie nützlich ist, hilft ein Trinkgeld, es am Laufen zu halten. Scannen Sie einen Code mit Ihrer Wallet oder kopieren Sie die Adresse. Vielen Dank."
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Bramble is installed directly, so updates are checked here."
-msgstr "Bramble wird direkt installiert, daher werden Updates hier überprüft."
+msgid "Vautix is installed directly, so updates are checked here."
+msgstr "Vautix wird direkt installiert, daher werden Updates hier überprüft."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-#~ msgid "Bramble is running but locked. Unlock it there first."
-#~ msgstr "Bramble läuft, ist aber gesperrt. Entsperren Sie es dort zuerst."
+#~ msgid "Vautix is running but locked. Unlock it there first."
+#~ msgstr "Vautix läuft, ist aber gesperrt. Entsperren Sie es dort zuerst."
 
 #: packages/core/src/app/update-prompt-copy.tsx
-msgid "Bramble is up to date"
-msgstr "Bramble ist aktuell"
+msgid "Vautix is up to date"
+msgstr "Vautix ist aktuell"
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Bramble is up to date."
-msgstr "Bramble ist auf dem neuesten Stand."
+msgid "Vautix is up to date."
+msgstr "Vautix ist auf dem neuesten Stand."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Bramble needs that permission to talk to the desktop app."
-msgstr "Bramble benötigt diese Berechtigung, um mit der Desktop-App zu kommunizieren."
+msgid "Vautix needs that permission to talk to the desktop app."
+msgstr "Vautix benötigt diese Berechtigung, um mit der Desktop-App zu kommunizieren."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Bramble needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
-msgstr "Bramble benötigt Ihre Berechtigung, um mit der Desktop-App auf diesem Computer zu kommunizieren. Ihr Browser wird Sie um Bestätigung bitten."
+msgid "Vautix needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
+msgstr "Vautix benötigt Ihre Berechtigung, um mit der Desktop-App auf diesem Computer zu kommunizieren. Ihr Browser wird Sie um Bestätigung bitten."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Bramble only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
-msgstr "Bramble muss nur hochladen und auflisten. Den Schlüssel auf diesen einen Bucket zu beschränken und das Löschen wegzulassen, begrenzt, was er anrichten kann, falls er jemals gestohlen wird."
+msgid "Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
+msgstr "Vautix muss nur hochladen und auflisten. Den Schlüssel auf diesen einen Bucket zu beschränken und das Löschen wegzulassen, begrenzt, was er anrichten kann, falls er jemals gestohlen wird."
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Bramble restarts by itself once this finishes."
-msgstr "Bramble startet nach Abschluss automatisch neu."
+msgid "Vautix restarts by itself once this finishes."
+msgstr "Vautix startet nach Abschluss automatisch neu."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Bramble will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
-msgstr "Bramble wird hier niemals etwas löschen, daher können hierfür Anmeldedaten verwendet werden, die das nicht dürfen. Werden sie gestohlen, können sie Ihren Backup-Verlauf nicht zerstören."
+msgid "Vautix will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
+msgstr "Vautix wird hier niemals etwas löschen, daher können hierfür Anmeldedaten verwendet werden, die das nicht dürfen. Werden sie gestohlen, können sie Ihren Backup-Verlauf nicht zerstören."
 
 #: packages/core/src/app/components/EntryRow.tsx
 #: packages/core/src/app/components/ui/password-strength-meter.tsx
@@ -680,8 +680,8 @@ msgid "Checking…"
 msgstr "Suche nach Updates…"
 
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
-msgid "Choose a .bramble file"
-msgstr "Wählen Sie eine .bramble-Datei aus"
+msgid "Choose a .vautix file"
+msgstr "Wählen Sie eine .vautix-Datei aus"
 
 #: packages/core/src/app/screens/Auth/Auth.tsx
 msgid "Choose a different vault"
@@ -714,8 +714,8 @@ msgid "Choose where to save this 2FA code."
 msgstr "Wählen Sie, wo dieser 2FA-Code gespeichert werden soll."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Choose where to store encrypted backups. Bramble only ever uploads ciphertext, so your provider can't read anything in your vault. Add as many as you like."
-msgstr "Wählen Sie aus, wo verschlüsselte Backups gespeichert werden sollen. Bramble lädt ausschließlich Chiffretext hoch, sodass Ihr Anbieter nichts in Ihrem Tresor lesen kann. Fügen Sie beliebig viele Ziele hinzu."
+msgid "Choose where to store encrypted backups. Vautix only ever uploads ciphertext, so your provider can't read anything in your vault. Add as many as you like."
+msgstr "Wählen Sie aus, wo verschlüsselte Backups gespeichert werden sollen. Vautix lädt ausschließlich Chiffretext hoch, sodass Ihr Anbieter nichts in Ihrem Tresor lesen kann. Fügen Sie beliebig viele Ziele hinzu."
 
 #: packages/core/src/app/screens/VaultSetup/components/SetupHeader.tsx
 msgid "Choose where to store your encrypted vault and pick a master password."
@@ -1004,8 +1004,8 @@ msgid "Create an API key at {0}"
 msgstr "API-Schlüssel erstellen unter {0}"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Create and store passkeys for other sites. While on, Bramble handles all passkey prompts in this browser."
-msgstr "Erstellen und speichern von Passkeys für andere Websites. Während der Aktivierung übernimmt Bramble alle Passkey-Anfragen in diesem Browser."
+msgid "Create and store passkeys for other sites. While on, Vautix handles all passkey prompts in this browser."
+msgstr "Erstellen und speichern von Passkeys für andere Websites. Während der Aktivierung übernimmt Vautix alle Passkey-Anfragen in diesem Browser."
 
 #: packages/core/src/app/screens/Auth/Auth.tsx
 msgid "Create another vault"
@@ -1168,8 +1168,8 @@ msgid "Done. Your old recovery code no longer works. Save this one now: it is sh
 msgstr "Fertig. Ihr alter Wiederherstellungscode funktioniert nicht mehr. Speichern Sie diesen jetzt: Er wird nur hier angezeigt und ist der einzige Weg zurück, wenn Sie Ihr Master-Passwort vergessen."
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
-msgid "Double-check this. Bramble cannot test it, and a wrong domain gives you addresses that quietly go nowhere."
-msgstr "Überprüfen Sie dies sorgfältig. Bramble kann es nicht testen, und eine falsche Domain liefert Ihnen Adressen, die still ins Leere laufen."
+msgid "Double-check this. Vautix cannot test it, and a wrong domain gives you addresses that quietly go nowhere."
+msgstr "Überprüfen Sie dies sorgfältig. Vautix kann es nicht testen, und eine falsche Domain liefert Ihnen Adressen, die still ins Leere laufen."
 
 #: packages/core/src/app/components/RecoveryCodeDisplay.tsx
 msgid "Download"
@@ -1189,8 +1189,8 @@ msgid "Downloading…"
 msgstr "Herunterladen…"
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Downloads and restarts Bramble. Your vault is untouched."
-msgstr "Bramble wird heruntergeladen und neu gestartet. Ihr Tresor bleibt unberührt."
+msgid "Downloads and restarts Vautix. Your vault is untouched."
+msgstr "Vautix wird heruntergeladen und neu gestartet. Ihr Tresor bleibt unberührt."
 
 #: packages/core/src/app/components/EntryRow.tsx
 #: packages/core/src/app/screens/EntryDetail/EntryDetail.tsx
@@ -1247,8 +1247,8 @@ msgid "Enter the password for your {providerLabel} database"
 msgstr "Geben Sie das Passwort für Ihre {providerLabel}-Datenbank ein"
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
-#~ msgid "Enter this code in the Bramble browser extension."
-#~ msgstr "Geben Sie diesen Code in der Bramble-Browser-Erweiterung ein."
+#~ msgid "Enter this code in the Vautix browser extension."
+#~ msgstr "Geben Sie diesen Code in der Vautix-Browser-Erweiterung ein."
 
 #: packages/core/src/app/screens/Settings/components/MasterPasswordSection.tsx
 msgid "Enter your current password"
@@ -1350,8 +1350,8 @@ msgid "Export selection"
 msgstr "Auswahl exportieren"
 
 #: packages/core/src/app/bulk-actions/export.tsx
-msgid "Export selection (.bramble)"
-msgstr "Auswahl exportieren (.bramble)"
+msgid "Export selection (.vautix)"
+msgstr "Auswahl exportieren (.vautix)"
 
 #: packages/core/src/app/bulk-actions/export.tsx
 #: packages/core/src/app/screens/Settings/components/KdbxExportDialog.tsx
@@ -1383,8 +1383,8 @@ msgid "Files are read on this device only. Nothing is uploaded. Delete the expor
 msgstr "Dateien werden nur auf diesem Gerät gelesen. Es wird nichts hochgeladen. Löschen Sie die Exportdatei, sobald Sie fertig sind."
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
-#~ msgid "Fill logins from the Bramble extension without unlocking twice."
-#~ msgstr "Logins aus der Bramble-Erweiterung ausfüllen, ohne zweimal zu entsperren."
+#~ msgid "Fill logins from the Vautix extension without unlocking twice."
+#~ msgstr "Logins aus der Vautix-Erweiterung ausfüllen, ohne zweimal zu entsperren."
 
 #: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
 msgid "Filter by type"
@@ -1428,8 +1428,8 @@ msgid "Generate"
 msgstr "Generieren"
 
 #: packages/core/src/app/screens/Settings/components/AliasSection.tsx
-msgid "Generate a different email address for every site, from an account you already have. Bramble only asks your provider for an address; it never handles the mail."
-msgstr "Erzeugen Sie für jede Website eine andere E-Mail-Adresse aus einem Konto, das Sie bereits besitzen. Bramble fragt Ihren Anbieter nur nach einer Adresse; es verarbeitet niemals die E-Mails."
+msgid "Generate a different email address for every site, from an account you already have. Vautix only asks your provider for an address; it never handles the mail."
+msgstr "Erzeugen Sie für jede Website eine andere E-Mail-Adresse aus einem Konto, das Sie bereits besitzen. Vautix fragt Ihren Anbieter nur nach einer Adresse; es verarbeitet niemals die E-Mails."
 
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
 msgid "Generate a new code"
@@ -1620,8 +1620,8 @@ msgid "Importing…"
 msgstr "Importiere..."
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
-msgid "In the Bramble extension, open Settings → Sync → Desktop app and enter this code."
-msgstr "Öffnen Sie in der Bramble-Erweiterung die Einstellungen → Synchronisation → Desktop-App und geben Sie diesen Code ein."
+msgid "In the Vautix extension, open Settings → Sync → Desktop app and enter this code."
+msgstr "Öffnen Sie in der Vautix-Erweiterung die Einstellungen → Synchronisation → Desktop-App und geben Sie diesen Code ein."
 
 #: packages/core/src/app/components/PasswordGenerator.tsx
 msgid "Include a number"
@@ -1790,8 +1790,8 @@ msgid "Linked {0}"
 msgstr "Verknüpft {0}"
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Linked to the Bramble desktop app."
-msgstr "Mit der Bramble-Desktop-App verknüpft."
+msgid "Linked to the Vautix desktop app."
+msgstr "Mit der Vautix-Desktop-App verknüpft."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
 msgid "Linked to this browser, but the app shares a different vault, not this one."
@@ -1932,8 +1932,8 @@ msgid "Next attempt {0}"
 msgstr "Nächster Versuch {0}"
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-#~ msgid "No answer. Is Bramble running on this computer?"
-#~ msgstr "Keine Antwort. Läuft Bramble auf diesem Computer?"
+#~ msgid "No answer. Is Vautix running on this computer?"
+#~ msgstr "Keine Antwort. Läuft Vautix auf diesem Computer?"
 
 #: packages/core/src/app/screens/VaultHome/VaultHome.tsx
 msgid "No archived items found matching your search."
@@ -2110,16 +2110,16 @@ msgstr "Öffnen Sie <0>{0}</0> als Tresor auf diesem Gerät. Geben Sie dessen Ma
 
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
 #: packages/core/src/app/screens/VaultSetup/components/SetupHeader.tsx
-msgid "Open an encrypted .bramble backup and make it the vault on this device."
-msgstr "Öffnen Sie ein verschlüsseltes .bramble-Backup und machen Sie es zum Tresor auf diesem Gerät."
+msgid "Open an encrypted .vautix backup and make it the vault on this device."
+msgstr "Öffnen Sie ein verschlüsseltes .vautix-Backup und machen Sie es zum Tresor auf diesem Gerät."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Open Bramble on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
-msgstr "Öffnen Sie Bramble auf diesem Computer, gehen Sie zu Einstellungen und wählen Sie „Browser verbinden“. Geben Sie dann den angezeigten Code ein."
+msgid "Open Vautix on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
+msgstr "Öffnen Sie Vautix auf diesem Computer, gehen Sie zu Einstellungen und wählen Sie „Browser verbinden“. Geben Sie dann den angezeigten Code ein."
 
 #: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
-msgid "Open Bramble on your other device and scan the code, or paste it there."
-msgstr "Öffnen Sie Bramble auf Ihrem anderen Gerät und scannen Sie den Code oder fügen Sie diesen ein."
+msgid "Open Vautix on your other device and scan the code, or paste it there."
+msgstr "Öffnen Sie Vautix auf Ihrem anderen Gerät und scannen Sie den Code oder fügen Sie diesen ein."
 
 #: packages/core/src/app/screens/Import/components/KdbxUnlock.tsx
 msgid "Open database"
@@ -2523,8 +2523,8 @@ msgid "Restore a backup"
 msgstr "Ein Backup wiederherstellen"
 
 #: packages/core/src/app/screens/Settings/components/DataSection.tsx
-msgid "Restore an encrypted .bramble backup. This replaces the vault on this device."
-msgstr "Stellen Sie ein verschlüsseltes .bramble-Backup wieder her. Dies ersetzt den Tresor auf diesem Gerät."
+msgid "Restore an encrypted .vautix backup. This replaces the vault on this device."
+msgstr "Stellen Sie ein verschlüsseltes .vautix-Backup wieder her. Dies ersetzt den Tresor auf diesem Gerät."
 
 #: packages/core/src/app/screens/EntryDetail/EntryDetail.tsx
 msgid "Restore entry"
@@ -2577,8 +2577,8 @@ msgid "Rotation failed and nothing was changed. Unlock and try again."
 msgstr "Die Rotation ist fehlgeschlagen und nichts wurde geändert. Entsperren Sie den Tresor und versuchen Sie es erneut."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-#~ msgid "Runs on schedule even while Bramble is locked"
-#~ msgstr "Wird auch bei gesperrtem Bramble planmäßig ausgeführt"
+#~ msgid "Runs on schedule even while Vautix is locked"
+#~ msgstr "Wird auch bei gesperrtem Vautix planmäßig ausgeführt"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Runs quietly in the menu bar so scheduled backups happen without you opening the app."
@@ -2601,8 +2601,8 @@ msgid "Save a .kdbx you can open in KeePassXC or any KeePass app, under a passwo
 msgstr "Speichern Sie eine .kdbx-Datei, die Sie mit einem selbst gewählten Passwort in KeePassXC oder einer beliebigen KeePass-App öffnen können."
 
 #: packages/core/src/app/screens/Settings/components/DataSection.tsx
-msgid "Save an encrypted .bramble copy of your vault. It still needs your master password to open."
-msgstr "Speichern Sie eine verschlüsselte .bramble-Kopie Ihres Tresors. Zum Öffnen ist weiterhin Ihr Master-Passwort erforderlich."
+msgid "Save an encrypted .vautix copy of your vault. It still needs your master password to open."
+msgstr "Speichern Sie eine verschlüsselte .vautix-Kopie Ihres Tresors. Zum Öffnen ist weiterhin Ihr Master-Passwort erforderlich."
 
 #: packages/core/src/app/components/RecoveryCodeDisplay.tsx
 msgid "Save it somewhere safe and offline now. It's the only way back in if you forget your master password and lose your security keys, and we can't recover it for you."
@@ -2650,8 +2650,8 @@ msgid "Scanning…"
 msgstr "Scannen…"
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Scheduled backups only run while Bramble is running. Start it at login and they happen on their own, from the menu bar, without you opening the app."
-msgstr "Geplante Backups werden nur ausgeführt, während Bramble läuft. Starten Sie Bramble bei der Anmeldung, dann erfolgen sie automatisch über die Menüleiste, ohne dass Sie die App öffnen."
+msgid "Scheduled backups only run while Vautix is running. Start it at login and they happen on their own, from the menu bar, without you opening the app."
+msgstr "Geplante Backups werden nur ausgeführt, während Vautix läuft. Starten Sie Vautix bei der Anmeldung, dann erfolgen sie automatisch über die Menüleiste, ohne dass Sie die App öffnen."
 
 #: packages/core/src/app/components/SasDisplay.tsx
 msgid "Scissors"
@@ -2835,8 +2835,8 @@ msgid "Show value"
 msgstr "Wert anzeigen"
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Sign in and Bramble stores encrypted backups in its own {name} app folder. Only ciphertext is uploaded, so {name} can't read anything in your vault."
-msgstr "Melden Sie sich an und Bramble speichert verschlüsselte Sicherungen in seinem eigenen {name}-App-Ordner. Es wird nur Chiffretext hochgeladen, sodass {name} nichts in Ihrem Tresor lesen kann."
+msgid "Sign in and Vautix stores encrypted backups in its own {name} app folder. Only ciphertext is uploaded, so {name} can't read anything in your vault."
+msgstr "Melden Sie sich an und Vautix speichert verschlüsselte Sicherungen in seinem eigenen {name}-App-Ordner. Es wird nur Chiffretext hochgeladen, sodass {name} nichts in Ihrem Tresor lesen kann."
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Sites you've muted"
@@ -2884,8 +2884,8 @@ msgid "Start at login"
 msgstr "Bei der Anmeldung starten"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Start Bramble at login"
-msgstr "Bramble bei der Anmeldung starten"
+msgid "Start Vautix at login"
+msgstr "Vautix bei der Anmeldung starten"
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
 msgid "Stop using the app"
@@ -2934,8 +2934,8 @@ msgid "Sync"
 msgstr "Synchronisierung"
 
 #: packages/core/src/app/screens/Settings/components/BrowserPairingSection.tsx
-msgid "Sync this vault to the Bramble extension and fill from it without unlocking twice."
-msgstr "Synchronisieren Sie diesen Tresor mit der Bramble-Erweiterung und füllen Sie Formulare von dort aus, ohne den Tresor zweimal zu entsperren."
+msgid "Sync this vault to the Vautix extension and fill from it without unlocking twice."
+msgstr "Synchronisieren Sie diesen Tresor mit der Vautix-Erweiterung und füllen Sie Formulare von dort aus, ohne den Tresor zweimal zu entsperren."
 
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
 msgid "Sync with the desktop app"
@@ -3009,12 +3009,12 @@ msgid "That does not look like a domain. Enter it on its own, like example.com, 
 msgstr "Das sieht nicht nach einer Domain aus. Geben Sie sie allein ein, wie example.com, ohne @ und ohne https://"
 
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
-msgid "That doesn't look like a Bramble backup (.bramble) file."
-msgstr "Dies sieht nicht wie eine Bramble-Backup-Datei (.bramble) aus."
+msgid "That doesn't look like a Vautix backup (.vautix) file."
+msgstr "Dies sieht nicht wie eine Vautix-Backup-Datei (.vautix) aus."
 
 #: packages/core/src/app/screens/Import/ImportShell.tsx
-msgid "That doesn't look like a Bramble export (.bramble) file."
-msgstr "Das sieht nicht nach einer Bramble-Exportdatei (.bramble) aus."
+msgid "That doesn't look like a Vautix export (.vautix) file."
+msgstr "Das sieht nicht nach einer Vautix-Exportdatei (.vautix) aus."
 
 #: packages/core/src/app/entry-modes/card.tsx
 msgid "That isn't the right number of digits for this type of card."
@@ -3025,8 +3025,8 @@ msgid "That link is an authenticator export holding several accounts, not a setu
 msgstr "Dieser Link ist ein Authenticator-Export mit mehreren Konten und kein Setup-Code. Fügen Sie stattdessen jedes Konto über die jeweilige Website hinzu."
 
 #: packages/core/src/app/screens/TotpSetup/TotpSetup.tsx
-msgid "That link isn't an authenticator setup code Bramble can use. Counter-based (HOTP) codes aren't supported."
-msgstr "Dieser Link ist kein Authenticator-Setup-Code, den Bramble verwenden kann. Zählerbasierte Codes (HOTP) werden nicht unterstützt."
+msgid "That link isn't an authenticator setup code Vautix can use. Counter-based (HOTP) codes aren't supported."
+msgstr "Dieser Link ist kein Authenticator-Setup-Code, den Vautix verwenden kann. Zählerbasierte Codes (HOTP) werden nicht unterstützt."
 
 #. placeholder {0}: vendor ?? "another authenticator app"
 #: packages/core/src/app/screens/TotpSetup/TotpSetup.tsx
@@ -3164,12 +3164,12 @@ msgid "This code has expired."
 msgstr "Dieser Code ist abgelaufen."
 
 #: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-#~ msgid "This computer keeps these credentials in its own keychain rather than inside the vault, so scheduled backups keep running while Bramble is locked. Your backups stay encrypted with your master password either way."
-#~ msgstr "Dieser Computer speichert diese Anmeldedaten im eigenen Schlüsselbund statt im Tresor, sodass geplante Backups auch bei gesperrtem Bramble weiter ausgeführt werden. Ihre Backups bleiben in jedem Fall mit Ihrem Master-Passwort verschlüsselt."
+#~ msgid "This computer keeps these credentials in its own keychain rather than inside the vault, so scheduled backups keep running while Vautix is locked. Your backups stay encrypted with your master password either way."
+#~ msgstr "Dieser Computer speichert diese Anmeldedaten im eigenen Schlüsselbund statt im Tresor, sodass geplante Backups auch bei gesperrtem Vautix weiter ausgeführt werden. Ihre Backups bleiben in jedem Fall mit Ihrem Master-Passwort verschlüsselt."
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "This copy of Bramble is kept up to date by your system's package manager. Updating your system updates Bramble with it."
-msgstr "Diese Kopie von Bramble wird über die Paketverwaltung Ihres Systems auf dem neuesten Stand gehalten. Wenn Sie Ihr System aktualisieren, wird Bramble mit aktualisiert."
+msgid "This copy of Vautix is kept up to date by your system's package manager. Updating your system updates Vautix with it."
+msgstr "Diese Kopie von Vautix wird über die Paketverwaltung Ihres Systems auf dem neuesten Stand gehalten. Wenn Sie Ihr System aktualisieren, wird Vautix mit aktualisiert."
 
 #: packages/core/src/app/screens/VaultSetup/components/JoinCard.tsx
 msgid "This creates a new vault on this device and syncs it from your other device. Use the same master password as that device."
@@ -3210,8 +3210,8 @@ msgid "This file held {0} {noun}, but none matched a supported format."
 msgstr "Die Datei enthielt {0} {noun}, jedoch konnte kein unterstütztes Format erkannt werden."
 
 #: packages/core/src/app/screens/Restore/RestoreShell.tsx
-msgid "This file is too large to be a Bramble backup."
-msgstr "Diese Datei ist zu groß, um ein Bramble-Backup zu sein."
+msgid "This file is too large to be a Vautix backup."
+msgstr "Diese Datei ist zu groß, um ein Vautix-Backup zu sein."
 
 #: packages/core/src/app/screens/Import/ImportShell.tsx
 msgid "This file is too large to import ({sizeMb} MB; max {MAX_IMPORT_FILE_MB} MB)."
@@ -3270,8 +3270,8 @@ msgid "Toggle autofill on web pages"
 msgstr "Autofill auf Webseiten umschalten"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Toggle Bramble passkey provider"
-msgstr "Bramble Passkey-Anbieter umschalten"
+msgid "Toggle Vautix passkey provider"
+msgstr "Vautix Passkey-Anbieter umschalten"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Toggle breach checks"
@@ -3508,8 +3508,8 @@ msgid "Update and restart"
 msgstr "Aktualisieren und neu starten"
 
 #: packages/core/src/app/update-prompt-copy.tsx
-msgid "Update Bramble"
-msgstr "Bramble aktualisieren"
+msgid "Update Vautix"
+msgstr "Vautix aktualisieren"
 
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
 msgid "Update failed: {error}"
@@ -3533,8 +3533,8 @@ msgid "Updates"
 msgstr "Aktualisierungen"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Use Bramble for passkeys"
-msgstr "Bramble für Passkeys verwenden"
+msgid "Use Vautix for passkeys"
+msgstr "Vautix für Passkeys verwenden"
 
 #: packages/core/src/app/entry-modes/card.tsx
 msgid "Use digits only."

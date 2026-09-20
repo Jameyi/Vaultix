@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { BrambleGlyph } from "../../../components/BrambleGlyph";
+import { VautixGlyph } from "../../../components/VautixGlyph";
 import type { VaultSetupMode } from "../types";
 
 interface SetupHeaderProps {
@@ -16,7 +16,7 @@ export function SetupHeader({ mode, mobile, adding }: SetupHeaderProps) {
 		mode === "join"
 			? t`Enter the pairing code from your other device to sync its vault onto this one.`
 			: mode === "restore"
-				? t`Open an encrypted .bramble backup and make it the vault on this device.`
+				? t`Open an encrypted .vautix backup and make it the vault on this device.`
 				: adding
 					? t`Create a new vault alongside your existing ones, with its own master password.`
 					: mobile
@@ -24,7 +24,7 @@ export function SetupHeader({ mode, mobile, adding }: SetupHeaderProps) {
 						: t`Choose where to store your encrypted vault and pick a master password.`;
 	return (
 		<div className="text-center mb-6">
-			<BrambleGlyph className="w-16 h-16 text-foreground mb-4 inline-block" />
+			<VautixGlyph className="w-16 h-16 text-foreground mb-4 inline-block" />
 			<h1 className="text-2xl mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
 				{mode === "join" ? (
 					<Trans>Join a device</Trans>

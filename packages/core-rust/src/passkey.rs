@@ -1,7 +1,7 @@
 //! WebAuthn passkey authenticator (provider role): mint and assert discoverable
 //! credentials so other sites can sign the user in. This is the opposite of the
 //! security-key *unlock* in lib.rs (which consumes an authenticator's hmac-secret);
-//! here Bramble *is* the authenticator. See docs/passkey-provider.md.
+//! here Vautix *is* the authenticator. See docs/passkey-provider.md.
 //!
 //! Both functions are pure and sync: keygen and signing happen here, but the
 //! private key rides the caller's existing entry encryption (it is returned at
@@ -29,16 +29,16 @@ const FLAG_BE: u8 = 0x08; // backup eligible (multi-device credential)
 const FLAG_BS: u8 = 0x10; // backup state (currently backed up / synced)
 const FLAG_AT: u8 = 0x40; // attested credential data included
 
-// Bramble syncs passkeys across devices (the P2P mesh), so every credential is a
+// Vautix syncs passkeys across devices (the P2P mesh), so every credential is a
 // multi-device credential that is currently backed up: BE and BS are always set.
 const FLAG_SYNCED: u8 = FLAG_BE | FLAG_BS;
 
-/// Bramble's authenticator AAGUID (4249c72f-2967-4a74-8ec5-e610036d7be1), advertised in
+/// Vautix's authenticator AAGUID (4249c72f-2967-4a74-8ec5-e610036d7be1), advertised in
 /// attestedCredentialData so relying parties + other password managers can identify the
 /// provider. Permanent and fixed across all installs: it is baked into every passkey we create,
 /// so do NOT change it. TODO(passkeys): register it in the community AAGUID list so UIs can show
-/// "Bramble" + icon - see docs/passkey-provider.md ("AAGUID registration").
-const BRAMBLE_AAGUID: [u8; 16] = [
+/// "Vautix" + icon - see docs/passkey-provider.md ("AAGUID registration").
+const VAUTIX_AAGUID: [u8; 16] = [
     0x42, 0x49, 0xc7, 0x2f, 0x29, 0x67, 0x4a, 0x74, 0x8e, 0xc5, 0xe6, 0x10, 0x03, 0x6d, 0x7b, 0xe1,
 ];
 
@@ -64,7 +64,7 @@ pub struct PasskeyRegistration {
     pub public_key: String,
 }
 
-/// Bramble key material converted from a P-256 PKCS#8 key, in standard base64.
+/// Vautix key material converted from a P-256 PKCS#8 key, in standard base64.
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[cfg_attr(feature = "ffi", derive(uniffi::Record))]
@@ -161,7 +161,7 @@ fn encode_ed25519_cose(public: &[u8; 32]) -> Result<Vec<u8>, CryptoError> {
         .map_err(|e| err(format!("cose encode: {e}")))
 }
 
-/// Convert a base64 PKCS#8 key into Bramble's stored form: a 32-byte secret, a COSE public key,
+/// Convert a base64 PKCS#8 key into Vautix's stored form: a 32-byte secret, a COSE public key,
 /// and the COSE algorithm that secret belongs to.
 ///
 /// The algorithm comes from the key's own OID and nothing else. Both stored secrets are 32 bytes
@@ -215,7 +215,7 @@ pub fn passkey_make_credential_core(
 
     // attestedCredentialData: aaguid(16) || credIdLen(2 BE) || credId || cosePubKey.
     let mut acd = Vec::with_capacity(18 + CREDENTIAL_ID_LEN + cose_bytes.len());
-    acd.extend_from_slice(&BRAMBLE_AAGUID);
+    acd.extend_from_slice(&VAUTIX_AAGUID);
     acd.extend_from_slice(&(CREDENTIAL_ID_LEN as u16).to_be_bytes());
     acd.extend_from_slice(&credential_id);
     acd.extend_from_slice(&cose_bytes);
@@ -670,7 +670,7 @@ mod tests {
         };
         assert_eq!(auth_data[32] & FLAG_AT, FLAG_AT, "AT flag set");
         assert_eq!(auth_data[32] & FLAG_SYNCED, FLAG_SYNCED, "synced (BE|BS) flags set");
-        assert_eq!(&auth_data[37..53], &BRAMBLE_AAGUID, "aaguid present");
+        assert_eq!(&auth_data[37..53], &VAUTIX_AAGUID, "aaguid present");
         let cred_len = u16::from_be_bytes([auth_data[53], auth_data[54]]) as usize;
         assert_eq!(cred_len, CREDENTIAL_ID_LEN);
         // The standalone authenticatorData field equals the bytes inside the attestation.

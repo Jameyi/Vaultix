@@ -224,7 +224,7 @@ function settleApproval(approved: boolean): void {
  * host console (offscreen on Chrome / event page on Firefox), which persists across popup closes -
  * unlike the panel log, which the popup drops when it closes during cross-browser enrollment. */
 function reportSyncStatus(status: string): void {
-	console.log("[bramble:sync]", status);
+	console.log("[vautix:sync]", status);
 	const payload: SyncStatusMsg = { status };
 	void api.runtime.sendMessage({ type: "SYNC_STATUS", payload }).catch(() => {});
 }
@@ -471,7 +471,7 @@ async function dispatchCrypto(a: CryptoAdapter, type: string, payload: unknown):
 			// Seals entries the caller passed in under a key the core generates for that
 			// file. Like CRYPTO_SAVE_KDBX it never touches the vault VEK, so no vaultId.
 			const p = CryptoSealPortableVaultSchema.parse(payload);
-			if (!a.sealPortableVault) throw new Error("Exporting a .bramble isn't available here.");
+			if (!a.sealPortableVault) throw new Error("Exporting a .vautix isn't available here.");
 			return a.sealPortableVault({
 				entriesJson: p.entriesJson,
 				password: p.password,
@@ -481,7 +481,7 @@ async function dispatchCrypto(a: CryptoAdapter, type: string, payload: unknown):
 
 		case "CRYPTO_OPEN_PORTABLE_VAULT": {
 			const p = CryptoOpenPortableVaultSchema.parse(payload);
-			if (!a.openPortableVault) throw new Error("Opening a .bramble isn't available here.");
+			if (!a.openPortableVault) throw new Error("Opening a .vautix isn't available here.");
 			// null (a wrong password) is a normal reply, not an error.
 			return a.openPortableVault({
 				password: p.password,

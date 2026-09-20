@@ -10,7 +10,7 @@ import { Shell } from "./Shell";
 
 /**
  * Credential step for any import that is behind a password: a .kdbx and its optional key
- * file, or a .bramble sealed under a password chosen at export. The label and the key-file
+ * file, or a .vautix sealed under a password chosen at export. The label and the key-file
  * field are per-format, since only KeePass has key files.
  */
 export function KdbxUnlock({
@@ -22,7 +22,7 @@ export function KdbxUnlock({
 }: {
 	providerLabel: string;
 	passwordLabel: string;
-	/** KeePass only; a .bramble has no second factor. */
+	/** KeePass only; a .vautix has no second factor. */
 	allowKeyfile?: boolean;
 	onOpen: (password: string, keyfileB64?: string) => Promise<void>;
 	onBack: () => void;

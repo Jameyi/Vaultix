@@ -59,8 +59,8 @@ if (target === "macos") {
 	const bundles = "packages/platform-desktop/src-tauri/target";
 	const app =
 		[
-			`${bundles}/universal-apple-darwin/release/bundle/macos/Bramble.app`,
-			`${bundles}/release/bundle/macos/Bramble.app`,
+			`${bundles}/universal-apple-darwin/release/bundle/macos/Vautix.app`,
+			`${bundles}/release/bundle/macos/Vautix.app`,
 		]
 			.map((p) => join(ROOT, p))
 			.find(existsSync) ?? fail("not built yet: pnpm build:macos");
@@ -88,7 +88,7 @@ if (target === "debian") {
 	// Killing a running instance first for the same class of reason: closing the window only hides
 	// it to the tray, so without this you reinstall and then look at the old binary still running.
 	console.log("stopping any running instance…");
-	spawnSync("pkill", ["-f", "bramble-desktop"], { stdio: "ignore" });
+	spawnSync("pkill", ["-f", "vautix-desktop"], { stdio: "ignore" });
 
 	console.log(`installing ${deb} (sudo)…`);
 	try {
@@ -98,5 +98,5 @@ if (target === "debian") {
 	}
 
 	console.log("\nlaunching the installed binary (not the one in target/)\n");
-	run("bramble-desktop");
+	run("vautix-desktop");
 }

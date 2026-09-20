@@ -1,5 +1,5 @@
 // Export then re-import through the real CXF path, which is what a user moving between two
-// Bramble installs (or out to another manager and back) actually goes through.
+// Vautix installs (or out to another manager and back) actually goes through.
 
 import { beforeAll, describe, expect, it } from "vitest";
 import type { Entry } from "../hooks/useVault";
@@ -9,7 +9,7 @@ import { parseCxf } from "./from-cxf";
 import { testParserContext } from "./test-crypto";
 import { toCxf } from "./to-cxf";
 
-const OPTS = { exporterRpId: "app.bramble.mobile", exporterDisplayName: "Bramble", now: 1_760_000 };
+const OPTS = { exporterRpId: "app.vautix.mobile", exporterDisplayName: "Vautix", now: 1_760_000 };
 
 let privateKey = "";
 let publicKeyCose = "";

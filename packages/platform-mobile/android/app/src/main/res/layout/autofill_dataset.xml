@@ -10,7 +10,7 @@
     android:paddingEnd="14dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
-    android:background="@color/bramble_af_background">
+    android:background="@color/vautix_af_background">
 
     <ImageView
         android:id="@+id/autofill_icon"
@@ -29,7 +29,7 @@
             android:id="@+id/autofill_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/bramble_af_foreground"
+            android:textColor="@color/vautix_af_foreground"
             android:textSize="15sp"
             android:textStyle="bold"
             android:maxLines="1"
@@ -39,7 +39,7 @@
             android:id="@+id/autofill_subtitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/bramble_af_muted"
+            android:textColor="@color/vautix_af_muted"
             android:textSize="13sp"
             android:maxLines="1"
             android:ellipsize="end" />

@@ -25,18 +25,18 @@ import {
 //
 //   docker compose up -d minio minio-init
 //   pnpm --filter @vault/platform-extension run build:chromium
-//   BRAMBLE_IT=1 pnpm exec playwright test backup-migration-minio
+//   VAUTIX_IT=1 pnpm exec playwright test backup-migration-minio
 //
-// Skipped without BRAMBLE_IT, like the provider integration suite: a machine with no containers
+// Skipped without VAUTIX_IT, like the provider integration suite: a machine with no containers
 // stays green rather than failing for a reason that is not about the code.
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const S3 = {
-	endpoint: process.env.BRAMBLE_IT_S3 ?? "http://localhost:9000",
-	bucket: process.env.BRAMBLE_IT_S3_BUCKET ?? "bramble-test",
-	key: process.env.BRAMBLE_IT_S3_KEY ?? "bramble",
-	secret: process.env.BRAMBLE_IT_S3_SECRET ?? "bramble-test-secret",
+	endpoint: process.env.VAUTIX_IT_S3 ?? "http://localhost:9000",
+	bucket: process.env.VAUTIX_IT_S3_BUCKET ?? "vautix-test",
+	key: process.env.VAUTIX_IT_S3_KEY ?? "vautix",
+	secret: process.env.VAUTIX_IT_S3_SECRET ?? "vautix-test-secret",
 	region: "us-east-1",
 };
 
@@ -83,8 +83,8 @@ async function vaultIds(context: Parameters<typeof backgroundWorker>[0]): Promis
 
 test.describe("cloud backup migration", () => {
 	test.skip(
-		!process.env.BRAMBLE_IT,
-		"needs MinIO: `docker compose up -d minio minio-init`, then BRAMBLE_IT=1",
+		!process.env.VAUTIX_IT,
+		"needs MinIO: `docker compose up -d minio minio-init`, then VAUTIX_IT=1",
 	);
 	// Two vaults, two real backups and a container round trip per assertion.
 	test.setTimeout(180_000);
@@ -173,13 +173,13 @@ test.describe("cloud backup migration", () => {
 			.toBe(2);
 
 		// And it landed the way a migrated target is supposed to land. Keys are
-		// `bramble-<stamp>-<hash>[-v<vault>].bramble`, and the marker is where the migration shows
+		// `vautix-<stamp>-<hash>[-v<vault>].vautix`, and the marker is where the migration shows
 		// up in the bucket: a target that belongs to one vault tags its snapshots with that vault,
 		// where a migrated one must not, because the folder it inherited is full of untagged
 		// snapshots and tagging only the new ones would leave the old ones unprunable. Keys sort
 		// chronologically by construction, so this is the before and the after.
 		const [tagged, untagged] = objectsUnder(PREFIX).sort();
-		expect(tagged).toMatch(/^bramble-\d{8}T\d{6}Z-[0-9a-f]{8}-v[0-9a-z]+\.bramble$/);
-		expect(untagged).toMatch(/^bramble-\d{8}T\d{6}Z-[0-9a-f]{8}\.bramble$/);
+		expect(tagged).toMatch(/^vautix-\d{8}T\d{6}Z-[0-9a-f]{8}-v[0-9a-z]+\.vautix$/);
+		expect(untagged).toMatch(/^vautix-\d{8}T\d{6}Z-[0-9a-f]{8}\.vautix$/);
 	});
 });

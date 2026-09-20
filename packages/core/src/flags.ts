@@ -133,7 +133,7 @@ export const CAPABILITIES = {
 	},
 	// Filter the file picker by extension. Extension only: the native document pickers on
 	// Android and iOS match on MIME type and grey out extensions they can't map, which is every
-	// container format we read (.1pux, .kdbx, .bramble). Mobile omits `accept` so the file is
+	// container format we read (.1pux, .kdbx, .vautix). Mobile omits `accept` so the file is
 	// selectable at all. See github issue #36.
 	// Desktop's native dialogs filter by extension properly, unlike the mobile pickers.
 	filePickerAcceptFilter: { extension: true, mobile: false, desktop: true },

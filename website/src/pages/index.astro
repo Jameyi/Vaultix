@@ -57,7 +57,7 @@ const features = [
     {
         icon: ServerOff,
         title: "No account, no server",
-        body: "Nothing to sign up for and no server holding your vault. There is no Bramble account to leak and no central database to breach.",
+        body: "Nothing to sign up for and no server holding your vault. There is no Vautix account to leak and no central database to breach.",
     },
     {
         icon: Route,
@@ -87,23 +87,23 @@ const features = [
     {
         icon: CloudLock,
         title: "Encrypted backups",
-        body: "Export an encrypted .bramble file any time, or point Bramble at Dropbox, any S3-compatible bucket, or your own WebDAV server. Only ciphertext ever leaves.",
+        body: "Export an encrypted .vautix file any time, or point Vautix at Dropbox, any S3-compatible bucket, or your own WebDAV server. Only ciphertext ever leaves.",
     },
 ];
 
 // `link` is appended to the answer, for the rare one that should point somewhere.
 const faqs: { q: string; a: string; link?: { href: string; label: string } }[] = [
     {
-        q: "Is Bramble really free?",
-        a: "Yes. Bramble is free and open source. There is no paid tier, no subscription, and no account to create.",
+        q: "Is Vautix really free?",
+        a: "Yes. Vautix is free and open source. There is no paid tier, no subscription, and no account to create.",
     },
     {
         q: "What happens if I forget my master password?",
-        a: "Bramble holds no copy of your master password or the keys derived from it, so it cannot reset it for you. If you set up a recovery code or a security key you can use those to regain access. If you lose your master password and every recovery method, the vault cannot be decrypted by you, by us, or by anyone. That is the trade-off for there being no backdoor.",
+        a: "Vautix holds no copy of your master password or the keys derived from it, so it cannot reset it for you. If you set up a recovery code or a security key you can use those to regain access. If you lose your master password and every recovery method, the vault cannot be decrypted by you, by us, or by anyone. That is the trade-off for there being no backdoor.",
     },
     {
         q: "Where is my data stored?",
-        a: "Only on your devices. In the browser that means your browser's private extension storage and/or a vault file you pick. On mobile it means the app's private, encrypted-at-rest storage. There is no Bramble cloud.",
+        a: "Only on your devices. In the browser that means your browser's private extension storage and/or a vault file you pick. On mobile it means the app's private, encrypted-at-rest storage. There is no Vautix cloud.",
     },
     {
         q: "Does anything get sent to your servers?",
@@ -118,7 +118,7 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
         a: "Yes, the whole thing. The code lives on GitHub, so you can read it, build it yourself, or point sync at your own relay.",
     },
     {
-        q: "Why isn't Bramble on the Google Play Store?",
+        q: "Why isn't Vautix on the Google Play Store?",
         a: "Because we don't want to help normalise Google's lockdown of Android. The Android build carries no Play Services and nothing else from Google: it is a signed APK you install yourself, and every release is published on GitHub. The campaign against that lockdown makes the case better than we can:",
         link: { href: "https://keepandroidopen.com/", label: "keepandroidopen.com" },
     },
@@ -292,7 +292,7 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
                     </h2>
                     <p class="mt-4 text-muted-foreground text-pretty">
                         Nobody else holds a copy of your vault, so keeping a backup is up to you, and
-                        Bramble makes it painless. Export an encrypted file by hand, or have it drop
+                        Vautix makes it painless. Export an encrypted file by hand, or have it drop
                         scheduled backups into storage you already run. Only ciphertext ever leaves
                         your device, so the destination stores something it can't read and a stolen
                         backup is useless without your master password.
@@ -311,7 +311,7 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
                                 {
                                     icon: BrandDropbox,
                                     title: "Dropbox",
-                                    body: "Sign in once and let Bramble keep encrypted snapshots there on the schedule you pick.",
+                                    body: "Sign in once and let Vautix keep encrypted snapshots there on the schedule you pick.",
                                 },
                                 {
                                     icon: Bucket,
@@ -326,7 +326,7 @@ const faqs: { q: string; a: string; link?: { href: string; label: string } }[] =
                                 {
                                     icon: FileExport,
                                     title: "Or export by hand",
-                                    body: "Save an encrypted .bramble file anywhere: another drive, a USB stick, wherever you like.",
+                                    body: "Save an encrypted .vautix file anywhere: another drive, a USB stick, wherever you like.",
                                 },
                             ].map((item) => {
                                 const Icon = item.icon;

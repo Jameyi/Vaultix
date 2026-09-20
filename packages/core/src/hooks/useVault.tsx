@@ -42,7 +42,7 @@ export interface CustomField {
 }
 
 /**
- * A WebAuthn passkey (discoverable credential) Bramble hosts for a relying party
+ * A WebAuthn passkey (discoverable credential) Vautix hosts for a relying party
  * in its authenticator role. Stored on the login for the same site; `privateKey`
  * rides the entry's existing DEK-under-VEK encryption like any other field. This
  * is the provider direction (other sites sign in with it), the opposite of the
@@ -52,7 +52,7 @@ export interface CustomField {
 // Rust core encodes that way and the native bridges decode that way. Convert at the edges
 // (webauthn-proxy.ts does, and so does exchange/ for CXF, which is base64url).
 export interface PasskeyCredential {
-	/** Standard-base64 credential id Bramble minted at creation or imported. */
+	/** Standard-base64 credential id Vautix minted at creation or imported. */
 	credentialId: string;
 	/** Relying-party id, e.g. "github.com". Matched against hostnames. */
 	rpId: string;
@@ -125,7 +125,7 @@ export interface LoginEntryData extends BaseEntryData {
 	autofillEnabled?: boolean;
 	autoSubmit?: boolean;
 	subdomainMatch?: SubdomainMatchMode;
-	/** Passkeys Bramble hosts for this site, in its authenticator role. */
+	/** Passkeys Vautix hosts for this site, in its authenticator role. */
 	passkeys?: PasskeyCredential[];
 	/** Superseded passwords, newest first, capped at MAX_PASSWORD_CHANGELOG. */
 	passwordChangelog?: PasswordChange[];
@@ -295,7 +295,7 @@ export interface VaultActions {
 	 * security-key ceremony errors.
 	 */
 	deleteVault(auth: DeleteVaultAuth): Promise<boolean>;
-	/** Save an encrypted `.bramble` backup of the vault. Rejects where the platform can't save files. */
+	/** Save an encrypted `.vautix` backup of the vault. Rejects where the platform can't save files. */
 	exportVault(): Promise<void>;
 	/**
 	 * Save the vault as a KeePass `.kdbx` (KDBX4), encrypted with `password` — chosen for the
@@ -1003,13 +1003,13 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 		[vaults, createRecord, shell, storage, platformCrypto],
 	);
 
-	/** Download an encrypted backup of the vault as a `.bramble` file (the encrypted VLT1
+	/** Download an encrypted backup of the vault as a `.vautix` file (the encrypted VLT1
 	 * blob, so it is safe at rest and still needs the master password to open). */
 	const exportVault = useCallback(async () => {
 		if (!shell.exportBytes) throw new Error(t`Export isn't available here.`);
 		const bytes = await storage.readVaultBlob();
 		const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-		await shell.exportBytes(`bramble-vault-${stamp}.bramble`, bytes, "application/octet-stream");
+		await shell.exportBytes(`vautix-vault-${stamp}.vautix`, bytes, "application/octet-stream");
 	}, [shell, storage, t]);
 
 	/** Export to a KeePass .kdbx under a password the user picks for the file. Reads the
@@ -1026,7 +1026,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 			});
 			const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 			await shell.exportBytes(
-				`bramble-vault-${stamp}.kdbx`,
+				`vautix-vault-${stamp}.kdbx`,
 				base64ToBytes(b64),
 				"application/octet-stream",
 			);

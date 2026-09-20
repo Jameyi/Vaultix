@@ -22,7 +22,7 @@ const FORM = `<!doctype html><html><head><title>login</title></head><body>
 	</form>
 </body></html>`;
 
-const HOST = "#bramble-autofill-dropdown";
+const HOST = "#vautix-autofill-dropdown";
 const TOGGLE = "Toggle autofill on web pages";
 
 test("the autofill toggle takes the on-page dropdown away, and gives it back", async ({
@@ -56,7 +56,7 @@ test("the autofill toggle takes the on-page dropdown away, and gives it back", a
 		await expect(host).toBeAttached({ timeout: 2000 });
 	}).toPass({ timeout: 20000 });
 	const openHost = await page.evaluateHandle(() =>
-		document.querySelector("#bramble-autofill-dropdown"),
+		document.querySelector("#vautix-autofill-dropdown"),
 	);
 
 	// Turn it off in Settings. Switching to the popup tab hides the page but leaves its picker

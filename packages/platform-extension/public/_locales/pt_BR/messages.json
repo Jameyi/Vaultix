@@ -4,7 +4,7 @@
 		"description": "Chrome Web Store / extension description shown under the name."
 	},
 	"cmdLockVault": {
-		"message": "Bloquear Bramble",
+		"message": "Bloquear Vautix",
 		"description": "Keyboard-shortcut command label shown in chrome://extensions/shortcuts."
 	},
 	"notNow": {
@@ -92,11 +92,11 @@
 		"description": "Passkey card title when saving a brand-new passkey."
 	},
 	"passkeyUnlockUseNote": {
-		"message": "Desbloqueie o Bramble para usar suas chaves de acesso neste site.",
+		"message": "Desbloqueie o Vautix para usar suas chaves de acesso neste site.",
 		"description": "Explains the locked passkey sign-in prompt."
 	},
 	"passkeyUnlockSaveNote": {
-		"message": "Desbloqueie o Bramble para salvar uma chave de acesso para este site.",
+		"message": "Desbloqueie o Vautix para salvar uma chave de acesso para este site.",
 		"description": "Explains the locked passkey save prompt."
 	},
 	"passkeyAddsTo": {

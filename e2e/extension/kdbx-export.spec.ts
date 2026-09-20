@@ -59,7 +59,7 @@ async function exportKdbx(page: Page, password: string, confirm = password) {
 	const downloadPromise = page.waitForEvent("download");
 	await modal.getByRole("button", { name: "Export", exact: true }).click();
 	const download = await downloadPromise;
-	const out = path.join(mkdtempSync(path.join(tmpdir(), "bramble-kdbx-")), "export.kdbx");
+	const out = path.join(mkdtempSync(path.join(tmpdir(), "vautix-kdbx-")), "export.kdbx");
 	await download.saveAs(out);
 	return { out, download, modal };
 }
@@ -73,8 +73,8 @@ test("exports the vault as a .kdbx the app can read back", async ({ context, ext
 	await openPopup(page, extensionId);
 	const { out, download, modal } = await exportKdbx(page, FILE_PW);
 
-	// Named for the vault + date, like the .bramble export.
-	expect(download.suggestedFilename()).toMatch(/^bramble-vault-\d{4}-\d{2}-\d{2}\.kdbx$/);
+	// Named for the vault + date, like the .vautix export.
+	expect(download.suggestedFilename()).toMatch(/^vautix-vault-\d{4}-\d{2}-\d{2}\.kdbx$/);
 	// KDBX4 signature + major version, so a structural break shows up here rather than as a
 	// confusing parse error in the re-import below.
 	const bytes = readFileSync(out);

@@ -32,6 +32,6 @@ describe("updatePromptCopy", () => {
 		const copy = updatePromptCopy("2.4.1");
 
 		expect(copy.body).toContain("2.4.1");
-		expect(copy.title).toBe("Update Bramble");
+		expect(copy.title).toBe("Update Vautix");
 	});
 });

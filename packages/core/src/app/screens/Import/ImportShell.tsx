@@ -287,8 +287,8 @@ export function ImportShell({ onClose }: { onClose?: () => void } = {}) {
 	const openKdbxAndPreview = async (password: string, keyfileB64?: string) => {
 		if (!kdbxPending) return;
 		const res =
-			kdbxPending.provider.id === "bramble"
-				? await openBrambleFile(password)
+			kdbxPending.provider.id === "vautix"
+				? await openVautixFile(password)
 				: await openKdbxFile(password, keyfileB64);
 		if (res.imported.length === 0) {
 			throw new Error(t`No importable items were found in this database.`);
@@ -315,12 +315,12 @@ export function ImportShell({ onClose }: { onClose?: () => void } = {}) {
 		}
 	};
 
-	// Bramble's own format. Entries come back already normalized, so unlike every foreign
+	// Vautix's own format. Entries come back already normalized, so unlike every foreign
 	// format there is nothing to map: passkeys and password history ride along untouched.
-	const openBrambleFile = async (password: string): Promise<ImportResult> => {
+	const openVautixFile = async (password: string): Promise<ImportResult> => {
 		if (!kdbxPending) throw new Error("no pending file");
 		const file = readPortableVaultFile(base64ToBytes(kdbxPending.fileB64));
-		if (!file) throw new Error(t`That doesn't look like a Bramble export (.bramble) file.`);
+		if (!file) throw new Error(t`That doesn't look like a Vautix export (.vautix) file.`);
 		const entries = await openPortableVaultFile(crypto, file, password);
 		// null is a wrong password, distinct from a file this can't read at all.
 		if (entries === null) throw new Error(t`That password didn't open the file.`);
@@ -413,11 +413,11 @@ export function ImportShell({ onClose }: { onClose?: () => void } = {}) {
 			<KdbxUnlock
 				providerLabel={kdbxPending.provider.label}
 				passwordLabel={
-					kdbxPending.provider.id === "bramble"
+					kdbxPending.provider.id === "vautix"
 						? t`Password for the file`
 						: t`KeePass master password`
 				}
-				allowKeyfile={kdbxPending.provider.id !== "bramble"}
+				allowKeyfile={kdbxPending.provider.id !== "vautix"}
 				onOpen={openKdbxAndPreview}
 				onBack={() => {
 					setKdbxPending(null);

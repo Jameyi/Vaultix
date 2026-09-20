@@ -151,11 +151,11 @@ export async function runDueBackups(
 		);
 		if (result.attempted > 0) {
 			console.info(
-				`[bramble:bg] backup: ${result.succeeded.length} ok, ${result.failed.length} failed`,
+				`[vautix:bg] backup: ${result.succeeded.length} ok, ${result.failed.length} failed`,
 			);
 		}
 		for (const f of result.failed) {
-			console.warn(`[bramble:bg] backup failed for ${f.id} (vault ${f.vaultId}):`, f.error);
+			console.warn(`[vautix:bg] backup failed for ${f.id} (vault ${f.vaultId}):`, f.error);
 		}
 	} finally {
 		running = false;

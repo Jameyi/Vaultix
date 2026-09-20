@@ -1,4 +1,4 @@
-/* Shared Bramble design tokens.
+/* Shared Vautix design tokens.
    Single source of truth for the color/radius scale used by every surface:
    the browser extension, the mobile app, and the marketing website. Import
    this AFTER `@import "tailwindcss"` so the `@theme inline` block can map the

@@ -1,6 +1,6 @@
 // Submit the built Firefox extension to addons.mozilla.org. Default channel is "listed" (the
 // public store): AMO reviews it, then signs + publishes, so nothing is downloaded here. Pass
-// --channel unlisted to sign immediately for self-distribution and write bramble-firefox.xpi. Usage:
+// --channel unlisted to sign immediately for self-distribution and write vautix-firefox.xpi. Usage:
 //   node scripts/sign-firefox.ts [path/to/dist] [--channel listed|unlisted]
 //   (defaults to packages/platform-extension/dist-firefox, channel listed)
 //
@@ -13,7 +13,7 @@
 // reuse a version, so it runs only at release time, never on `bundle`.
 //
 // Credentials resolve from the env first (AMO_API_KEY + AMO_API_SECRET, for CI / one-off),
-// else an age-encrypted JSON at ~/.config/bramble/amo-api-credentials.age (override
+// else an age-encrypted JSON at ~/.config/vautix/amo-api-credentials.age (override
 // AMO_CREDENTIALS_AGE) holding { "apiKey": "...", "apiSecret": "..." }.
 //
 // One-time setup lives in docs/release-signing.md.
@@ -39,10 +39,10 @@ const channel = channelIdx >= 0 ? argv[channelIdx + 1] : "listed";
 // The lone positional is the dist dir (skip the value following --channel).
 const distArg = argv.find((a, i) => !a.startsWith("--") && argv[i - 1] !== "--channel");
 const DIST = resolve(distArg ?? "packages/platform-extension/dist-firefox");
-const OUT = resolve("packages/platform-extension/bramble-firefox.xpi");
+const OUT = resolve("packages/platform-extension/vautix-firefox.xpi");
 const HOME = process.env.HOME ?? "";
 const CREDS_AGE =
-	process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/bramble/amo-api-credentials.age");
+	process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/vautix/amo-api-credentials.age");
 // web-ext 8.x requires the AMO API base URL explicitly: its CLI defaults `--amo-base-url`, but the
 // programmatic cmd.sign() does not, so an unset value throws "Invalid AMO API base URL: undefined".
 // Production AMO (v5) for both channels; override AMO_BASE_URL only for a staging instance.
@@ -76,7 +76,7 @@ let apiKey = process.env.AMO_API_KEY;
 let apiSecret = process.env.AMO_API_SECRET;
 
 // 0700 scratch dir: the plaintext credentials + signing artifacts live here and are wiped in finally.
-const tmp = mkdtempSync(join(tmpdir(), "bramble-sign-ff-"));
+const tmp = mkdtempSync(join(tmpdir(), "vautix-sign-ff-"));
 try {
 	if (!apiKey || !apiSecret) {
 		if (!existsSync(CREDS_AGE))
@@ -102,13 +102,13 @@ try {
 	// web-ext uploads dist-firefox to AMO, waits for automated signing, and downloads the signed
 	// .xpi into `artifacts`. The extension id (browser_specific_settings.gecko.id) must be set.
 	const artifacts = join(tmp, "artifacts");
-	// AMO review needs the buildable source for a listed add-on (Bramble is bundled + ships WASM).
+	// AMO review needs the buildable source for a listed add-on (Vautix is bundled + ships WASM).
 	// Archive the working tree: `git stash create` captures the release's uncommitted version bump,
 	// so the source matches what built dist-firefox. docs/amo-source-build.md ships inside it.
 	let sourceArchive: string | undefined;
 	let metadataFile: string | undefined;
 	if (channel === "listed") {
-		sourceArchive = join(tmp, "bramble-source.zip");
+		sourceArchive = join(tmp, "vautix-source.zip");
 		const worktree = execFileSync("git", ["stash", "create"]).toString().trim();
 		execFileSync("git", ["archive", "--format=zip", "-o", sourceArchive, worktree || "HEAD"]);
 		// Listed submissions require a license (version-level) + a category (add-on-level); AMO

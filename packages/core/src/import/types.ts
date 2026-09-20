@@ -1,7 +1,7 @@
 import type { PasskeyImportResult } from "../adapters/crypto";
 import type { EntryData, EntryType } from "../hooks/useVault";
 
-/** Password managers whose plaintext/container exports Bramble can read. */
+/** Password managers whose plaintext/container exports Vautix can read. */
 export type ImportProvider =
 	| "bitwarden"
 	| "onepassword"

@@ -56,7 +56,7 @@ const HOME = process.env.HOME ?? "";
 const DESKTOP_CONF = "packages/platform-desktop/src-tauri/tauri.conf.json";
 const DESKTOP_MANIFEST = "website/public/desktop/latest.json";
 /** Canonical copy of the Homebrew cask; the published one lives in homebrew/homebrew-cask. */
-const DESKTOP_CASK = "packages/platform-desktop/homebrew/bramble.rb";
+const DESKTOP_CASK = "packages/platform-desktop/homebrew/vautix.rb";
 /** Branch deploy-website.yml builds from; the manifest is only live once that runs. */
 const WEBSITE_BRANCH = "main";
 
@@ -215,12 +215,12 @@ async function releaseExtension(target: string, version: string) {
 	// Chrome Web Store publish prereq, checked before the slow gate + build so a missing
 	// credential fails fast. sign-cws.ts uploads + publishes with the service account.
 	const cwsAge =
-		process.env.CWS_SERVICE_ACCOUNT_AGE ?? join(HOME, ".config/bramble/cws-service-account.age");
+		process.env.CWS_SERVICE_ACCOUNT_AGE ?? join(HOME, ".config/vautix/cws-service-account.age");
 	if (!process.env.CWS_SERVICE_ACCOUNT_JSON && !existsSync(cwsAge))
 		fail(
 			`no Chrome Web Store credentials: set CWS_SERVICE_ACCOUNT_JSON, or provide ${cwsAge} (override CWS_SERVICE_ACCOUNT_AGE). See docs/release-signing.md.`,
 		);
-	const cwsKeyAge = process.env.CWS_KEY_AGE ?? join(HOME, ".config/bramble/cws-signing-key.age");
+	const cwsKeyAge = process.env.CWS_KEY_AGE ?? join(HOME, ".config/vautix/cws-signing-key.age");
 	if (!process.env.CWS_KEY_PEM && !existsSync(cwsKeyAge))
 		fail(
 			`no Chrome Web Store signing key: set CWS_KEY_PEM, or provide ${cwsKeyAge} (override CWS_KEY_AGE). See docs/release-signing.md.`,
@@ -266,16 +266,16 @@ async function releaseExtension(target: string, version: string) {
 		);
 	}
 
-	const zip = `${DIST}/bramble.zip`;
-	const crx = `${DIST}/bramble.crx`;
-	if (!existsSync(zip) || !existsSync(crx)) fail("expected bramble.zip and a signed bramble.crx");
+	const zip = `${DIST}/vautix.zip`;
+	const crx = `${DIST}/vautix.crx`;
+	if (!existsSync(zip) || !existsSync(crx)) fail("expected vautix.zip and a signed vautix.crx");
 
 	commitTagPush(bumped, manifest, `chore(release): ${target} ${version}`, tag, branch);
 
 	const title = `${target.charAt(0).toUpperCase()}${target.slice(1)} Extension ${version}`;
-	const stage = mkdtempSync(join(tmpdir(), "bramble-release-"));
-	const crxAsset = join(stage, `bramble_${target}_${version}.crx`);
-	const zipAsset = join(stage, `bramble_${target}_${version}.zip`);
+	const stage = mkdtempSync(join(tmpdir(), "vautix-release-"));
+	const crxAsset = join(stage, `vautix_${target}_${version}.crx`);
+	const zipAsset = join(stage, `vautix_${target}_${version}.zip`);
 	copyFileSync(crx, crxAsset);
 	copyFileSync(zip, zipAsset);
 	// SHA256SUMS over the GitHub-hosted .crx/.zip (integrity for direct/unpacked
@@ -294,7 +294,7 @@ async function releaseExtension(target: string, version: string) {
 		rmSync(stage, { recursive: true, force: true });
 	}
 	console.log(
-		`\nreleased ${tag}: published to the Chrome Web Store (in review) + signed bramble_${target}_${version}.crx + SHA256SUMS attached to the GitHub release.`,
+		`\nreleased ${tag}: published to the Chrome Web Store (in review) + signed vautix_${target}_${version}.crx + SHA256SUMS attached to the GitHub release.`,
 	);
 }
 
@@ -303,7 +303,7 @@ async function releaseExtension(target: string, version: string) {
 async function releaseFirefox(version: string) {
 	const MANIFEST = "packages/manifests/firefox/manifest.json";
 	const DIST = "packages/platform-extension";
-	const ZIP = `${DIST}/bramble-firefox.zip`;
+	const ZIP = `${DIST}/vautix-firefox.zip`;
 
 	// Firefox manifest versions follow the same 1-4 dotted-int rule as Chrome.
 	const PART = /^(0|[1-9]\d{0,4})$/;
@@ -322,7 +322,7 @@ async function releaseFirefox(version: string) {
 	// previously signed version, so retrying a consumed version means bumping.
 	const haveEnvCreds = !!(process.env.AMO_API_KEY && process.env.AMO_API_SECRET);
 	const credsAge =
-		process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/bramble/amo-api-credentials.age");
+		process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/vautix/amo-api-credentials.age");
 	if (!haveEnvCreds) {
 		if (!existsSync(credsAge))
 			fail(
@@ -368,8 +368,8 @@ async function releaseFirefox(version: string) {
 
 	commitTagPush(bumped, MANIFEST, `chore(release): firefox ${version}`, tag, branch);
 
-	const stage = mkdtempSync(join(tmpdir(), "bramble-release-"));
-	const zipAsset = join(stage, `bramble_firefox_${version}.zip`);
+	const stage = mkdtempSync(join(tmpdir(), "vautix-release-"));
+	const zipAsset = join(stage, `vautix_firefox_${version}.zip`);
 	copyFileSync(ZIP, zipAsset);
 	// The signed .xpi lives on AMO (listed, after review); the GitHub release carries the source
 	// bundle + its checksum for transparency. SHA256SUMS over the .zip, like the other branches.
@@ -386,7 +386,7 @@ async function releaseFirefox(version: string) {
 		rmSync(stage, { recursive: true, force: true });
 	}
 	console.log(
-		`\nreleased ${tag}: submitted ${version} to AMO (listed, in review); source bramble_firefox_${version}.zip + SHA256SUMS on the GitHub release.`,
+		`\nreleased ${tag}: submitted ${version} to AMO (listed, in review); source vautix_firefox_${version}.zip + SHA256SUMS on the GitHub release.`,
 	);
 }
 
@@ -410,19 +410,19 @@ async function releaseAndroid(version: string, resume: boolean) {
 	// Signing inputs (post-build; gradle never sees the key). The keystore is age+YubiKey
 	// encrypted; passwords resolve from the env, then the macOS login Keychain, then an
 	// age+YubiKey file, which is the only one of the three that works off macOS. Store one once:
-	//   security add-generic-password -s bramble-android-keystore -a "$USER" -w
-	//   printf %s 'PASSWORD' | age -r age1yubikey1... -o ~/.config/bramble/android-keystore-password.age
+	//   security add-generic-password -s vautix-android-keystore -a "$USER" -w
+	//   printf %s 'PASSWORD' | age -r age1yubikey1... -o ~/.config/vautix/android-keystore-password.age
 	const ksAge =
-		process.env.ANDROID_KEYSTORE_AGE ?? join(HOME, ".config/bramble/android-release-keystore.age");
+		process.env.ANDROID_KEYSTORE_AGE ?? join(HOME, ".config/vautix/android-release-keystore.age");
 	const ksPassAge =
 		process.env.ANDROID_KEYSTORE_PASSWORD_AGE ??
-		join(HOME, ".config/bramble/android-keystore-password.age");
+		join(HOME, ".config/vautix/android-keystore-password.age");
 	const keyPassAge =
-		process.env.ANDROID_KEY_PASSWORD_AGE ?? join(HOME, ".config/bramble/android-key-password.age");
+		process.env.ANDROID_KEY_PASSWORD_AGE ?? join(HOME, ".config/vautix/android-key-password.age");
 	const envStorePassword =
-		process.env.ANDROID_KEYSTORE_PASSWORD ?? secretFromKeychain("bramble-android-keystore");
+		process.env.ANDROID_KEYSTORE_PASSWORD ?? secretFromKeychain("vautix-android-keystore");
 	const envKeyPassword =
-		process.env.ANDROID_KEY_PASSWORD ?? secretFromKeychain("bramble-android-key");
+		process.env.ANDROID_KEY_PASSWORD ?? secretFromKeychain("vautix-android-key");
 	if (!existsSync(ksAge))
 		fail(
 			`encrypted keystore not at ${ksAge} (override ANDROID_KEYSTORE_AGE). See docs/release-signing.md.`,
@@ -430,9 +430,9 @@ async function releaseAndroid(version: string, resume: boolean) {
 	// Only the source is checked here. The decrypt happens beside the keystore's, on one touch.
 	if (!envStorePassword && !existsSync(ksPassAge))
 		fail(
-			`no keystore password: set ANDROID_KEYSTORE_PASSWORD, store it in the macOS Keychain as bramble-android-keystore, or age-encrypt it to ${ksPassAge}. See docs/release-signing.md.`,
+			`no keystore password: set ANDROID_KEYSTORE_PASSWORD, store it in the macOS Keychain as vautix-android-keystore, or age-encrypt it to ${ksPassAge}. See docs/release-signing.md.`,
 		);
-	const keyAlias = process.env.ANDROID_KEY_ALIAS ?? "bramble";
+	const keyAlias = process.env.ANDROID_KEY_ALIAS ?? "vautix";
 	requireBins(["age", "age-plugin-yubikey"], "docs/release-signing.md");
 	// Native build toolchain, checked before the gate: core:build shells out to wasm-pack and
 	// ffi:build:android to cargo-ndk, and finding either missing after the release commit means a
@@ -445,8 +445,8 @@ async function releaseAndroid(version: string, resume: boolean) {
 	const java21 = resolveJava21();
 
 	const branch = capture("git rev-parse --abbrev-ref HEAD");
-	const stage = mkdtempSync(join(tmpdir(), "bramble-release-"));
-	const apkName = `bramble_android_${version}.apk`;
+	const stage = mkdtempSync(join(tmpdir(), "vautix-release-"));
+	const apkName = `vautix_android_${version}.apk`;
 	const apkAsset = join(stage, apkName);
 	let versionCode: number;
 	let commit: string;
@@ -534,7 +534,7 @@ async function releaseAndroid(version: string, resume: boolean) {
 
 	// Sign. The commit and the unsigned apk are KEPT on failure: the build is the expensive
 	// part, and the usual failure here is a missed YubiKey touch. `--resume` picks it up from here.
-	const tmp = mkdtempSync(join(tmpdir(), "bramble-android-"));
+	const tmp = mkdtempSync(join(tmpdir(), "vautix-android-"));
 	try {
 		// Decrypt the keystore into a 0700 dir, apksigner-sign gradle's unsigned apk, then wipe the
 		// key. `--v1-signing-enabled false` drops the JAR/META-INF signature files: minSdk is 24, so
@@ -696,7 +696,7 @@ async function releaseIos(version: string, ipaOnly: boolean) {
 		try {
 			run("pnpm run ios:ipa");
 			console.log(
-				`\ndry run: signed IPA at ~/Desktop/Bramble-TestFlight.ipa (v${version}); not uploaded.`,
+				`\ndry run: signed IPA at ~/Desktop/Vautix-TestFlight.ipa (v${version}); not uploaded.`,
 			);
 		} finally {
 			if (bumped) run(`git checkout ${PBXPROJ}`);
@@ -705,9 +705,9 @@ async function releaseIos(version: string, ipaOnly: boolean) {
 	}
 
 	// Build + upload to TestFlight (fastlane `beta`: prepare -> build_app -> upload_to_testflight).
-	// BRAMBLE_IOS_BUILD pins the build number to the one computed above; the lane reads
+	// VAUTIX_IOS_BUILD pins the build number to the one computed above; the lane reads
 	// MARKETING_VERSION from the bump above.
-	process.env.BRAMBLE_IOS_BUILD = String(build);
+	process.env.VAUTIX_IOS_BUILD = String(build);
 	try {
 		run("pnpm run ios:beta");
 	} catch {
@@ -775,7 +775,7 @@ async function releaseDesktop(version: string, universal: boolean, resume = fals
 	// than optional here, unlike a local build: Gatekeeper blocks an un-notarized app on every
 	// machine that did not build it, so publishing one ships something nobody can open.
 	const keyAge =
-		process.env.DESKTOP_UPDATER_KEY_AGE ?? join(HOME, ".config/bramble/desktop-updater-key.age");
+		process.env.DESKTOP_UPDATER_KEY_AGE ?? join(HOME, ".config/vautix/desktop-updater-key.age");
 	// Build-only prerequisites. A resume signs nothing and notarizes nothing: it reads the .sig
 	// files the original run wrote, so demanding a YubiKey and an Apple key to upload finished
 	// artifacts would just make the recovery path harder than the thing it recovers from.
@@ -876,7 +876,7 @@ async function releaseDesktop(version: string, universal: boolean, resume = fals
 	// The website's download box builds this URL from the version rather than reading it from
 	// anywhere, because the updater manifest names the .app.tar.gz and never the disk image. A
 	// rename here would leave the front page's main macOS download pointing at a 404.
-	const expectedDmg = `Bramble_${version}_universal.dmg`;
+	const expectedDmg = `Vautix_${version}_universal.dmg`;
 	if (universal && !dmgs.includes(expectedDmg))
 		fail(
 			`expected ${expectedDmg}, built ${dmgs.join(", ")}.\n` +
@@ -893,7 +893,7 @@ async function releaseDesktop(version: string, universal: boolean, resume = fals
 	// all along, and it cannot be malformed by its input.
 	// The bundlers bracket the version in one delimiter or the other, never a mix, so requiring a
 	// matched pair rejects 10.4.0 and 0.4.0-rc1 alike, where either loose end would take both.
-	/** `Bramble_0.4.0_amd64.deb` and `Bramble-0.4.0-1.x86_64.rpm`. */
+	/** `Vautix_0.4.0_amd64.deb` and `Vautix-0.4.0-1.x86_64.rpm`. */
 	const ofThisVersion = (f: string) => ["_", "-"].some((d) => f.includes(`${d}${version}${d}`));
 
 	const assets: string[] = [];
@@ -929,7 +929,7 @@ async function releaseDesktop(version: string, universal: boolean, resume = fals
 		assets.push(join(macos, a), join(macos, `${a}.sig`));
 	}
 
-	const stage = mkdtempSync(join(tmpdir(), "bramble-release-"));
+	const stage = mkdtempSync(join(tmpdir(), "vautix-release-"));
 	const sumsAsset = join(stage, "SHA256SUMS");
 	// Keyed by basename because the cask below needs the .dmg's checksum, and `test:brew`
 	// asserts the two agree: hashing the same file twice is how they would come to disagree.
@@ -1074,7 +1074,7 @@ function primeCwsSecrets(keyAge: string, saAge: string): () => void {
 	requireBins(["age", "age-plugin-yubikey"], "docs/release-signing.md");
 
 	// 0700 scratch dir; the plaintext secrets never leave it and are wiped by the cleanup.
-	const tmp = mkdtempSync(join(tmpdir(), "bramble-cws-secrets-"));
+	const tmp = mkdtempSync(join(tmpdir(), "vautix-cws-secrets-"));
 	try {
 		const idFile = join(tmp, "id.txt"); // identity stub -> YubiKey slot; not key material
 		writeFileSync(idFile, execFileSync("age-plugin-yubikey", ["--identity"]));
@@ -1200,7 +1200,7 @@ async function releaseNotes(tag: string, platform: string): Promise<string> {
 // Draft -> upload -> publish, so the `release: published` event fires only once the
 // signed artifacts are attached (CI verifies them on that event).
 async function publish(tag: string, title: string, assets: string[]) {
-	const notesDir = mkdtempSync(join(tmpdir(), "bramble-notes-"));
+	const notesDir = mkdtempSync(join(tmpdir(), "vautix-notes-"));
 	const notesFile = join(notesDir, "NOTES.md");
 	writeFileSync(notesFile, await releaseNotes(tag, platform));
 	try {

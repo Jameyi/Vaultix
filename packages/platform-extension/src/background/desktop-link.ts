@@ -1,6 +1,6 @@
 /// <reference types="chrome" />
 
-// The extension's half of the link to the Bramble desktop app.
+// The extension's half of the link to the Vautix desktop app.
 //
 // Chrome spawns a small proxy binary (declared in a native-messaging host manifest the desktop
 // app installs) and relays framed JSON to it over stdio; the proxy passes those bytes to the
@@ -22,7 +22,7 @@ import { sendToOffscreen } from "./offscreen-client";
 import { extensionOnly, on } from "./router";
 
 /** Must match the `name` in the host manifest the desktop app writes. */
-const HOST_NAME = "app.bramble.desktop";
+const HOST_NAME = "app.vautix.desktop";
 
 /** Must match `NATIVE_PROXY_PORT` in ../desktop-link.ts (page side). */
 const NATIVE_PROXY_PORT = "link-native-proxy";
@@ -533,7 +533,7 @@ export async function openDesktopLink(): Promise<boolean> {
 	linkWanted = true;
 	startKeepalive();
 	const up = (await ensureHeld()) !== null;
-	if (up) console.log("[bramble:link] connected to the desktop app");
+	if (up) console.log("[vautix:link] connected to the desktop app");
 	return up;
 }
 
@@ -618,7 +618,7 @@ async function ensureHeld(): Promise<HeldLink | null> {
 			await offscreen("LINK_READ", { sessionId: start.sessionId, message: reply.message });
 		}
 	} catch (e) {
-		console.warn("[bramble:link] desktop app refused or unreachable:", e);
+		console.warn("[vautix:link] desktop app refused or unreachable:", e);
 		await offscreen("LINK_CLOSE", { sessionId: start.sessionId }).catch(() => {});
 		session.close();
 		return null;
@@ -691,7 +691,7 @@ async function dropHeld(): Promise<void> {
  * domain-separation string, same case folding, same base64. If these drift the handshake
  * simply fails, with no clue as to why.
  */
-const PSK_INFO = "bramble/desktop/extension-pairing/psk/v1";
+const PSK_INFO = "vautix/desktop/extension-pairing/psk/v1";
 
 async function pskFor(code: string): Promise<string> {
 	const encoder = new TextEncoder();

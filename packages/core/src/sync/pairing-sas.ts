@@ -19,7 +19,7 @@
 import { base64ToBytes } from "../util/bytes";
 import { SAS_EMOJI_LEN } from "./sas-emoji";
 
-const SAS_INFO = "bramble/sync/sas/v1";
+const SAS_INFO = "vautix/sync/sas/v1";
 const SAS_DIGITS = 12;
 const GROUP = 4;
 /** 6 bits per symbol, which is why the alphabet is exactly 64 long. */

@@ -1,1 +1,1 @@
-Bramble: Password Manager
+Vautix: Password Manager

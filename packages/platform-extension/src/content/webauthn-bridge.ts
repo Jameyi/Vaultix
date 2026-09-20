@@ -16,7 +16,7 @@ const api = ((globalThis as { browser?: typeof chrome }).browser ??
 	(globalThis as { chrome?: typeof chrome }).chrome) as typeof chrome;
 
 interface Req {
-	__bramble_pk: "req";
+	__vautix_pk: "req";
 	id: string;
 	method: "create" | "get";
 	payload: unknown;
@@ -26,7 +26,7 @@ function isReq(d: unknown): d is Req {
 	return (
 		typeof d === "object" &&
 		d !== null &&
-		(d as Req).__bramble_pk === "req" &&
+		(d as Req).__vautix_pk === "req" &&
 		typeof (d as Req).id === "string" &&
 		((d as Req).method === "create" || (d as Req).method === "get")
 	);
@@ -39,7 +39,7 @@ window.addEventListener("message", (ev: MessageEvent) => {
 	if (!isReq(d)) return;
 	const type = d.method === "create" ? "WEBAUTHN_CREATE" : "WEBAUTHN_GET";
 	const reply = (result: unknown) =>
-		window.postMessage({ __bramble_pk: "res", id: d.id, result }, ev.origin || "*");
+		window.postMessage({ __vautix_pk: "res", id: d.id, result }, ev.origin || "*");
 
 	void Promise.resolve()
 		.then(() => api.runtime.sendMessage({ type, payload: d.payload }))

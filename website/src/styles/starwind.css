@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-/* Bramble's shared design tokens: the extension's exact palette, radius scale,
+/* Vautix's shared design tokens: the extension's exact palette, radius scale,
    dark variant, and core @theme inline mapping. Single source of truth in the
    @vault/theme workspace package so the site and the extension stay identical. */
 @import "@vault/theme/theme.css";
@@ -32,7 +32,7 @@
 
 /* Starwind bridge. Starwind components reference a superset of the extension's
    shadcn tokens (--outline, --error/info/success/warning, --primary-accent, the
-   xs/2xl/3xl radius steps). Map those extra names onto Bramble's monochrome
+   xs/2xl/3xl radius steps). Map those extra names onto Vautix's monochrome
    palette so Starwind UI is visually indistinguishable from the extension. */
 @theme inline {
   --color-outline: var(--outline);
@@ -96,7 +96,7 @@
 }
 
 /* Starwind's dark active-tab style leans on --input being a translucent light
-   overlay. Bramble's flat dark palette maps --input, --muted, and --card to the
+   overlay. Vautix's flat dark palette maps --input, --muted, and --card to the
    same gray, so the selected tab blends into the muted tab list. Give the active
    tab an explicit raised chip with a visible border. Unlayered so it wins over
    the component's utility classes. */

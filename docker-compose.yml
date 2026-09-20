@@ -1,4 +1,4 @@
-# Local Nextcloud and MinIO for testing Bramble's cloud backups end-to-end.
+# Local Nextcloud and MinIO for testing Vautix's cloud backups end-to-end.
 # This is NOT part of the app; it's throwaway WebDAV and S3 servers you run on
 # your own machine to exercise the backup path without a cloud account.
 #
@@ -8,20 +8,20 @@
 #   docker compose down -v      # ...and wipe the data volumes for a clean slate
 #
 # With both up, the provider integration suite runs against them:
-#   BRAMBLE_IT=1 pnpm --filter @vault/core exec vitest run providers.integration
+#   VAUTIX_IT=1 pnpm --filter @vault/core exec vitest run providers.integration
 #
-# Once it's up, point Bramble's WebDAV provider at:
+# Once it's up, point Vautix's WebDAV provider at:
 #   Server URL: http://localhost:8080/remote.php/dav/files/admin/
 #   Username:   admin
-#   Password:   Bramble-test-123
-# Backups land in a "bramble/" folder under that user's files. http://localhost
+#   Password:   Vautix-test-123
+# Backups land in a "vautix/" folder under that user's files. http://localhost
 # works from the extension popup (host permissions bypass CORS; localhost is
 # exempt from mixed-content blocking).
 
 services:
   nextcloud:
     image: nextcloud:stable
-    container_name: bramble-nextcloud
+    container_name: vautix-nextcloud
     ports:
       # host:container. Change the left port (8080) if something already uses it.
       - "8080:80"
@@ -31,13 +31,13 @@ services:
       # for testing (a real deploy would use MariaDB/Postgres + Redis).
       SQLITE_DATABASE: nextcloud
       NEXTCLOUD_ADMIN_USER: admin
-      NEXTCLOUD_ADMIN_PASSWORD: Bramble-test-123
+      NEXTCLOUD_ADMIN_PASSWORD: Vautix-test-123
       # Without this, Nextcloud rejects requests with an "untrusted domain" error.
       NEXTCLOUD_TRUSTED_DOMAINS: localhost 127.0.0.1
     volumes:
       # Persist the install + uploaded backups across restarts. Blow it away with
       # `docker compose down -v` to get a fresh, empty instance.
-      - bramble-nextcloud-data:/var/www/html
+      - vautix-nextcloud-data:/var/www/html
     restart: unless-stopped
 
   # S3, for the other half of the backup code. MinIO validates SigV4 the way a real S3 endpoint
@@ -45,21 +45,21 @@ services:
   # TypeScript, and Rust for the desktop, which cannot reach a provider from its webview), and
   # test vectors only prove they agree with each other. This proves they agree with a server.
   #
-  #   Endpoint: http://localhost:9000    Bucket: bramble-test
-  #   Key: bramble                       Secret: bramble-test-secret
+  #   Endpoint: http://localhost:9000    Bucket: vautix-test
+  #   Key: vautix                       Secret: vautix-test-secret
   # The console is on http://localhost:9001 if you want to look at what landed.
   minio:
     image: minio/minio:latest
-    container_name: bramble-minio
+    container_name: vautix-minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: bramble
-      MINIO_ROOT_PASSWORD: bramble-test-secret
+      MINIO_ROOT_USER: vautix
+      MINIO_ROOT_PASSWORD: vautix-test-secret
     volumes:
-      - bramble-minio-data:/data
+      - vautix-minio-data:/data
     restart: unless-stopped
 
   # Creates the bucket and exits. A one-shot rather than a manual step, so `docker compose up -d`
@@ -70,12 +70,12 @@ services:
       - minio
     entrypoint: >
       /bin/sh -c "
-      until mc alias set local http://minio:9000 bramble bramble-test-secret; do sleep 1; done;
-      mc mb --ignore-existing local/bramble-test;
-      echo 'bucket ready: bramble-test';
+      until mc alias set local http://minio:9000 vautix vautix-test-secret; do sleep 1; done;
+      mc mb --ignore-existing local/vautix-test;
+      echo 'bucket ready: vautix-test';
       "
     restart: "no"
 
 volumes:
-  bramble-nextcloud-data:
-  bramble-minio-data:
+  vautix-nextcloud-data:
+  vautix-minio-data:

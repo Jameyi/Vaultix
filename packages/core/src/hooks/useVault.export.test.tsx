@@ -56,7 +56,7 @@ function mountActions(platform: Platform) {
 }
 
 describe("exportVault", () => {
-	it("reads the vault blob and hands it to shell.exportBytes as a dated .bramble file", async () => {
+	it("reads the vault blob and hands it to shell.exportBytes as a dated .vautix file", async () => {
 		const exportBytes = vi.fn<(n: string, b: Uint8Array, m: string) => Promise<void>>(
 			async () => {},
 		);
@@ -73,7 +73,7 @@ describe("exportVault", () => {
 		const call = exportBytes.mock.calls[0];
 		if (!call) throw new Error("exportBytes was not called");
 		const [name, bytes, mime] = call;
-		expect(name).toMatch(/^bramble-vault-\d{4}-\d{2}-\d{2}\.bramble$/);
+		expect(name).toMatch(/^vautix-vault-\d{4}-\d{2}-\d{2}\.vautix$/);
 		expect(bytes).toEqual(new Uint8Array([1, 2, 3, 4]));
 		expect(mime).toBe("application/octet-stream");
 	});
@@ -128,7 +128,7 @@ describe("exportKdbx", () => {
 		expect(saveKdbx).toHaveBeenCalledWith({ entries: [], password: "file-password" });
 		const call = exportBytes.mock.calls[0];
 		if (!call) throw new Error("exportBytes was not called");
-		expect(call[0]).toMatch(/^bramble-vault-\d{4}-\d{2}-\d{2}\.kdbx$/);
+		expect(call[0]).toMatch(/^vautix-vault-\d{4}-\d{2}-\d{2}\.kdbx$/);
 		expect(Array.from(call[1])).toEqual([222, 173, 190, 239]);
 	});
 

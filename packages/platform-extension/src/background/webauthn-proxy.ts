@@ -1,6 +1,6 @@
 /// <reference types="chrome" />
 
-// Passkey provider via chrome.webAuthenticationProxy: Bramble acts as the WebAuthn
+// Passkey provider via chrome.webAuthenticationProxy: Vautix acts as the WebAuthn
 // authenticator for other sites. The crypto is the shared Rust core (Phase 0); this
 // module orchestrates the proxy events around it. The orchestration (handleCreate /
 // handleGet) takes injected deps so origin validation, the ES256 check, and response

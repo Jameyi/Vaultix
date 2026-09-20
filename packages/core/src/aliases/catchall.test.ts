@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createCatchAllClient, looksLikeDomain } from "./catchall";
 import { AliasError } from "./types";
 
-// The provider with no provider: the user points a domain they own at their inbox, and Bramble
+// The provider with no provider: the user points a domain they own at their inbox, and Vautix
 // makes the address locally. See docs/email-aliases.md.
 
 const client = (over = {}) => createCatchAllClient({ domain: "example.com", ...over });

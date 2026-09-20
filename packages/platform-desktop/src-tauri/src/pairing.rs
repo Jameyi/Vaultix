@@ -49,7 +49,7 @@ const MAX_ATTEMPTS: u8 = 5;
 
 /// HKDF-style domain separation, so a code can never be mistaken for key material from
 /// anywhere else in the system.
-const PSK_INFO: &[u8] = b"bramble/desktop/extension-pairing/psk/v1";
+const PSK_INFO: &[u8] = b"vautix/desktop/extension-pairing/psk/v1";
 
 #[cfg_attr(test, allow(dead_code))]
 const KEYCHAIN_ACCOUNT: &str = "extension-pairing-identity";

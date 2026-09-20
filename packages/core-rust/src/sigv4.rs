@@ -30,7 +30,7 @@ pub struct S3Credentials {
 pub struct SignRequest<'a> {
     pub method: &'a str,
     pub host: &'a str,
-    /// Already URI-encoded, slashes intact, e.g. `/bucket/bramble/backup.bramble`.
+    /// Already URI-encoded, slashes intact, e.g. `/bucket/vautix/backup.vautix`.
     pub uri_path: &'a str,
     /// Decoded pairs. The signer encodes and sorts them, and hands back the exact string to send.
     pub query: &'a [(String, String)],
@@ -257,7 +257,7 @@ mod tests {
             &SignRequest {
                 method: "PUT",
                 host: "s3.example.com",
-                uri_path: "/mybucket/bramble/bramble-2026-08-14T10-11-12Z-abcd1234.bramble",
+                uri_path: "/mybucket/vautix/vautix-2026-08-14T10-11-12Z-abcd1234.vautix",
                 query: &[],
                 headers: &[(
                     "content-type".to_string(),
@@ -284,7 +284,7 @@ mod tests {
                 uri_path: "/mybucket",
                 query: &[
                     ("list-type".to_string(), "2".to_string()),
-                    ("prefix".to_string(), "bramble/sub dir".to_string()),
+                    ("prefix".to_string(), "vautix/sub dir".to_string()),
                 ],
                 headers: &[],
                 body: b"",
@@ -307,7 +307,7 @@ mod tests {
                 host: "s3.example.com",
                 uri_path: "/bucket",
                 query: &[
-                    ("prefix".to_string(), "bramble/sub dir".to_string()),
+                    ("prefix".to_string(), "vautix/sub dir".to_string()),
                     ("list-type".to_string(), "2".to_string()),
                 ],
                 headers: &[],
@@ -319,7 +319,7 @@ mod tests {
         );
         assert_eq!(
             signed.canonical_query,
-            "list-type=2&prefix=bramble%2Fsub%20dir"
+            "list-type=2&prefix=vautix%2Fsub%20dir"
         );
     }
 }

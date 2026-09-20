@@ -79,8 +79,8 @@ describe("createSimpleLoginClient", () => {
 
 	it("sends a description as the note", async () => {
 		const calls = route(() => json(CREATED, 201));
-		await createSimpleLoginClient({}, "key").create({ description: "Bramble" });
-		expect(JSON.parse(only(calls).init.body as string)).toEqual({ note: "Bramble" });
+		await createSimpleLoginClient({}, "key").create({ description: "Vautix" });
+		expect(JSON.parse(only(calls).init.body as string)).toEqual({ note: "Vautix" });
 	});
 
 	// No allowance is reported anywhere in this API, and the premium flag is a different question.

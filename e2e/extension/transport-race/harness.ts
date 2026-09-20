@@ -9,14 +9,14 @@ import { fileURLToPath } from "node:url";
 // open a URL in their browser; every assertion about the contract lives here, so Chromium and
 // Firefox are held to the identical property. See e2e/README.md.
 //
-// The fixture is a tiny test-only extension, never Bramble: it proves the BROWSER's
-// request/reply primitive survives a navigation race. That Bramble uses that primitive is
+// The fixture is a tiny test-only extension, never Vautix: it proves the BROWSER's
+// request/reply primitive survives a navigation race. That Vautix uses that primitive is
 // proven by the extension unit tests, not here.
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 
 export const FIXTURE_DIR = path.join(dir, "fixture");
-export const SENTINEL = "BRAMBLE_TRANSPORT_SENTINEL";
+export const SENTINEL = "VAUTIX_TRANSPORT_SENTINEL";
 
 export type TransportMode = "same-origin" | "cross-origin" | "bfcache";
 

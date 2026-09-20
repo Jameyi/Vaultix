@@ -1,5 +1,5 @@
 // Download-count badges, summed across every release: GET /api/downloads/{android,macos,linux}.
-// Shields can only sum an exact asset name, and ours carry a version (bramble_android_0.15.0.apk).
+// Shields can only sum an exact asset name, and ours carry a version (vautix_android_0.15.0.apk).
 import { badge, type DownloadPlatform, json, type PagesContext, snapshot } from "../_github";
 
 const BADGES: Record<DownloadPlatform, { namedLogo: string; logoColor?: string }> = {

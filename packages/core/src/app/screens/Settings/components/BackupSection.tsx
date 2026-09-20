@@ -262,7 +262,7 @@ function SetupHint({ def }: { def: ProviderDef }) {
  * What this credential can reach beyond the backups, stated where it is being created.
  *
  * Scoping is the only real defence for a credential a machine has to be able to use unattended,
- * and it is the user's to apply: we can say what Bramble needs, we cannot restrict what they hand
+ * and it is the user's to apply: we can say what Vautix needs, we cannot restrict what they hand
  * us. WebDAV gets its own line because it is the one that cannot be narrowed at all — a Nextcloud
  * app password is account-wide by construction, so the containment is a separate account rather
  * than a smaller permission. See docs/cloud-storage-backups.md.
@@ -271,7 +271,7 @@ function ScopeHint({ def }: { def: ProviderDef }) {
 	if (def.kind === "s3")
 		return (
 			<Trans>
-				Bramble only needs to upload and list. Restricting the key to this one bucket, and leaving
+				Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving
 				out delete, limits what it can do if it is ever stolen.
 			</Trans>
 		);
@@ -339,7 +339,7 @@ function OneClickPanel({
 		<>
 			<p className="text-xs text-muted-foreground">
 				<Trans>
-					Sign in and Bramble stores encrypted backups in its own {name} app folder. Only ciphertext
+					Sign in and Vautix stores encrypted backups in its own {name} app folder. Only ciphertext
 					is uploaded, so {name} can't read anything in your vault.
 				</Trans>
 			</p>
@@ -656,7 +656,7 @@ export function BackupSection() {
 					<div className="rounded-lg border border-border bg-muted/40 p-3 space-y-2">
 						<p className="text-xs">
 							<Trans>
-								Scheduled backups only run while Bramble is running. Start it at login and they
+								Scheduled backups only run while Vautix is running. Start it at login and they
 								happen on their own, from the menu bar, without you opening the app.
 							</Trans>
 						</p>
@@ -690,7 +690,7 @@ export function BackupSection() {
 				<>
 					<p className="text-sm text-muted-foreground">
 						<Trans>
-							Choose where to store encrypted backups. Bramble only ever uploads ciphertext, so your
+							Choose where to store encrypted backups. Vautix only ever uploads ciphertext, so your
 							provider can't read anything in your vault. Add as many as you like.
 						</Trans>
 					</p>
@@ -756,7 +756,7 @@ export function BackupSection() {
 					<p className="text-xs text-muted-foreground">
 						<Trans>
 							Backups are best-effort, not a fixed time. Each target backs up at most as often as
-							you pick, the next time you unlock Bramble after one is due, so real frequency depends
+							you pick, the next time you unlock Vautix after one is due, so real frequency depends
 							on how often you open it on this device. Unchanged vaults are skipped.
 						</Trans>
 					</p>
@@ -901,13 +901,13 @@ export function BackupSection() {
 									<option value="0">{t`Keep everything`}</option>
 								</SelectField>
 								{/* The security point of the option, and the only reason to pick it over
-										    a number: deleting is the one thing Bramble asks for that can lose
+										    a number: deleting is the one thing Vautix asks for that can lose
 										    you something, so not needing it is what lets the credential
 										    give it up. */}
 								{keep === 0 && (
 									<p className="text-xs text-muted-foreground text-pretty">
 										<Trans>
-											Bramble will never delete anything here, so this can use a credential that
+											Vautix will never delete anything here, so this can use a credential that
 											isn't allowed to. One that's stolen then can't destroy your backup history.
 										</Trans>
 									</p>

@@ -1,11 +1,11 @@
 # Security Policy
 
-Bramble is a password manager, so its security is the whole point. Reports are
+Vautix is a password manager, so its security is the whole point. Reports are
 taken seriously and handled with priority. Thank you for helping keep it safe.
 
 ## Supported Versions
 
-Bramble is early and ships frequently. Only the latest released version receives
+Vautix is early and ships frequently. Only the latest released version receives
 security fixes. There are no long-term support branches, so always update to the
 newest release before reporting an issue.
 
@@ -15,7 +15,7 @@ newest release before reporting an issue.
 | Any older release  | :x:                |
 
 The current version is shown on the
-[releases page](https://github.com/flythenimbus/bramble/releases) and in the
+[releases page](https://github.com/flythenimbus/vautix/releases) and in the
 Chrome Web Store listing.
 
 ## Reporting a Vulnerability
@@ -27,7 +27,7 @@ risk.
 Use either of these private channels:
 
 - **GitHub Security Advisories (preferred).** Go to the
-  [Security tab](https://github.com/flythenimbus/bramble/security/advisories) and
+  [Security tab](https://github.com/flythenimbus/vautix/security/advisories) and
   click **Report a vulnerability**. This keeps the report private and lets us
   collaborate on a fix in one place.
 - **Email.** flythenimbus@pm.me. For sensitive details, say so and we can arrange

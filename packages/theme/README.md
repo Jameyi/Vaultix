@@ -1,6 +1,6 @@
 # @vault/theme
 
-The single source of truth for Bramble's design tokens: the color scale,
+The single source of truth for Vautix's design tokens: the color scale,
 radius scale, dark-mode variant, and the Tailwind v4 `@theme inline` mapping
 that turns those CSS variables into utilities (`bg-background`, `text-muted-foreground`, ...).
 

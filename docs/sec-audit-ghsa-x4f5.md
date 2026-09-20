@@ -180,7 +180,7 @@ what makes the skew matrix work.
 
 |  | old inviter | new inviter |
 |---|---|---|
-| **old joiner** | unchanged | inviter's bounded wait expires, aborts with "update Bramble on your other device to pair" |
+| **old joiner** | unchanged | inviter's bounded wait expires, aborts with "update Vautix on your other device to pair" |
 | **new joiner** | joiner's entry queues (channel.ts queues inbound), old inviter sends the bundle then reads that entry as its ack: works unchanged | full gate |
 
 The new joiner must send its entry **once, up front, and never again**, or an old inviter is left
@@ -192,7 +192,7 @@ hard-fail with an update prompt; this is deliberate and is called out in the adv
 
 `exp` is purely additive. Verified against this repo's zod 4: `z.object` strips unknown keys, so an
 old client parsing a code carrying `exp` silently ignores it. Keep `v: 1` and the
-`bramble-pair-1.` prefix (a bump would make old joiners fail with a raw zod error instead of a
+`vautix-pair-1.` prefix (a bump would make old joiners fail with a raw zod error instead of a
 readable message). An old joiner ignoring `exp` is not a downgrade risk, because expiry is enforced
 inviter-side by a local timer that tears the session down; the joiner's check only buys a better
 error message. The inviter uses a **local timer** rather than comparing wall clocks, so device
@@ -252,7 +252,7 @@ secrets, and is accurate. Left alone.)
 
 - **sync/pairing-sas.ts** (new): `pairingSas(pskB64, pubA, pubB)`. HKDF-SHA256 over
   `crypto.subtle` in the shape of nostr.ts:57-58: `ikm = psk`, `salt = sorted(pubA, pubB)`
-  concatenated, `info = "bramble/sync/sas/v1"`, 8 bytes out, as a BigInt mod 10^12, zero-padded to
+  concatenated, `info = "vautix/sync/sas/v1"`, 8 bytes out, as a BigInt mod 10^12, zero-padded to
   12 digits, formatted `NNNN NNNN NNNN`.
 - **enroll-host.ts**: protocol reorder per above. The `entry.publicKey !== sess.remoteStatic` check
   moves from :233 (after the bundle) to before it, which is the fix for finding 5. `sendBundle` no

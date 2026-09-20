@@ -13,7 +13,7 @@ import { RestoreShell } from "./screens/Restore/RestoreShell";
 import { VaultSetup, type VaultSetupMode } from "./screens/VaultSetup/VaultSetup";
 
 // Lazy: the import pipeline + parsers (kdbx/csv) are heavy, so load them on demand. RestoreShell,
-// by contrast, only decodes a .bramble blob with deps already in this bundle, so it's imported
+// by contrast, only decodes a .vautix blob with deps already in this bundle, so it's imported
 // directly - it's the primary "Restore from backup" setup tab and a lazy fetch would lag the click.
 const ImportShell = lazy(() =>
 	import("./screens/Import/ImportShell").then((m) => ({ default: m.ImportShell })),

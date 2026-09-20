@@ -162,7 +162,7 @@ test("'Unlock on open' raises the gate by itself, once, and only when it should"
 					.getByRole("button", { name: /Delete this vault/i })
 					.last()
 					.click({ force: true });
-				await expect(page.getByText(/Choose a vault|Welcome to Bramble/i).first()).toBeVisible();
+				await expect(page.getByText(/Choose a vault|Welcome to Vautix/i).first()).toBeVisible();
 			} catch {
 				// Leave it rather than flailing: a stray e2e-* vault is obvious and harmless.
 			}

@@ -1,4 +1,4 @@
-// SPIKE (throwaway): will Chromium accept an explicit rp.id of "bramble.sh" from a
+// SPIKE (throwaway): will Chromium accept an explicit rp.id of "vautix.sh" from a
 // chrome-extension:// origin? If yes, both browsers could register under ONE rpID and a key
 // made in Chrome would unlock in Firefox (Apple Passwords syncs the credential; Windows Hello
 // is an OS store both browsers reach). If no, cross-browser unlock is a property to document,
@@ -20,8 +20,8 @@ const PROBE_JS = `
 const VARIANTS = [
 	{
 		name: "explicit-rpid",
-		note: "THE QUESTION: can a chrome-extension origin assert rp.id=bramble.sh?",
-		rpId: "bramble.sh",
+		note: "THE QUESTION: can a chrome-extension origin assert rp.id=vautix.sh?",
+		rpId: "vautix.sh",
 	},
 	{
 		name: "implicit-control",
@@ -80,7 +80,7 @@ async function run(cfg) {
 	try {
 		created = await withProxyPaused(() => navigator.credentials.create({ publicKey: {
 			challenge: rand(32),
-			rp: cfg.rpId ? { name: "Bramble", id: cfg.rpId } : { name: "Bramble" },
+			rp: cfg.rpId ? { name: "Vautix", id: cfg.rpId } : { name: "Vautix" },
 			user: { id: rand(16), name: "spike@local", displayName: "rpID spike" },
 			pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
 			authenticatorSelection: {
@@ -166,7 +166,7 @@ const PROBE_HTML = `<!DOCTYPE html>
 <html>
 	<head><meta charset="utf-8" /><title>rpID spike</title></head>
 	<body style="font:14px system-ui;margin:16px">
-		<h3>Can Chromium assert rp.id=bramble.sh from an extension origin?</h3>
+		<h3>Can Chromium assert rp.id=vautix.sh from an extension origin?</h3>
 		<p>Run <b>explicit-rpid</b> first. An instant SecurityError is the expected "no".
 		If a dialog appears, pick <b>iCloud Keychain / Apple Passwords</b>.</p>
 		<p>Run <b>implicit-control</b> only if the first one fails, to prove the harness works.</p>
@@ -203,7 +203,7 @@ writeFileSync(path.join(DIR, "manifest.json"), `${JSON.stringify(manifest, null,
 console.log(`stamped. the toolbar popup now opens the probe (the next build restores it)
 
   1. reload the extension at brave://extensions (or vivaldi://extensions)
-  2. click the Bramble toolbar icon
+  2. click the Vautix toolbar icon
   3. click "explicit-rpid"
 
 Expected "no" is an instant SecurityError. Anything else is the interesting answer.

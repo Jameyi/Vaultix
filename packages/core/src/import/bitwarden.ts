@@ -89,7 +89,7 @@ const passkeySchema = z.object({
 	counter: z.string().nullish(),
 	creationDate: z.string().nullish(),
 });
-// Ignore `discoverable` so Bramble preserves every otherwise valid credential.
+// Ignore `discoverable` so Vautix preserves every otherwise valid credential.
 
 type BwField = z.infer<typeof fieldSchema>;
 
@@ -244,7 +244,7 @@ function mapFields(fields: BwField[] | null | undefined): RawField[] {
 		.map((f) => ({ key: f.name ?? "", value: f.value ?? "", hidden: f.type === 1 }));
 }
 
-/** Parse an unencrypted Bitwarden JSON export into Bramble entries. Throws on non-Bitwarden input. */
+/** Parse an unencrypted Bitwarden JSON export into Vautix entries. Throws on non-Bitwarden input. */
 export async function parseBitwarden(
 	raw: string | Uint8Array,
 	context: ImportParserContext,

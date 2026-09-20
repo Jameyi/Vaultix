@@ -71,7 +71,7 @@ a content script cannot request matches for a different domain.
 ### App URIs are not web hosts
 
 An entry's URL list can contain identifiers for a mobile app rather than a
-website. Bramble never writes these, but importers carry them through verbatim:
+website. Vautix never writes these, but importers carry them through verbatim:
 `androidapp://com.example` is Bitwarden's convention, `android://<cert-hash>@com.example`
 is Google Password Manager's. `isAppUri` recognises them and `extractHostname`
 returns empty for them, so they stay out of the match index and out of the
@@ -391,7 +391,7 @@ could not have saved on that site even inside its window.
 
 ## The corner prompt
 
-When the user submits a login form with credentials Bramble does not have, or
+When the user submits a login form with credentials Vautix does not have, or
 that differ from what it has stored, the content script renders an in-page
 top-right card offering to save or update.
 

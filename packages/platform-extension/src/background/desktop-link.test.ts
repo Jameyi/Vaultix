@@ -62,8 +62,8 @@ vi.mock("../platform-api", () => ({
 			// extension origin at import time. An https stand-in, not a real chrome-extension://
 			// URL: Node gives non-special schemes an opaque "null" origin, which would reject
 			// every port including the legitimate ones. Same trick as sender.test.ts.
-			id: "bramble-test",
-			getURL: (p: string) => `https://bramble-test.example/${p}`,
+			id: "vautix-test",
+			getURL: (p: string) => `https://vautix-test.example/${p}`,
 			onConnect: {
 				addListener: (cb: (port: unknown) => void) => h.onConnect.push(cb),
 			},
@@ -396,7 +396,7 @@ describe("pairing borrows the page's native transport", () => {
 	}
 
 	/** A popup or pop-out: the extension origin. See the getURL note on the platform-api mock. */
-	const EXT_SENDER = { origin: "https://bramble-test.example" };
+	const EXT_SENDER = { origin: "https://vautix-test.example" };
 
 	/** Drive a pairing to completion over `page`, resolving what pairWithDesktop returned. */
 	async function pairOver(
@@ -570,7 +570,7 @@ describe("a borrowed pipe serves link requests, not just pairing", () => {
 		let onMessage: ((m: unknown) => void) | undefined;
 		const port = {
 			name: "link-native-proxy",
-			sender: { origin: "https://bramble-test.example" },
+			sender: { origin: "https://vautix-test.example" },
 			postMessage: (m: Record<string, unknown>) => sent.push(m),
 			onMessage: {
 				addListener: (cb: (m: unknown) => void) => {

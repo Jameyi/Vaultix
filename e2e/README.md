@@ -85,8 +85,8 @@ A replacement document must never observe the sentinel. A failure means this req
 must not ship, and must not fall back to frame targeting. The only approved fallback is explicit
 exact-`documentId` targeting with the Firefox support floor raised to 153.
 
-The fixture is deliberately a tiny test-only extension, never Bramble: it proves the *browser's*
-primitive. That Bramble uses that primitive is proven by the extension unit tests.
+The fixture is deliberately a tiny test-only extension, never Vautix: it proves the *browser's*
+primitive. That Vautix uses that primitive is proven by the extension unit tests.
 
 ---
 

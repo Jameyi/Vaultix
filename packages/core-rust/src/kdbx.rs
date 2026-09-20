@@ -748,15 +748,15 @@ fn build_xml(entries: &[SaveEntry], inner_key: &[u8]) -> Res<Vec<u8>> {
     };
 
     let mut x = String::from(r#"<?xml version="1.0" encoding="utf-8" standalone="yes"?>"#);
-    x.push_str("<KeePassFile><Meta><Generator>Bramble</Generator>");
-    x.push_str("<DatabaseName>Bramble Export</DatabaseName>");
+    x.push_str("<KeePassFile><Meta><Generator>Vautix</Generator>");
+    x.push_str("<DatabaseName>Vautix Export</DatabaseName>");
     // No recycle bin and no history: open_inner discards entries in either, and an export
     // should not carry a second, stale copy of every secret.
     x.push_str("<RecycleBinEnabled>False</RecycleBinEnabled>");
     x.push_str("<HistoryMaxItems>0</HistoryMaxItems></Meta>");
     x.push_str("<Root><Group>");
     x.push_str(&format!("<UUID>{}</UUID>", uuid()?));
-    x.push_str("<Name>Bramble</Name>");
+    x.push_str("<Name>Vautix</Name>");
     for e in entries {
         x.push_str("<Entry>");
         x.push_str(&format!("<UUID>{}</UUID>", uuid()?));
@@ -1159,8 +1159,8 @@ mod export_tests {
     /// Writes a real .kdbx to /tmp for cross-checking against an actual KeePass client,
     /// which our own reader can't prove. Ignored by default (it touches the filesystem):
     ///   cargo test --lib emit_for_keepassxc -- --ignored --nocapture
-    ///   printf 'export-pw-123\n' | keepassxc-cli show -s /tmp/bramble-export.kdbx GitHub
-    ///   printf 'export-pw-123\n' | keepassxc-cli show -t /tmp/bramble-export.kdbx GitHub
+    ///   printf 'export-pw-123\n' | keepassxc-cli show -s /tmp/vautix-export.kdbx GitHub
+    ///   printf 'export-pw-123\n' | keepassxc-cli show -t /tmp/vautix-export.kdbx GitHub
     /// Verified against keepassxc-cli 2.7.12: entries list, protected values decrypt, the
     /// `otp` field generates a live code, and custom String fields survive.
     #[test]
@@ -1183,7 +1183,7 @@ mod export_tests {
                 ("Number","4111111111111111",true),("CVV","123",true),("Expiry","08/2027",false)]),
         ];
         let bytes = super::save_inner(&entries, "export-pw-123").expect("save");
-        std::fs::write("/tmp/bramble-export.kdbx", &bytes).unwrap();
+        std::fs::write("/tmp/vautix-export.kdbx", &bytes).unwrap();
         eprintln!("WROTE {} bytes", bytes.len());
     }
 

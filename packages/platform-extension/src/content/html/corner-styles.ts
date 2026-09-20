@@ -1,5 +1,5 @@
 import { html } from "../template";
-import { brambleGlyphDataUrl } from "./bramble-glyph-data";
+import { vautixGlyphDataUrl } from "./vautix-glyph-data";
 
 export const cornerStyles = html`
 		<style>
@@ -58,8 +58,8 @@ export const cornerStyles = html`
 				width: 22px;
 				height: 22px;
 				background: currentColor;
-				-webkit-mask: url(${[brambleGlyphDataUrl]}) center / contain no-repeat;
-				mask: url(${[brambleGlyphDataUrl]}) center / contain no-repeat;
+				-webkit-mask: url(${[vautixGlyphDataUrl]}) center / contain no-repeat;
+				mask: url(${[vautixGlyphDataUrl]}) center / contain no-repeat;
 			}
 			.tp-choices {
 				display: flex;

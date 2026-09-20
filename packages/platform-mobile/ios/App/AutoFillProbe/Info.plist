@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bramble AutoFill</string>
+	<string>Vautix AutoFill</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,7 +23,7 @@
 	<!-- Required to read the biometric-gated VEK Keychain item (Face ID) from the
 	     extension; without it the biometric read fails and nothing can be decrypted. -->
 	<key>NSFaceIDUsageDescription</key>
-	<string>Bramble uses Face ID to unlock and fill your saved passwords.</string>
+	<string>Vautix uses Face ID to unlock and fill your saved passwords.</string>
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
@@ -45,7 +45,7 @@
 				<key>ProvidesPasskeys</key>
 				<true/>
 				<!-- Credential exchange (iOS 26+). Declared on the EXTENSION even though the
-				     transfer runs in the app: this is what makes the OS list Bramble in the
+				     transfer runs in the app: this is what makes the OS list Vautix in the
 				     import/export picker. Older systems ignore both keys.
 				     See docs/credential-exchange.md. -->
 				<key>SupportsCredentialExchange</key>

@@ -149,7 +149,7 @@ export function GeneralSection() {
 			{autostart.available && (
 				<Row
 					icon={<Power className="w-4 h-4 text-primary" />}
-					title={t`Start Bramble at login`}
+					title={t`Start Vautix at login`}
 					subtitle={t`Runs quietly in the menu bar so scheduled backups happen without you opening the app.`}
 				>
 					<div className="flex flex-col items-end gap-1">
@@ -226,13 +226,13 @@ export function GeneralSection() {
 			</Row>
 
 			{/* Passkey provider: extension only (Chromium via webAuthenticationProxy, Firefox via
-			    a MAIN-world content-script override). While on, Bramble handles passkey prompts,
+			    a MAIN-world content-script override). While on, Vautix handles passkey prompts,
 			    so the subtitle is explicit. Toggling applies live and persists for next startup. */}
 			{hasPasskeyProviderToggle && (
 				<Row
 					icon={<KeyRound className="w-4 h-4 text-primary" />}
-					title={t`Use Bramble for passkeys`}
-					subtitle={t`Create and store passkeys for other sites. While on, Bramble handles all passkey prompts in this browser.`}
+					title={t`Use Vautix for passkeys`}
+					subtitle={t`Create and store passkeys for other sites. While on, Vautix handles all passkey prompts in this browser.`}
 				>
 					<div className="flex flex-col items-end gap-1">
 						<Toggle
@@ -251,7 +251,7 @@ export function GeneralSection() {
 									}
 								})()
 							}
-							label={t`Toggle Bramble passkey provider`}
+							label={t`Toggle Vautix passkey provider`}
 						/>
 						{passkeyProviderError && (
 							<span className="text-xs text-red-500 text-right">{passkeyProviderError}</span>

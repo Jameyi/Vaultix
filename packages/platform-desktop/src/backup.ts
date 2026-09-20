@@ -155,7 +155,7 @@ async function report(result: ScheduledBackupResult): Promise<void> {
 /** Listen for the shell's tick. Returns an unsubscribe; call once, from the main window. */
 export function startBackupSchedule(): () => void {
 	const stop = listen(TICK_EVENT, () => {
-		void runDueBackups().catch((e) => console.warn("[bramble] backup tick failed:", e));
+		void runDueBackups().catch((e) => console.warn("[vautix] backup tick failed:", e));
 	});
 	return () => void stop.then((off) => off());
 }

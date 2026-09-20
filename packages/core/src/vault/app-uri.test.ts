@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { appIdFromUri, extractHostname, isAppUri } from "./autofill-index";
 
-// Issue #46, second half. Bramble never writes these; importers carry them
+// Issue #46, second half. Vautix never writes these; importers carry them
 // through verbatim (androidapp:// is Bitwarden's convention, android:// is
 // Google Password Manager's). Before this, extractHostname handed back the
 // reverse-DNS package name as if it were a web host, so an imported entry put

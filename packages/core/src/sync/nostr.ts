@@ -8,14 +8,14 @@ import { base64ToBytes, bytesToBase64, bytesToHex } from "../util/bytes";
 import { sha256Hex } from "../util/hash";
 
 const EPHEMERAL_KIND = 20000;
-const ROOM_LABEL = "bramble/signal";
+const ROOM_LABEL = "vautix/signal";
 const ROOM_TAG = "d";
 
 // Domain-separation contexts so the room-id MAC key and the signaling AES key are
 // independent subkeys of the group key, never the same raw bytes fed to two
 // primitives.
-const ROOM_KDF_INFO = "bramble/room-id";
-const SIGNAL_KDF_INFO = "bramble/signal-key";
+const ROOM_KDF_INFO = "vautix/room-id";
+const SIGNAL_KDF_INFO = "vautix/signal-key";
 
 export interface NostrEvent {
 	id: string;

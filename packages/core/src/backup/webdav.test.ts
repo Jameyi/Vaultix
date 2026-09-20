@@ -5,7 +5,7 @@ const CFG = {
 	kind: "webdav",
 	serverUrl: "http://localhost:8080/remote.php/dav/files/admin/",
 	username: "admin",
-	password: "Bramble-test-123",
+	password: "Vautix-test-123",
 } as const;
 
 afterEach(() => vi.unstubAllGlobals());
@@ -39,7 +39,7 @@ describe("createWebdavTarget", () => {
 	it("omits ambient cookies on every request", async () => {
 		const calls = route(() => new Response("", { status: 201 }));
 		const t = createWebdavTarget(CFG);
-		await t.put("bramble/x.bramble", new Uint8Array([1]), "application/octet-stream");
+		await t.put("vautix/x.vautix", new Uint8Array([1]), "application/octet-stream");
 		expect(calls.length).toBeGreaterThan(0);
 		for (const c of calls) expect(c.init.credentials).toBe("omit");
 	});
@@ -47,14 +47,14 @@ describe("createWebdavTarget", () => {
 	// The folder now arrives in the key, so it must appear exactly once in the URL.
 	it("puts a folder-prefixed key at the right depth", async () => {
 		const calls = route(() => new Response("", { status: 201 }));
-		await createWebdavTarget(CFG).put("backups/x.bramble", new Uint8Array([1]));
+		await createWebdavTarget(CFG).put("backups/x.vautix", new Uint8Array([1]));
 		const put = calls.find((c) => c.init.method === "PUT");
-		expect(put?.url).toBe("http://localhost:8080/remote.php/dav/files/admin/backups/x.bramble");
+		expect(put?.url).toBe("http://localhost:8080/remote.php/dav/files/admin/backups/x.vautix");
 	});
 
 	it("creates each intermediate collection, outermost first", async () => {
 		const calls = route(() => new Response("", { status: 201 }));
-		await createWebdavTarget(CFG).put("a/b/x.bramble", new Uint8Array([1]));
+		await createWebdavTarget(CFG).put("a/b/x.vautix", new Uint8Array([1]));
 		const mkcols = calls.filter((c) => c.init.method === "MKCOL").map((c) => c.url);
 		expect(mkcols).toEqual([
 			"http://localhost:8080/remote.php/dav/files/admin/a",
@@ -64,10 +64,10 @@ describe("createWebdavTarget", () => {
 
 	it("sends basic auth", async () => {
 		const calls = route(() => new Response("", { status: 201 }));
-		await createWebdavTarget(CFG).put("bramble/x.bramble", new Uint8Array([1]));
+		await createWebdavTarget(CFG).put("vautix/x.vautix", new Uint8Array([1]));
 		const put = calls.find((c) => c.init.method === "PUT");
 		const headers = put?.init.headers as Record<string, string>;
-		expect(headers.Authorization).toBe(`Basic ${btoa("admin:Bramble-test-123")}`);
+		expect(headers.Authorization).toBe(`Basic ${btoa("admin:Vautix-test-123")}`);
 	});
 
 	it("surfaces the server's explanation in the thrown error", async () => {
@@ -77,7 +77,7 @@ describe("createWebdavTarget", () => {
 				: new Response("", { status: 201 }),
 		);
 		await expect(
-			createWebdavTarget(CFG).put("bramble/x.bramble", new Uint8Array([1])),
+			createWebdavTarget(CFG).put("vautix/x.vautix", new Uint8Array([1])),
 		).rejects.toThrow("WebDAV PUT failed (401): CSRF check not passed.");
 	});
 
@@ -87,7 +87,7 @@ describe("createWebdavTarget", () => {
 			init.method === "PUT" ? new Response("", { status: 429 }) : new Response("", { status: 201 }),
 		);
 		await expect(
-			createWebdavTarget(CFG).put("bramble/x.bramble", new Uint8Array([1])),
+			createWebdavTarget(CFG).put("vautix/x.vautix", new Uint8Array([1])),
 		).rejects.toThrow("WebDAV PUT failed (429): rate-limited by the server");
 	});
 
@@ -98,7 +98,7 @@ describe("createWebdavTarget", () => {
 				: new Response("", { status: 201 }),
 		);
 		await expect(
-			createWebdavTarget(CFG).put("bramble/x.bramble", new Uint8Array([1])),
+			createWebdavTarget(CFG).put("vautix/x.vautix", new Uint8Array([1])),
 		).rejects.toThrow("WebDAV PUT failed (401)");
 	});
 });

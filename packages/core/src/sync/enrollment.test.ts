@@ -35,7 +35,7 @@ describe("pairing code", () => {
 
 	it("is prefixed and tolerates surrounding whitespace", () => {
 		const encoded = encodePairingCode(code);
-		expect(encoded.startsWith("bramble-pair-1.")).toBe(true);
+		expect(encoded.startsWith("vautix-pair-1.")).toBe(true);
 		expect(decodePairingCode(`  ${encoded}\n`)).toEqual(code);
 	});
 
@@ -44,7 +44,7 @@ describe("pairing code", () => {
 	});
 
 	it("rejects a malformed body", () => {
-		expect(() => decodePairingCode("bramble-pair-1.@@@")).toThrow();
+		expect(() => decodePairingCode("vautix-pair-1.@@@")).toThrow();
 	});
 
 	it("does not carry a VEK field", () => {
@@ -72,7 +72,7 @@ describe("pairing code expiry", () => {
 		// zod strips unknown keys, which is what lets a NEWER code be read by an older build. If
 		// this ever became strict, every future additive field would be a hard compat break.
 		const forward = JSON.stringify({ ...live, somethingNew: "x", nested: { a: 1 } });
-		const encoded = `bramble-pair-1.${btoa(forward)}`;
+		const encoded = `vautix-pair-1.${btoa(forward)}`;
 		expect(decodePairingCode(encoded)).toEqual(live);
 	});
 
@@ -92,10 +92,10 @@ describe("pairing code expiry", () => {
 
 	it("rejects a non-positive or fractional exp", () => {
 		expect(() =>
-			decodePairingCode(`bramble-pair-1.${btoa(JSON.stringify({ ...code, exp: -1 }))}`),
+			decodePairingCode(`vautix-pair-1.${btoa(JSON.stringify({ ...code, exp: -1 }))}`),
 		).toThrow();
 		expect(() =>
-			decodePairingCode(`bramble-pair-1.${btoa(JSON.stringify({ ...code, exp: 1.5 }))}`),
+			decodePairingCode(`vautix-pair-1.${btoa(JSON.stringify({ ...code, exp: 1.5 }))}`),
 		).toThrow();
 	});
 });

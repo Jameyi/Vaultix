@@ -1,6 +1,6 @@
 # Mobile app (Capacitor) plan: feasibility findings
 
-Research notes on shipping Bramble as a native iOS + Android app built with Ionic Capacitor, reusing
+Research notes on shipping Vautix as a native iOS + Android app built with Ionic Capacitor, reusing
 the existing codebase. Captures what is already portable, what needs a new platform implementation,
 the genuine blockers, the unknown unknowns to retire early, and a phased plan.
 
@@ -42,7 +42,7 @@ dated **June 2026** and flagged where they are unverified. Re-verify before acti
   UI / TanStack Router / vault logic / KDBX import / recovery codes / slot policy are all portable,
   and the offscreen-document indirection collapses (mobile has one webview with a DOM, like
   Firefox's event page, so crypto runs in-process in WASM or in a native plugin).
-- **Scope note (v1).** Bramble does **not** host passkeys for other sites or apps in v1; that
+- **Scope note (v1).** Vautix does **not** host passkeys for other sites or apps in v1; that
   credential-provider passkey role is a deferred future feature (now planned in
   `docs/passkey-provider.md`). v1 mobile autofill fills
   **passwords and TOTP** only. This keeps the credential provider simpler (iOS one extension with
@@ -183,7 +183,7 @@ ground truth of what exists.
     fills **silently** when a keep-unlocked session is live (otherwise it asks for auth, then fills the chosen
     record directly). With Auto-lock = "Immediately" every fill still authenticates by design.
   - **UI is SwiftUI** styled from the app's design tokens (the unlock screen mirrors the app auth screen:
-    glyph, heading, card; the list mirrors the in-app vault). The `bramble-glyph.png` is base64-embedded.
+    glyph, heading, card; the list mirrors the in-app vault). The `vautix-glyph.png` is base64-embedded.
   - **Release pipeline:** `pnpm ios:beta` (fastlane: build + TestFlight upload, **timestamp build numbers**
     so the auto-bump can't collide) and `pnpm ios:ipa` (distribution IPA to ~/Desktop). Needs an ASC API key
     in `<repo root>/fastlane/.env` + `AuthKey.p8` (gitignored). Wiring is idempotent (`scripts/add-native-crypto.rb`).
@@ -222,7 +222,7 @@ ground truth of what exists.
   classic `AutofillService` below is pure AOSP, so it's unaffected; a future passkey/Credential-Manager
   path must stay Play-free.
 - **Android autofill: BUILT + device-tested, at iOS parity (commit `a51edca`).** The classic AOSP
-  `AutofillService` (`BrambleAutofillService` + `Datasets`/`InlineHelper`/`AutofillCaps`, registered via
+  `AutofillService` (`VautixAutofillService` + `Datasets`/`InlineHelper`/`AutofillCaps`, registered via
   `res/xml/autofill_service.xml` + the manifest) runs in its own `:autofill` process, reads the real vault
   via the uniffi core (`VaultReader`), and fills with dataset-level auth through an `AutofillUnlockActivity`
   unlock screen (`setAuthentication`), plus a `KeepUnlockedStore` keep-unlocked window, inline (IME)
@@ -332,14 +332,14 @@ package is left untouched; both ship from one `core`.
   - **CAVEAT (verified on device, June 2026): WASM needs JIT, and iOS disables JIT in two states,
     breaking all crypto (`ReferenceError: Can't find variable: WebAssembly`):**
     1. **Lockdown Mode** disables JIT system-wide, so under it **the vault cannot be created or
-       unlocked at all** — and Bramble's security-conscious audience is the most likely to run
+       unlocked at all** — and Vautix's security-conscious audience is the most likely to run
        Lockdown Mode. This is a **real product limitation today**, not a dev-only quirk.
     2. Running attached to the **Xcode debugger** (lldb) also disables JIT; launch from the home
        screen instead (dev-only annoyance). See `development.md`.
     - **The fix for both is the Phase 3 native Rust crypto core (uniffi):** native AES/Argon2/KDBX
       needs no JIT, so it works under Lockdown Mode. So the uniffi refactor isn't only an autofill
       enabler — it's what makes the app usable under Lockdown Mode. Until then, document that
-      Bramble requires Lockdown Mode off on iOS.
+      Vautix requires Lockdown Mode off on iOS.
 - **WebCrypto / SubtleCrypto.** `crypto.subtle` and `isSecureContext` are available: Capacitor serves
   the app from `capacitor://localhost` (iOS) and `https://localhost` (Android), and `localhost` is a
   "potentially trustworthy" secure context per the W3C spec. Capacitor's docs confirm secure-context
@@ -475,7 +475,7 @@ by native autofill UI. Medium, mechanical.
 The user-visible promise of a mobile password manager is filling logins into other apps and into
 mobile browsers. On mobile that is not a browser extension and not the webview: it is the OS
 **credential provider** mechanism, implemented as native targets (Swift on iOS, Kotlin on Android)
-that run outside Bramble's webview and must read and decrypt the vault themselves. This is the
+that run outside Vautix's webview and must read and decrypt the vault themselves. This is the
 largest and riskiest workstream. None of `packages/platform-extension/src/content/` (detection,
 fill, capture, picker, corner-prompt) ports; the fill engine is rebuilt natively.
 
@@ -507,7 +507,7 @@ account, managed capability) on both app and extension, and `Info.plist` capabil
 deferred with passkey hosting. Lifecycle:
 
 - **QuickType bar (fast path):** `provideCredentialWithoutUserInteraction(for:)`. The OS already
-  painted suggestion chips from the identity store (below) without launching Bramble. If the vault
+  painted suggestion chips from the identity store (below) without launching Vautix. If the vault
   is unlocked (cached key available), return the secret with no UI; otherwise throw
   `ASExtensionError.userInteractionRequired`.
 - **Locked / reprompt:** the OS relaunches and calls `prepareInterfaceToProvideCredential(for:)`;
@@ -531,7 +531,7 @@ deferred with passkey hosting. Lifecycle:
 `ASCredentialIdentityStore` holds **identities only** (service + username + an opaque
 `recordIdentifier`, no secret). The main app populates it while the vault is unlocked, so the OS can
 show QuickType suggestions while the vault is locked; on selection the extension gets the
-`recordIdentifier` back and fetches/decrypts the real secret. This maps cleanly onto Bramble's
+`recordIdentifier` back and fetches/decrypts the real secret. This maps cleanly onto Vautix's
 existing design, which already separates match summaries from secrets in `autofill-index` and
 `autofill-ui`.
 
@@ -543,7 +543,7 @@ existing design, which already separates match summaries from secrets in `autofi
   For password-and-TOTP autofill this is sufficient on every Android version, so it is the only
   provider v1 ships. Manifest: `BIND_AUTOFILL_SERVICE`, action
   `android.service.autofill.AutofillService`, and an `android.autofill` meta-data resource; the user
-  enables Bramble under Settings -> Passwords, passkeys and autofill.
+  enables Vautix under Settings -> Passwords, passkeys and autofill.
 - **Deferred: Credential Manager provider** (`CredentialProviderService`, API 34+ / Android 14):
   `onBeginGetCredentialRequest` / `onBeginCreateCredentialRequest`. This is the only path for
   **passkeys**, so it lands with passkey hosting (future), not v1. At that point you run both
@@ -578,11 +578,11 @@ native `onSaveRequest` capture into the existing `offerToSave` / `neverSaveSites
 
 Two passkey concerns are easy to conflate, and **both are out of v1 scope**:
 
-- **Unlocking Bramble's own vault with a passkey** (the WebAuthn/PRF question in Hard problem 2: a
+- **Unlocking Vautix's own vault with a passkey** (the WebAuthn/PRF question in Hard problem 2: a
   biometric or platform passkey deriving the KEK). v1 unlock is biometric + password + recovery
   code; passkey/PRF unlock is the optional long-lead item in the plan.
-- **Hosting passkeys for other sites and apps** (Bramble as a passkey provider: the user's
-  third-party passkeys live in Bramble and it satisfies their WebAuthn ceremonies through the
+- **Hosting passkeys for other sites and apps** (Vautix as a passkey provider: the user's
+  third-party passkeys live in Vautix and it satisfies their WebAuthn ceremonies through the
   credential provider). This is a **future feature, not built now.** It would add generating and
   storing P-256 keys and hand-building attestation/assertion (CBOR/COSE; Apple's docs are thin, so
   reference Dashlane/Bitwarden), the iOS `ProvidesPasskeys` capability + `ASPasskey*` flows, and the
@@ -611,14 +611,14 @@ The provider is native code with no webview and no WASM. On its own it must:
 
 **The memory constraint is the design driver.** iOS credential-provider extensions run under a hard
 cap of roughly 120 MB (consensus from shipping managers; Apple does not publish the exact AutoFill
-figure). Bramble's password slot uses Argon2id at 64 MiB, which is impractical inside that cap (the
+figure). Vautix's password slot uses Argon2id at 64 MiB, which is impractical inside that cap (the
 KeePass family reports Argon2 must stay under ~32 MiB, ~19 MiB advised, for autofill to survive). So
 **do not run Argon2id in the extension.** Adopt the industry pattern: the main app, which has full
 memory, runs Argon2id once at unlock, derives the VEK, then re-wraps it (or a dedicated wrapping key)
 under the biometric-gated Keychain/Keystore item; the extension biometric-unwraps that and performs
 only an AES-256-GCM unwrap plus the KDBX parse, never the KDF.
 
-This is a new unlock path that intersects Bramble's VEK/KEK/slot model (`vault-format.ts`,
+This is a new unlock path that intersects Vautix's VEK/KEK/slot model (`vault-format.ts`,
 `slot-policy.ts`): mobile adds a **cached-wrapping-key** path distinct from the Argon2 password slot.
 Be explicit that caching a hardware-gated key at rest is a deliberate attack-surface decision (it is
 what Bitwarden does for biometric unlock).
@@ -794,7 +794,7 @@ Implementation status up top).
 
 ### Deferred (future features, post-v1)
 
-- **Passkey hosting** (Bramble as a passkey provider for other sites and apps): adds the Android
+- **Passkey hosting** (Vautix as a passkey provider for other sites and apps): adds the Android
   Credential Manager `CredentialProviderService`, the iOS `ProvidesPasskeys` capability +
   `ASPasskey*` registration/assertion, and P-256 keygen + CBOR/COSE attestation. Additive on top of
   the Phase 3 credential-provider plumbing (shared storage, biometric unlock, Rust core). The iOS

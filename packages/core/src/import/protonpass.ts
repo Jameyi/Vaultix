@@ -69,7 +69,7 @@ function splitExpiry(raw: string | null | undefined): { expMonth: string; expYea
 	return { expMonth: String(Number(raw.slice(0, 2))), expYear: raw.slice(2) };
 }
 
-/** Parse a Proton Pass zip export into Bramble entries. Throws on non-Proton input. */
+/** Parse a Proton Pass zip export into Vautix entries. Throws on non-Proton input. */
 export function parseProtonPass(raw: string | Uint8Array): ImportResult {
 	const parsed = readZippedJson(raw, {
 		findData: (files) => Object.entries(files).find(([p]) => p.endsWith("data.json"))?.[1],

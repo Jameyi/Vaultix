@@ -5,7 +5,7 @@ name: Deploy website (Cloudflare Pages)
 # repo secrets:
 #   CLOUDFLARE_API_TOKEN   - token with "Account > Cloudflare Pages > Edit"
 #   CLOUDFLARE_ACCOUNT_ID  - the target account's ID
-# The Pages project (name from website/wrangler.jsonc: bramble-website) must exist.
+# The Pages project (name from website/wrangler.jsonc: vautix-website) must exist.
 on:
   push:
     branches: [main]

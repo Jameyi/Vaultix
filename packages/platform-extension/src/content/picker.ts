@@ -68,7 +68,7 @@ let suppressedAutocomplete: string | null = null;
 const LOAD_BEARING_TOKEN_RE = /\bone-time-code\b/i;
 
 // Route every anchorField change through here so the browser's native autofill is
-// suppressed on exactly the field Bramble is handling and restored the moment we release
+// suppressed on exactly the field Vautix is handling and restored the moment we release
 // it - otherwise the native dropdown renders on top of ours. The MutationObserver watches
 // childList/subtree only (not attributes), so this write never invalidates the field-model
 // cache directly; our own host insertion does, and the re-parse that follows reads whatever
@@ -253,7 +253,7 @@ function stopPositionTracking(): void {
 
 // --- Shadow dropdown (COEP fallback renderer) ---
 
-const DROPDOWN_ID = "bramble-autofill-dropdown";
+const DROPDOWN_ID = "vautix-autofill-dropdown";
 
 let dropdownEl: HTMLElement | null = null;
 // Joined ids of the rendered matches; lets re-queries with the same set skip

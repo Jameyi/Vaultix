@@ -34,8 +34,8 @@ const ORIGINS = {
 const CREATE = process.argv.includes("--create");
 // Whatever site the fake signup is pretending to be. Shows up in the provider's dashboard, so it
 // is obviously a test rather than something the user has to puzzle over later.
-const FOR_DOMAIN = "bramble-spike.example.com";
-const DESCRIPTION = "Bramble Phase 0 spike (safe to delete)";
+const FOR_DOMAIN = "vautix-spike.example.com";
+const DESCRIPTION = "Vautix Phase 0 spike (safe to delete)";
 
 const green = (s: string) => `\x1b[32m${s}\x1b[0m`;
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`;
@@ -218,7 +218,7 @@ async function fastmail() {
 					{
 						accountId,
 						create: {
-							bramble: { state: "enabled", forDomain: FOR_DOMAIN, description: DESCRIPTION },
+							vautix: { state: "enabled", forDomain: FOR_DOMAIN, description: DESCRIPTION },
 						},
 					},
 					"0",
@@ -226,7 +226,7 @@ async function fastmail() {
 			],
 		}),
 	});
-	const made = pick(created.body, "methodResponses.0.1.created.bramble") as
+	const made = pick(created.body, "methodResponses.0.1.created.vautix") as
 		| { email?: string; state?: string }
 		| undefined;
 	console.log(`     ${bold("alias:")} ${made?.email} state=${made?.state}`);

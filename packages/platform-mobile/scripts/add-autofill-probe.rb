@@ -12,8 +12,8 @@ require "xcodeproj"
 
 PROJECT = File.expand_path("../ios/App/App.xcodeproj", __dir__)
 EXT_NAME = "AutoFillProbe"
-APP_GROUP = "group.app.bramble.mobile"
-BUNDLE_ID = "app.bramble.mobile.AutoFillProbe"
+APP_GROUP = "group.app.vautix.mobile"
+BUNDLE_ID = "app.vautix.mobile.AutoFillProbe"
 
 project = Xcodeproj::Project.open(PROJECT)
 app = project.targets.find { |t| t.name == "App" } or abort("App target not found")

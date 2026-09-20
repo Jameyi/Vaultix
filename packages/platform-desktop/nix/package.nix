@@ -2,7 +2,7 @@
 #
 # For NixOS users, and for anyone who wants a build that fetches nothing at build time and
 # produces the same bytes twice. This is a genuine source build: the Rust binary and the frontend
-# are both compiled here, not lifted out of the .deb we publish to apt.bramble.sh.
+# are both compiled here, not lifted out of the .deb we publish to apt.vautix.sh.
 #
 # It deliberately does NOT self-update: a Nix store path is read-only, so the updater could never
 # replace anything. The app already knows — `can_self_update()` is false without `APPIMAGE` in the
@@ -36,7 +36,7 @@ let
   tauriConf = lib.importJSON ../src-tauri/tauri.conf.json;
 in
 rustPlatform.buildRustPackage (finalAttrs: {
-  pname = "bramble";
+  pname = "vautix";
   version = tauriConf.version;
 
   inherit src;
@@ -95,9 +95,9 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
   meta = {
     description = "Offline-first password manager with direct device-to-device sync";
-    homepage = "https://bramble.sh";
+    homepage = "https://vautix.sh";
     license = lib.licenses.gpl3Only;
-    mainProgram = "bramble-desktop";
+    mainProgram = "vautix-desktop";
     platforms = lib.platforms.linux;
   };
 })

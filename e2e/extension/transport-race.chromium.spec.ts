@@ -12,7 +12,7 @@ import {
 } from "./transport-race/harness";
 
 // Chromium half of the document-bound transport gate (GHSA-xm22-vwcg-9jqg). Deliberately does NOT
-// use ./fixtures.ts: this loads the tiny contract fixture, not Bramble, and so needs no
+// use ./fixtures.ts: this loads the tiny contract fixture, not Vautix, and so needs no
 // `build:chromium`. Excluded from `pnpm test:e2e`; run via `pnpm test:transport-race`.
 
 let server: FixtureServer;
@@ -21,7 +21,7 @@ let profile: string;
 
 test.beforeAll(async () => {
 	server = await startFixtureServer();
-	profile = await mkdtemp(path.join(tmpdir(), "bramble-transport-chromium-"));
+	profile = await mkdtemp(path.join(tmpdir(), "vautix-transport-chromium-"));
 	try {
 		browser = await chromium.launchPersistentContext(profile, {
 			args: [

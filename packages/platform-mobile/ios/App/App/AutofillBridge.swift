@@ -22,35 +22,35 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 		CAPPluginMethod(name: "consumePendingPasskeys", returnType: CAPPluginReturnPromise),
 	]
 
-	// Shared identifiers (App Group, Keychain group, keys) live in BrambleVault, compiled
+	// Shared identifiers (App Group, Keychain group, keys) live in VautixVault, compiled
 	// into both this target and the AutoFill extension so the two processes can't drift.
 
 	// iv/ciphertext = encryptWithVek over the JSON login list. Opaque without the VEK.
 	@objc func sync(_ call: CAPPluginCall) {
-		let defaults = UserDefaults(suiteName: BrambleVault.appGroup)
+		let defaults = UserDefaults(suiteName: VautixVault.appGroup)
 		if let iv = call.getString("iv"), let ct = call.getString("ciphertext"),
 			let data = try? JSONSerialization.data(withJSONObject: ["iv": iv, "ciphertext": ct])
 		{
-			defaults?.set(data, forKey: BrambleVault.bundleKey)
+			defaults?.set(data, forKey: VautixVault.bundleKey)
 		}
 		// Stamp the bundle with the vault it was encrypted for. The extension compares this to the
 		// vault the cached VEK was armed for and only offers the fast unlock when they match.
 		if let vaultId = call.getString("vaultId") {
-			defaults?.set(vaultId, forKey: BrambleVault.bundleVaultKey)
+			defaults?.set(vaultId, forKey: VautixVault.bundleVaultKey)
 		}
 		// The password slot lets the extension unlock itself with the master password.
 		// Non-secret (the wrappedVek stays AES-encrypted); store as JSON Data.
 		if let slot = call.getObject("slot"),
 			let slotJson = try? JSONSerialization.data(withJSONObject: slot)
 		{
-			defaults?.set(slotJson, forKey: BrambleVault.slotKey)
+			defaults?.set(slotJson, forKey: VautixVault.slotKey)
 		}
 		// Passkey bundle (provider role): a second VEK-encrypted blob the extension decrypts
 		// to assert. Its own key so the login/password path above is untouched.
 		if let pkIv = call.getString("passkeyIv"), let pkCt = call.getString("passkeyCiphertext"),
 			let pkData = try? JSONSerialization.data(withJSONObject: ["iv": pkIv, "ciphertext": pkCt])
 		{
-			defaults?.set(pkData, forKey: BrambleVault.passkeyBundleKey)
+			defaults?.set(pkData, forKey: VautixVault.passkeyBundleKey)
 		}
 		// QuickType identity store: populated only when the user opted into keyboard
 		// suggestions (the JS sends identities then). Each carries a domain + username +
@@ -70,7 +70,7 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 		}
 		// Replace atomically (an empty list clears the store). saveCredentialIdentities is an
 		// upsert and removeAll-then-save can race iOS's indexing; replaceCredentialIdentities
-		// does both in one step. It silently no-ops unless the user has enabled Bramble as an
+		// does both in one step. It silently no-ops unless the user has enabled Vautix as an
 		// AutoFill provider, so guard on the store state (and so QuickType only populates once
 		// the provider is actually on).
 		if #available(iOS 17.0, *) {
@@ -126,10 +126,10 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 	// write the vault itself). Returns the VEK-encrypted entries and clears them; the app
 	// decrypts and merges them into the vault. See CredentialProviderViewController.stashPending.
 	@objc func consumePendingPasskeys(_ call: CAPPluginCall) {
-		let defaults = UserDefaults(suiteName: BrambleVault.appGroup)
+		let defaults = UserDefaults(suiteName: VautixVault.appGroup)
 		let pending =
-			(defaults?.array(forKey: BrambleVault.pendingPasskeysKey) as? [[String: String]]) ?? []
-		defaults?.removeObject(forKey: BrambleVault.pendingPasskeysKey)
+			(defaults?.array(forKey: VautixVault.pendingPasskeysKey) as? [[String: String]]) ?? []
+		defaults?.removeObject(forKey: VautixVault.pendingPasskeysKey)
 		call.resolve(["pending": pending])
 	}
 
@@ -137,13 +137,13 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 	// must also drop the pending-passkey handoff and the live keep-unlocked session VEK: both
 	// outlive the vault otherwise, and both are readable with the same credential it used.
 	@objc func clear(_ call: CAPPluginCall) {
-		let defaults = UserDefaults(suiteName: BrambleVault.appGroup)
-		defaults?.removeObject(forKey: BrambleVault.bundleKey)
-		defaults?.removeObject(forKey: BrambleVault.slotKey)
-		defaults?.removeObject(forKey: BrambleVault.passkeyBundleKey)
-		defaults?.removeObject(forKey: BrambleVault.pendingPasskeysKey)
+		let defaults = UserDefaults(suiteName: VautixVault.appGroup)
+		defaults?.removeObject(forKey: VautixVault.bundleKey)
+		defaults?.removeObject(forKey: VautixVault.slotKey)
+		defaults?.removeObject(forKey: VautixVault.passkeyBundleKey)
+		defaults?.removeObject(forKey: VautixVault.pendingPasskeysKey)
 		// Without this the extension still believes it holds a bundle for the deleted vault.
-		defaults?.removeObject(forKey: BrambleVault.bundleVaultKey)
+		defaults?.removeObject(forKey: VautixVault.bundleVaultKey)
 		Self.deleteAllSessions()
 		ASCredentialIdentityStore.shared.removeAllCredentialIdentities { _, _ in call.resolve() }
 	}
@@ -152,7 +152,7 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 	// Turning it off clears any live cached session immediately.
 	@objc func setKeepUnlocked(_ call: CAPPluginCall) {
 		let minutes = call.getInt("minutes") ?? 0
-		UserDefaults(suiteName: BrambleVault.appGroup)?.set(minutes, forKey: BrambleVault.keepUnlockedKey)
+		UserDefaults(suiteName: VautixVault.appGroup)?.set(minutes, forKey: VautixVault.keepUnlockedKey)
 		if minutes == 0 { Self.deleteAllSessions() }
 		call.resolve()
 	}
@@ -166,8 +166,8 @@ public class AutofillBridgePlugin: CAPPlugin, CAPBridgedPlugin {
 		SecItemDelete(
 			[
 				kSecClass as String: kSecClassGenericPassword,
-				kSecAttrService as String: BrambleVault.sessionService,
-				kSecAttrAccessGroup as String: BrambleVault.accessGroup,
+				kSecAttrService as String: VautixVault.sessionService,
+				kSecAttrAccessGroup as String: VautixVault.accessGroup,
 			] as CFDictionary)
 	}
 }

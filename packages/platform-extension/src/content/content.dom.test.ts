@@ -1022,7 +1022,7 @@ describe("content: deferred direct response cancellation", () => {
 		expect(submitFromField).toHaveBeenCalledWith(pass);
 	});
 
-	it("keeps Bramble synthetic input inert after scheduling submit", async () => {
+	it("keeps Vautix synthetic input inert after scheduling submit", async () => {
 		vi.useFakeTimers();
 		const user = document.getElementById("user") as HTMLInputElement;
 		const pass = document.getElementById("pass") as HTMLInputElement;

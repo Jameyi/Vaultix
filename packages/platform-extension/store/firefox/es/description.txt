@@ -1,4 +1,4 @@
-Bramble es un gestor de contraseñas que reside en su navegador y mantiene sus secretos en su propio equipo. Sin cuentas, sin servidores que alojen su bóveda, sin empresas que puedan sufrir una filtración y exponerlo todo. Usted controla la bóveda, usted posee la contraseña, y eso es todo.
+Vautix es un gestor de contraseñas que reside en su navegador y mantiene sus secretos en su propio equipo. Sin cuentas, sin servidores que alojen su bóveda, sin empresas que puedan sufrir una filtración y exponerlo todo. Usted controla la bóveda, usted posee la contraseña, y eso es todo.
 
 Funciona en Firefox, LibreWolf, Waterfox, Zen y otros navegadores basados en Firefox. Instálelo y estará operativo en aproximadamente un minuto.
 
@@ -6,7 +6,7 @@ QUÉ HACE
 
 Sus contraseñas se cifran en su dispositivo y se almacenan en el almacenamiento propio de la extensión del navegador, en su equipo. No hay cuentas ni servidores que alojen su bóveda. Configúrelo una vez y comenzará a autocompletar inicios de sesión, guardar nuevos y generar contraseñas de inmediato.
 
-¿Tiene más de un dispositivo? Vincúlelos y Bramble mantendrá su bóveda sincronizada entre ellos a través de un canal cifrado de extremo a extremo. El relé que presenta sus dispositivos solo ve texto cifrado y no almacena nada, por lo que sus secretos nunca llegan a ningún servidor.
+¿Tiene más de un dispositivo? Vincúlelos y Vautix mantendrá su bóveda sincronizada entre ellos a través de un canal cifrado de extremo a extremo. El relé que presenta sus dispositivos solo ve texto cifrado y no almacena nada, por lo que sus secretos nunca llegan a ningún servidor.
 
 CARACTERÍSTICAS
 
@@ -19,7 +19,7 @@ CARACTERÍSTICAS
 - Generador de contraseñas integrado.
 - Copias de seguridad cifradas. Exporte toda su bóveda a un archivo cifrado en cualquier momento para obtener una copia offline que usted conserva. Aún necesita su contraseña maestra para abrirla.
 - Códigos de recuperación. Cada bóveda obtiene un código de recuperación seguro durante la configuración: una copia de seguridad imprimible que la desbloquea independientemente de su contraseña maestra.
-- Códigos TOTP / 2FA. Pegue una URI otpauth:// o un secreto y Bramble genera los códigos.
+- Códigos TOTP / 2FA. Pegue una URI otpauth:// o un secreto y Vautix genera los códigos.
 - Verificación opcional de filtraciones. Consulta Have I Been Pwned mediante k-anonimato, por lo que nada sobre su contraseña sale de su equipo. Desactivado por defecto.
 - Bloqueo automático tras 15 minutos de inactividad (configurable).
 - Importación desde KeePass, Bitwarden, Proton Pass y 1Password.
@@ -28,7 +28,7 @@ POR QUÉ LOCAL PRIMERO
 
 Los gestores en la nube almacenan las bóvedas de todos en sus servidores, lo que constituye un objetivo enorme. Cuando uno es vulnerado, no se filtra una bóveda, sino millones a la vez, a menudo revelado meses después.
 
-Bramble invierte esto:
+Vautix invierte esto:
 - Sin servidor que vulnerar. Su bóveda nunca sale de su control.
 - Sin cuentas, sin suscripciones, sin telemetría. Nada que requiera registro.
 - Sus dispositivos, sus datos. Sincronícelo entre sus propios dispositivos, manténgalo en un solo equipo sin conexión, o exporte una copia de seguridad cifrada que usted conserva. Nada se almacena nunca en un servidor ajeno.
@@ -36,8 +36,8 @@ Bramble invierte esto:
 
 CÓMO FUNCIONA EL CIFRADO
 
-Bramble utiliza ranuras de clave al estilo LUKS y cifrado por sobre envoltura. Una Clave de Bóveda aleatoria protege sus datos. Cada método de desbloqueo (contraseña maestra, código de recuperación) deriva su propia Clave de Cifrado de Clave que desenvuelve una copia de esa misma Clave de Bóveda, por lo que agregar o revocar un método de desbloqueo nunca vuelve a cifrar una sola entrada. Luego, la Clave de Bóveda desenvuelve una clave nueva por entrada para cada elemento. Todo es AES-256-GCM.
+Vautix utiliza ranuras de clave al estilo LUKS y cifrado por sobre envoltura. Una Clave de Bóveda aleatoria protege sus datos. Cada método de desbloqueo (contraseña maestra, código de recuperación) deriva su propia Clave de Cifrado de Clave que desenvuelve una copia de esa misma Clave de Bóveda, por lo que agregar o revocar un método de desbloqueo nunca vuelve a cifrar una sola entrada. Luego, la Clave de Bóveda desenvuelve una clave nueva por entrada para cada elemento. Todo es AES-256-GCM.
 
 ¿VIENE DE KEEPASS?
 
-Se sentirá como en casa: su bóveda cifrada, su control, sin intermediarios en la nube, y Bramble importa sus archivos KDBX4. Las diferencias: reside en su navegador (sin aplicación de escritorio independiente ni puente de complementos), el autocompletado está integrado con coincidencia de dominios y un menú desplegable en la página, y ofrece una compilación moderna con Argon2id y AES-256-GCM en lugar de una variedad de complementos. Interfaz limpia, modo oscuro incluido.
+Se sentirá como en casa: su bóveda cifrada, su control, sin intermediarios en la nube, y Vautix importa sus archivos KDBX4. Las diferencias: reside en su navegador (sin aplicación de escritorio independiente ni puente de complementos), el autocompletado está integrado con coincidencia de dominios y un menú desplegable en la página, y ofrece una compilación moderna con Argon2id y AES-256-GCM en lugar de una variedad de complementos. Interfaz limpia, modo oscuro incluido.

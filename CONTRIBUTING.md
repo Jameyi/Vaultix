@@ -1,6 +1,6 @@
-# Contributing to Bramble
+# Contributing to Vautix
 
-Bramble is open source and contributions are welcome. It is also a password
+Vautix is open source and contributions are welcome. It is also a password
 manager, so the bar for changes is higher than for most projects. This file
 describes what an acceptable contribution looks like, so you are not guessing.
 
@@ -10,7 +10,7 @@ describes what an acceptable contribution looks like, so you are not guessing.
   and changes to the vault format or crypto should be discussed before you write
   code. Bug reports and small fixes can go straight to a pull request.
 - **Found a security issue? Do not open a public issue.** Report it privately via
-  [GitHub Security Advisories](https://github.com/flythenimbus/bramble/security/advisories)
+  [GitHub Security Advisories](https://github.com/flythenimbus/vautix/security/advisories)
   or email. See [SECURITY.md](SECURITY.md).
 - **Read the design docs.** [docs/](docs/README.md) holds the reasoning behind the
   crypto, unlock flows, storage, and autofill. Code comments point there instead
@@ -94,7 +94,7 @@ sync.
 Especially welcome: new real-site autofill fixtures
 (`packages/platform-extension/src/fixtures/sites`) and import-format coverage
 (`packages/platform-extension/src/fixtures/imports`). These are the cheapest way
-to make Bramble more robust and they rarely conflict with other work.
+to make Vautix more robust and they rarely conflict with other work.
 
 ## User-facing strings
 
@@ -122,5 +122,5 @@ ci:check && pnpm test`.
 
 ## Licensing
 
-Bramble is GPLv3. By contributing you agree that your contribution is licensed
+Vautix is GPLv3. By contributing you agree that your contribution is licensed
 under the same terms. See [LICENSE](LICENSE).

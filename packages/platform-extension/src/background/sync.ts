@@ -65,7 +65,7 @@ import * as vekStore from "./vek-store";
 // runs in this same event page, so reportSyncStatus already logs there. Diagnostic only; doesn't
 // consume the message (the popup panel still receives it).
 api.runtime.onMessage.addListener((msg: { type?: string; payload?: { status?: string } }) => {
-	if (msg?.type === "SYNC_STATUS") console.log("[bramble:sync]", msg.payload?.status ?? "");
+	if (msg?.type === "SYNC_STATUS") console.log("[vautix:sync]", msg.payload?.status ?? "");
 	return false;
 });
 
@@ -240,7 +240,7 @@ let stopInFlight: Promise<void> = Promise.resolve();
  */
 function abandonStart(stage: string, startEpoch: number, vekEpoch: number): void {
 	console.warn(
-		`[bramble:bg] sync start abandoned at ${stage}: the vault session moved`,
+		`[vautix:bg] sync start abandoned at ${stage}: the vault session moved`,
 		// Process-local counters only; no key material, vault id or roster data.
 		{
 			stopSuperseded: startEpoch !== syncEpoch,

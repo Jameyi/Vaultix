@@ -92,8 +92,8 @@ let account = ASImportableAccount(
 	collections: [], items: [item])
 
 let payload = ASExportedCredentialData(
-	accounts: [account], formatVersion: .v1, exporterRelyingPartyIdentifier: "app.bramble.mobile",
-	exporterDisplayName: "Bramble", timestamp: Date(timeIntervalSince1970: 1_760_000_000))
+	accounts: [account], formatVersion: .v1, exporterRelyingPartyIdentifier: "app.vautix.mobile",
+	exporterDisplayName: "Vautix", timestamp: Date(timeIntervalSince1970: 1_760_000_000))
 
 let enc = JSONEncoder()
 enc.outputFormatting = [.prettyPrinted, .sortedKeys]

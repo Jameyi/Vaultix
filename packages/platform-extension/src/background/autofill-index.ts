@@ -105,7 +105,7 @@ export const indexHydration = (async () => {
 		const hostnames = r[HOSTNAMES_KEY];
 		if (Array.isArray(hostnames)) for (const h of hostnames) knownHostnames.add(h);
 	} catch (e) {
-		console.warn("[bramble:bg] hostname hydration failed", e);
+		console.warn("[vautix:bg] hostname hydration failed", e);
 	}
 })();
 
@@ -114,7 +114,7 @@ async function persistKnownHostnames(): Promise<void> {
 	try {
 		await api.storage.local.set({ [HOSTNAMES_KEY]: Array.from(knownHostnames) });
 	} catch (e) {
-		console.warn("[bramble:bg] persistKnownHostnames failed", e);
+		console.warn("[vautix:bg] persistKnownHostnames failed", e);
 	}
 }
 
@@ -421,7 +421,7 @@ async function hydrateIndexForOwner(
 		// next reader will discard the no-longer-owned plaintext index.
 		return autofillSessionOwnerIsCurrent(owner);
 	} catch (e) {
-		console.warn("[bramble:bg] hydrateAutofillIndexFromDisk failed", e);
+		console.warn("[vautix:bg] hydrateAutofillIndexFromDisk failed", e);
 		return false;
 	}
 }
@@ -670,14 +670,14 @@ on("AUTOFILL_SET_INDEX", autofillSetIndex);
 async function fillFromDesktop(fill: DesktopFill): Promise<void> {
 	const [tab] = await api.tabs.query({ active: true, lastFocusedWindow: true }).catch(() => []);
 	if (tab?.id === undefined) {
-		console.warn("[bramble:link] fill: no active tab to fill");
+		console.warn("[vautix:link] fill: no active tab to fill");
 		return;
 	}
 	// The app sends the authenticator KEY, the same seed its own index holds, and the code is
 	// computed here rather than there: this is where the one TOTP implementation lives. Passing
 	// the key through would type the seed itself into the page's one-time-code field.
 	const totp = liveTotpCode(fill.totpKey);
-	if (fill.totpKey && !totp) console.warn("[bramble:link] fill: unusable authenticator key");
+	if (fill.totpKey && !totp) console.warn("[vautix:link] fill: unusable authenticator key");
 	const reply = await api.tabs
 		.sendMessage(
 			tab.id,
@@ -690,16 +690,16 @@ async function fillFromDesktop(fill: DesktopFill): Promise<void> {
 		.catch((e) => {
 			// No content script on this page (a settings tab, the store, a PDF), or one orphaned by
 			// an extension reload, which keeps running but can no longer answer.
-			console.warn("[bramble:link] fill: the page did not answer:", e);
+			console.warn("[vautix:link] fill: the page did not answer:", e);
 			return undefined;
 		});
-	if (reply && reply.ok !== true) console.warn("[bramble:link] fill declined:", reply);
+	if (reply && reply.ok !== true) console.warn("[vautix:link] fill declined:", reply);
 }
 
 onDesktopFillRequest((fill) => {
 	// Caught rather than left to become an unhandled rejection, which is how the first version of
 	// this could fail with nothing in the console at all.
-	void fillFromDesktop(fill).catch((e) => console.warn("[bramble:link] fill failed:", e));
+	void fillFromDesktop(fill).catch((e) => console.warn("[vautix:link] fill failed:", e));
 });
 
 /** Keep the desktop app told which page this browser is on, so its panel can name the target. */

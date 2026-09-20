@@ -6,7 +6,7 @@
 
 import type { Entry, LoginEntryData, PasskeyCredential } from "../hooks/useVault";
 
-/** COSE algorithm identifier for ES256, the only algorithm Bramble MINTS. */
+/** COSE algorithm identifier for ES256, the only algorithm Vautix MINTS. */
 export const COSE_ES256 = -7;
 /** EdDSA. Imported only (KeePassXC prefers it); see docs/passkey-import.md. */
 export const COSE_EDDSA = -8;

@@ -1,6 +1,6 @@
 # @vault/platform-mobile
 
-Capacitor (iOS + Android) shell for Bramble. A Vite SPA that mounts `@core`'s `App`
+Capacitor (iOS + Android) shell for Vautix. A Vite SPA that mounts `@core`'s `App`
 with mobile adapters (`src/adapters/`). Phase 0 walking skeleton: in-app vault UI,
 WASM crypto, filesystem storage. System autofill, biometric unlock, and sync are
 later phases (see `docs/mobile-port.md`).
@@ -86,9 +86,9 @@ direct `gradlew` build on the system-default JDK 17 fails with
 ## Verifying a release APK
 
 Release builds are published on the project's GitHub Releases (tag `<version>-android`) as
-`bramble_android_<version>.apk` next to a `SHA256SUMS`. The app is signed with Bramble's release
+`vautix_android_<version>.apk` next to a `SHA256SUMS`. The app is signed with Vautix's release
 key, which Android pins: every update must be signed by the same key, so the signing
-**certificate fingerprint is the trust anchor**. Bramble's release certificate SHA-256 is:
+**certificate fingerprint is the trust anchor**. Vautix's release certificate SHA-256 is:
 
 ```
 46:4F:5E:91:3C:22:D5:80:F5:8A:46:67:A3:AD:B2:B7:20:E6:FC:CE:05:F7:C0:60:5C:B4:56:02:FB:97:EC:E1
@@ -98,7 +98,7 @@ To verify a download:
 
 ```bash
 # Authenticity: confirm the APK is signed by the key above.
-apksigner verify --print-certs bramble_android_<version>.apk   # compare "SHA-256 digest"
+apksigner verify --print-certs vautix_android_<version>.apk   # compare "SHA-256 digest"
 
 # Integrity: confirm the download wasn't corrupted.
 shasum -a 256 -c SHA256SUMS    # macOS  (sha256sum -c on Linux)

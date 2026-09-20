@@ -18,7 +18,7 @@ export const SIMPLELOGIN_DEFAULT_BASE_URL = "https://app.simplelogin.io";
  * How the local part is built, on SimpleLogin's own shared domains.
  *
  * Not a cosmetic choice. Measured, `word` lifts the site name into the address: a create for
- * `bramble-spike.example.com` returned `example.reentry351@simplelogin.com`. That is legible in
+ * `vautix-spike.example.com` returned `example.reentry351@simplelogin.com`. That is legible in
  * your own inbox and it also tells anyone who sees the address where it is used, which is a real
  * loss for a feature whose purpose is compartmentalization. `uuid` reveals nothing.
  */

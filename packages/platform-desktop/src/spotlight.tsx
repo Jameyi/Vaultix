@@ -292,7 +292,7 @@ function Spotlight() {
 							<Key>O</Key>
 						</>
 					}
-					label="Open in Bramble"
+					label="Open in Vautix"
 				/>
 			</div>
 		</div>

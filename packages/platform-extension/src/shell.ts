@@ -32,7 +32,7 @@ function webOrigin(tab: chrome.tabs.Tab | undefined): string | null {
 const POPUP_ROUTE_KEY = "popup.route";
 
 // When the passkey provider proxy is attached it intercepts all browser WebAuthn,
-// which would hijack Bramble's own security-key (PRF) unlock. Pause it around our
+// which would hijack Vautix's own security-key (PRF) unlock. Pause it around our
 // ceremony by detaching for the duration; best-effort so a messaging hiccup never
 // blocks unlock. Runs in the popup/options context (where the ceremony runs). See
 // docs/passkey-provider.md.
@@ -60,16 +60,16 @@ export const extensionTarget: Target =
 // Both browsers register PLATFORM keys (Touch ID / Windows Hello) under this shared rpID, so one
 // registration unlocks in either. Firefox additionally needs it because it rejects its own
 // moz-extension:// origin as an RP. Security keys are unaffected and keep Chromium's implicit
-// extension-id rpID; see rpIdFor(). Depends on bramble.sh being covered by host_permissions
+// extension-id rpID; see rpIdFor(). Depends on vautix.sh being covered by host_permissions
 // (<all_urls> today) - narrowing that would break unlock. Needs Chrome M122+ / Firefox 150+.
-// bramble.sh because we OWN it. WebAuthn never verifies ownership of an rpID (there is no DNS or
+// vautix.sh because we OWN it. WebAuthn never verifies ownership of an rpID (there is no DNS or
 // .well-known lookup for a plain rp.id; the check is only "could an origin I have permission for
-// claim this"), so the earlier bramble.app worked despite belonging to someone else. It would
+// claim this"), so the earlier vautix.app worked despite belonging to someone else. It would
 // still have been wrong: password managers show the rpID to the user as the site a passkey
-// belongs to, so every Bramble key would have listed a stranger's domain. See docs/security-keys.md.
+// belongs to, so every Vautix key would have listed a stranger's domain. See docs/security-keys.md.
 //
 // The apex, not a subdomain: an rpID can be narrowed later but never widened, so this keeps the
-// door open for bramble.sh itself to share credentials one day.
+// door open for vautix.sh itself to share credentials one day.
 // Firefox cannot use its implicit moz-extension:// rpID at all (SecurityError, not a miss), and
 // has no security keys to have registered under one either, so the shared rpID is its only option.
 //
@@ -83,7 +83,7 @@ const firefoxMajor = Number(
 	/Firefox\/(\d+)/.exec(typeof navigator === "undefined" ? "" : navigator.userAgent)?.[1] ?? 0,
 );
 const canClaimRpId = extensionTarget !== "firefox" || firefoxMajor >= FIREFOX_RPID_CLAIM_MIN;
-setWebauthnRpId(canClaimRpId ? "bramble.sh" : undefined, {
+setWebauthnRpId(canClaimRpId ? "vautix.sh" : undefined, {
 	implicitUsable: extensionTarget !== "firefox",
 });
 
@@ -193,7 +193,7 @@ export const extensionShell: ShellAdapter = {
 			type: "BACKUP_OAUTH_CONNECT",
 			payload: { providerId, targetId: opts?.targetId },
 		})) as { ok?: boolean; error?: string } | undefined;
-		if (!res) throw new Error("No response from Bramble's background (reload the extension?).");
+		if (!res) throw new Error("No response from Vautix's background (reload the extension?).");
 		if (!res.ok) throw new Error(res.error ?? "Sign-in failed.");
 	},
 	async setAutofillEnabled(enabled: boolean) {

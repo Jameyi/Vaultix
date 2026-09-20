@@ -49,8 +49,8 @@ export function RecoveryCodeDisplay({
 			"",
 		].join("\n");
 		// Hardcoded rather than built from appName: a file name would need slugging, and this
-		// matches the `.bramble` extension the rest of the app writes.
-		const name = "bramble-recovery-code.txt";
+		// matches the `.vautix` extension the rest of the app writes.
+		const name = "vautix-recovery-code.txt";
 		try {
 			// On native platforms this saves via the OS share sheet ("Save to Files", Mail, ...);
 			// a WKWebView ignores <a download>, so the blob path below is a web/extension fallback.

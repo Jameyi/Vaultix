@@ -1,0 +1,155 @@
+# PRD v0.2
+
+# 项目名称
+
+## Vautix
+
+全称：
+
+Vautix Personal Encrypted Key Management System
+
+---
+
+# 项目定位
+
+Vautix 是一个个人使用的跨平台加密密钥管理系统。
+
+用于安全保存：
+
+* 网站账号密码
+* 登录凭证
+* API Key
+* Secret Key
+* Token
+* 其他敏感文本数据
+
+目标：
+
+打造一个：
+
+* 安全
+* 轻量
+* 快速
+* 稳定
+* 长期可维护
+
+的个人密码与密钥管理工具。
+
+---
+
+# 项目核心理念
+
+## Vault（保险库）
+
+所有敏感数据均存储于加密保险库中。
+
+数据：
+
+* 不明文保存
+* 本地加密
+* 云端加密同步
+
+## Matrix（系统核心）
+
+通过：
+
+* 本地数据库
+* 云端数据库
+* 同步系统
+* 加密系统
+
+组成一个稳定的数据管理核心。
+
+---
+
+# 项目目录规范
+
+推荐：
+
+Vautix
+
+```
+Vautix
+│
+├── Vautix-PC
+│
+├── Vautix-Mobile
+│
+├── Vautix-Core
+│
+├── Vautix-Sync
+│
+├── Vautix-Crypto
+│
+├── Vautix-Database
+│
+└── Vautix-Docs
+```
+
+---
+
+# 数据库命名规范
+
+数据库：
+
+```
+vautix_database
+```
+
+表：
+
+```
+vautix_users
+
+vautix_password_items
+
+vautix_password_history
+
+vautix_devices
+
+vautix_sync_queue
+
+vautix_audit_log
+```
+
+---
+
+# 应用名称显示
+
+PC端：
+
+```
+Vautix
+Personal Encrypted Key Vault
+```
+
+移动端：
+
+```
+Vautix
+```
+
+---
+
+# 后续文档统一修改
+
+后续所有：
+
+* PRD
+* 数据库设计
+* 架构设计
+* 开发任务
+* Git项目
+* 代码目录
+
+统一使用：
+
+```
+Vautix
+```
+
+替代：
+
+```
+Personal Password Manager
+```

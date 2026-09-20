@@ -6,7 +6,7 @@ interface ModeTabsProps {
 	mode: VaultSetupMode;
 	onChange: (mode: VaultSetupMode) => void;
 	disabled?: boolean;
-	/** Show the "Restore from backup" tab; its panel is the .bramble restore flow rendered inline
+	/** Show the "Restore from backup" tab; its panel is the .vautix restore flow rendered inline
 	 * (not a page swap), so the tabs stay put. Same experience in first-run and adding views. */
 	showRestore?: boolean;
 	/** Show the "Join a device" tab. */

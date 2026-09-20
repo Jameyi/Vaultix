@@ -177,13 +177,13 @@ export function buildCryptoAdapter(
 		// TypeError on undefined, and the UI gates on the capability before getting here.
 		async sealPortableVault(i) {
 			const wasm = await getWasm();
-			if (!wasm.seal_portable_vault) throw new Error("Exporting a .bramble isn't available here.");
+			if (!wasm.seal_portable_vault) throw new Error("Exporting a .vautix isn't available here.");
 			return wasm.seal_portable_vault(i.entriesJson, i.password, i.magicVersion);
 		},
 
 		async openPortableVault(i) {
 			const wasm = await getWasm();
-			if (!wasm.open_portable_vault) throw new Error("Opening a .bramble isn't available here.");
+			if (!wasm.open_portable_vault) throw new Error("Opening a .vautix isn't available here.");
 			// undefined (not a throw) is the wrong-password answer, so the caller can tell
 			// a bad password from a corrupt file.
 			return (await wasm.open_portable_vault(i.password, i.file, i.magicVersion)) ?? null;

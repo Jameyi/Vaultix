@@ -1,6 +1,6 @@
 # platform-mobile development guide
 
-How to develop the Bramble mobile app (Capacitor 8, iOS + Android), the quirks we
+How to develop the Vautix mobile app (Capacitor 8, iOS + Android), the quirks we
 hit standing it up, and how to get past each one. For the high-level port plan see
 `../../../docs/mobile-port.md`; for a terse quickstart see `../README.md`.
 
@@ -137,7 +137,7 @@ The biometric unlock ships as a **local plugin** living inside the owned native 
   name). A new `.swift` file must be added to `project.pbxproj` in four places (PBXBuildFile,
   PBXFileReference, the `App` PBXGroup children, and the Sources build phase). JS side:
   `registerPlugin<T>("BiometricVault")`.
-- **Android** (`android/app/src/main/java/app/bramble/mobile/BiometricVaultPlugin.java`): a
+- **Android** (`android/app/src/main/java/app/vautix/mobile/BiometricVaultPlugin.java`): a
   `@CapacitorPlugin(name = "BiometricVault")` class extending `Plugin`, registered with
   `registerPlugin(BiometricVaultPlugin.class)` in `MainActivity.onCreate` (before
   `super.onCreate`).
@@ -194,7 +194,7 @@ and `AppDelegate` writes a dummy value to the App Group, so **replace/remove it 
 shipping build**. Hard-won setup notes:
 
 - **App Group is the app<->extension channel.** Both `App/App.entitlements` and
-  `AutoFillProbe/AutoFillProbe.entitlements` declare `group.app.bramble.mobile`; the app
+  `AutoFillProbe/AutoFillProbe.entitlements` declare `group.app.vautix.mobile`; the app
   writes with native `UserDefaults(suiteName:)` (Capacitor Preferences can't write to a
   group). The extension reads the same container.
 - **The AutoFill capability is restricted** — it needs real provisioning, not ad-hoc.
@@ -220,7 +220,7 @@ shipping build**. Hard-won setup notes:
   (`AutoFillProbe.debug.dylib`) can stop an app extension from registering as a provider;
   `ENABLE_DEBUG_DYLIB_SUPPORT=NO` did not drop it here, but a Release build has no stub.
 - **CONFIRMED end-to-end on a real device (2026-06-22)** via a TestFlight (distribution) build:
-  Bramble appears in Settings → AutoFill & Passwords, enables, launches in a live Safari fill, and
+  Vautix appears in Settings → AutoFill & Passwords, enables, launches in a live Safari fill, and
   reads the App Group value the app wrote. The whole chain works. (A dev build never cleanly
   isolated dev-signing vs the entitlement because device-trust install walls kept blocking it; the
   TestFlight build, with the entitlement on both targets, just worked. Earlier notes blaming an
@@ -234,7 +234,7 @@ shipping build**. Hard-won setup notes:
   "credential|EXConcreteExtension|AuthenticationServicesAgent"`.
 
 ### 14. "Can't find variable: WebAssembly" on a real iOS device (JIT disabled)
-All of Bramble's crypto is WASM (Argon2/AES/KDBX), and WASM needs JIT. iOS disables JIT in two
+All of Vautix's crypto is WASM (Argon2/AES/KDBX), and WASM needs JIT. iOS disables JIT in two
 states, and in both the app throws `ReferenceError: Can't find variable: WebAssembly` and the
 vault can't be created/unlocked:
 
@@ -287,10 +287,10 @@ and adds `NativeCrypto.swift` + `AutofillBridge.swift` to the App). Re-run it af
 - **Autofill:** the main app's `setIndex` encrypts each password under the VEK and pushes
   (service, username, recordId, encrypted secret) to the shared App Group + `ASCredentialIdentityStore`
   (`AutofillBridge`). The extension reads the biometric-gated VEK from a **shared Keychain access group**
-  (`BHGR3PP64J.app.bramble.mobile.shared`, in both entitlements + BiometricVault's queries) and decrypts on
+  (`BHGR3PP64J.app.vautix.mobile.shared`, in both entitlements + BiometricVault's queries) and decrypts on
   selection. Passwords are never written to the App Group in cleartext.
 - **On-device firsts:** because the VEK Keychain item moved to the shared access group, **re-enable
-  biometric once** (the old item won't be found), and **enable Bramble under Settings > Passwords >
+  biometric once** (the old item won't be found), and **enable Vautix under Settings > Passwords >
   AutoFill**. Archive distribution with `-allowProvisioningUpdates` so Xcode registers the keychain-sharing
   capability + app group.
 - **App Group payload is JSON**, not a plist array-of-dicts: `array(forKey:) as? [[String: Any]]` can
@@ -335,8 +335,8 @@ plutil -extract NSExtension.NSExtensionAttributes.ASCredentialProviderExtensionC
 Quirk 13 says the Settings AutoFill toggle is device-only. The registration half is reachable from
 the CLI:
 ```bash
-xcrun simctl spawn <udid> pluginkit -e use -i app.bramble.mobile.AutoFillProbe   # blank -> "+"
-xcrun simctl spawn <udid> pluginkit -m -vvv -i app.bramble.mobile.AutoFillProbe  # inspect the record
+xcrun simctl spawn <udid> pluginkit -e use -i app.vautix.mobile.AutoFillProbe   # blank -> "+"
+xcrun simctl spawn <udid> pluginkit -m -vvv -i app.vautix.mobile.AutoFillProbe  # inspect the record
 ```
 Only the flag flip is verified, not that AuthenticationServices honours it for live fill or for the
 credential-exchange picker; `pluginkit` does not surface the extension's declared capabilities either.

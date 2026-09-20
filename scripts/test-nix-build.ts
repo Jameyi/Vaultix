@@ -20,7 +20,7 @@ import { dockerProblem } from "./docker-available.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const IMAGE = "nixos/nix";
-const STORE_VOLUME = "bramble-nix-store";
+const STORE_VOLUME = "vautix-nix-store";
 
 const dockerIssue = dockerProblem();
 if (dockerIssue) {

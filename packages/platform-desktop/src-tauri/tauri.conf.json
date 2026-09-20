@@ -1,8 +1,8 @@
 {
 	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-	"productName": "Bramble",
+	"productName": "Vautix",
 	"version": "0.8.0",
-	"identifier": "app.bramble.desktop",
+	"identifier": "app.vautix.desktop",
 	"build": {
 		"frontendDist": "../dist",
 		"devUrl": "http://localhost:1420",
@@ -13,8 +13,8 @@
 		"macOSPrivateApi": true,
 		"windows": [
 			{
-				"label": "main",
-				"title": "Bramble",
+			"label": "main",
+			"title": "Vautix\nPersonal Encrypted Key Vault",
 				"width": 660,
 				"height": 580,
 				"minWidth": 420,
@@ -26,7 +26,7 @@
 			{
 				"label": "spotlight",
 				"url": "spotlight.html",
-				"title": "Bramble Quick Access",
+				"title": "Vautix Quick Access",
 				"width": 640,
 				"height": 400,
 				"center": true,
@@ -55,10 +55,10 @@
 			"icons/icon.icns",
 			"icons/icon.ico"
 		],
-		"externalBin": ["binaries/bramble-proxy"],
+		"externalBin": ["binaries/vautix-proxy"],
 		"createUpdaterArtifacts": true,
-		"publisher": "Bramble",
-		"homepage": "https://bramble.sh",
+		"publisher": "Vautix",
+		"homepage": "https://vautix.sh",
 		"license": "GPL-3.0-only",
 		"shortDescription": "Password manager",
 		"longDescription": "An offline-first password manager. Vaults are encrypted locally and sync directly between your own devices, with no account and no server holding your data.",
@@ -71,7 +71,7 @@
 	},
 	"plugins": {
 		"updater": {
-			"endpoints": ["https://bramble.sh/desktop/latest.json"],
+			"endpoints": ["https://vautix.sh/desktop/latest.json"],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY3RjkzNUVGQ0ZEMjhGNjkKUldScGo5TFA3elg1Wi90bUgzenhFR1VpUCtvTGMwKzFOYng3bDJyWTJCenl6RkFNeGRRNTlTaXQK"
 		}
 	}

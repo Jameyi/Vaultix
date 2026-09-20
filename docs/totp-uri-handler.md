@@ -1,6 +1,6 @@
 # Inbound `otpauth://` URIs on iOS and Android
 
-How Bramble becomes one of the apps the OS offers when a user sets up a 2FA code
+How Vautix becomes one of the apps the OS offers when a user sets up a 2FA code
 somewhere else: the **Set Up Codes In** list on iOS, and the ordinary app chooser on
 Android.
 
@@ -19,7 +19,7 @@ Two different capabilities share the word "codes". Do not conflate them.
 - **Filling** a one-time code into a login form. Already shipped on both platforms
   through the native autofill provider; the seed stays in the vault and only digits
   reach the page. See [totp.md](totp.md) and [autofill.md](autofill.md).
-- **Setting up** a code: another app or a website hands Bramble an `otpauth://` URI so
+- **Setting up** a code: another app or a website hands Vautix an `otpauth://` URI so
   it can be saved against a login. This is what is missing, and what this plan adds.
 
 ## What the OS actually offers
@@ -34,14 +34,14 @@ Two different capabilities share the word "codes". Do not conflate them.
 Apple has confirmed the mechanism directly on the developer forums: an app appears in
 that list if it registers itself as a handler of the `otpauth` URL scheme. There is no
 AuthenticationServices API for it, and it is unrelated to the credential-provider
-extension Bramble already ships. Android has no equivalent settings list at all; it
+extension Vautix already ships. Android has no equivalent settings list at all; it
 simply routes `otpauth://` VIEW intents through the chooser, which is what Bitwarden
 and FreeOTP rely on.
 
 **Known flakiness (iOS).** The Settings section appeared and then vanished across the
 iOS 16 betas, and iOS 15 had the built-in Passwords app swallowing `otpauth://` links
-outright. Treat "Bramble is listed under Set Up Codes In" as a device-test result, not
-a given. The registration is worth doing regardless: it also makes Bramble the target
+outright. Treat "Vautix is listed under Set Up Codes In" as a device-test result, not
+a given. The registration is worth doing regardless: it also makes Vautix the target
 for any `otpauth://` link tapped anywhere on the device.
 
 ## Bottom line
@@ -65,7 +65,7 @@ for any `otpauth://` link tapped anywhere on the device.
 Both properties matter, and they pull in different directions.
 
 **Untrusted.** Registering a scheme makes an entry point any app on the device can fire
-at Bramble, unprompted, with a payload it controls. On Android that means an exported
+at Vautix, unprompted, with a payload it controls. On Android that means an exported
 activity reachable by any installed app. The mitigation is a rule, not a check: **an
 inbound URI never writes to the vault.** It only ever prefills a form the user then
 confirms. That single rule also makes intent replay harmless (see the launch-URL
@@ -101,7 +101,7 @@ lives from arrival until the setup screen takes it, or until the process ends.
 
 ## Vocabulary
 
-- **TotpHandoff**: an `otpauth://` URI delivered to Bramble by the OS rather than
+- **TotpHandoff**: an `otpauth://` URI delivered to Vautix by the OS rather than
   scanned or typed. It is parked, not applied: it lives in memory from arrival until
   either the user confirms a destination or the vault locks.
 
@@ -156,7 +156,7 @@ first; both platform phases then reduce to delivery.
        <key>CFBundleTypeRole</key>
        <string>Viewer</string>
        <key>CFBundleURLName</key>
-       <string>app.bramble.mobile.otpauth</string>
+       <string>app.vautix.mobile.otpauth</string>
        <key>CFBundleURLSchemes</key>
        <array><string>otpauth</string></array>
      </dict>
@@ -164,7 +164,7 @@ first; both platform phases then reduce to delivery.
    ```
 
    `LSApplicationQueriesSchemes` is **not** needed. That governs querying other apps,
-   which Bramble does not do.
+   which Vautix does not do.
 2. **No Swift changes.** `AppDelegate.swift:35` already forwards
    `application(_:open:options:)` to `ApplicationDelegateProxy`, which is what makes
    `@capacitor/app` fire `appUrlOpen`.
@@ -172,11 +172,11 @@ first; both platform phases then reduce to delivery.
    `appUrlOpen` listener for the warm case, and one `App.getLaunchUrl()` read on mount
    for the cold case, where the URL is delivered before the webview exists. Both feed
    `setPendingTotp` and navigate to `/vault/totp-setup`.
-4. **Do not arm the file-pick grace.** `armFilePickGrace()` exists for pickers Bramble
-   itself opens. Here Bramble is being launched from elsewhere, so locking on the way out
+4. **Do not arm the file-pick grace.** `armFilePickGrace()` exists for pickers Vautix
+   itself opens. Here Vautix is being launched from elsewhere, so locking on the way out
    was correct; the user unlocks and the parked URI is still there.
 5. **Device checklist.**
-   - Bramble is listed under Settings > Apps > Passwords > Set Up Codes In, and selecting
+   - Vautix is listed under Settings > Apps > Passwords > Set Up Codes In, and selecting
      it sticks.
    - Tap an `otpauth://` link in Safari: cold launch, warm launch, and from the app switcher.
    - Vault locked on arrival, with auto-lock set to "Immediately": the URI survives unlock.
@@ -214,7 +214,7 @@ first; both platform phases then reduce to delivery.
      -d "otpauth://totp/GitHub:octocat?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
    ```
 
-   Then: cold launch, warm launch, chooser shows Bramble alongside other authenticators,
+   Then: cold launch, warm launch, chooser shows Vautix alongside other authenticators,
    "always" sticks, and locked-on-arrival survives unlock. Build and install with JDK 21
    and `adb install` directly rather than `cap run android`.
 
@@ -236,9 +236,9 @@ first; both platform phases then reduce to delivery.
   today by design, and the classifier already explains why. **Do not register that
   scheme**: appearing in a chooser and then refusing the payload is worse than not
   appearing. Revisit only if bulk migration import is ever built.
-- **HOTP.** Parsed by the underlying library, rejected by `parseTotp` because Bramble
+- **HOTP.** Parsed by the underlying library, rejected by `parseTotp` because Vautix
   only generates TOTP. The handoff copy has to say so plainly.
-- **Discoverability on iOS.** The Set Up Codes In list is a single default, so Bramble is
+- **Discoverability on iOS.** The Set Up Codes In list is a single default, so Vautix is
   competing with every authenticator the user has installed. Worth a line in the release
   notes and possibly a Settings hint pointing at where to switch it.
 
@@ -254,6 +254,6 @@ first; both platform phases then reduce to delivery.
 
 | Question | Why it matters |
 |---|---|
-| Does Set Up Codes In actually list Bramble on the current iOS? | The section has a history of disappearing. The scheme registration still pays off via `otpauth://` links either way. |
+| Does Set Up Codes In actually list Vautix on the current iOS? | The section has a history of disappearing. The scheme registration still pays off via `otpauth://` links either way. |
 | Does `App.getLaunchUrl()` return a custom-scheme URL at cold launch on iOS? | If not, the URI has to be parked natively the way `CredentialExchangeInbox` parks its token. |
 | Do real sites emit tappable `otpauth://` links on mobile web? | Few do. On Android the QR scanner already covers most enrollment, so the intent filter mainly buys app-to-app handoff and migration off another authenticator. Sets expectations for the payoff, not the feasibility. |

@@ -141,7 +141,7 @@ unrelated and deliberately named "changelog" to keep the two apart.
 
 - **Import.** KDBX `History` elements, and the equivalents in the 1Password and
   Bitwarden exports, are still skipped on import. Only rotations performed in
-  Bramble produce rows.
+  Vautix produce rows.
 - **Export.** The changelog stays local to the vault.
 - **A retention setting.** The cap is a constant.
 - **Any way to purge.** No per-row delete, no "clear history", no off switch. If

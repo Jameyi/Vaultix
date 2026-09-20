@@ -51,7 +51,7 @@ async function activeConfig() {
  * Whether an alias row may be offered at all, for the autofill query to carry.
  *
  * No provider is contacted to answer this, so a page asking whether the row exists cannot make
- * Bramble talk to anyone.
+ * Vautix talk to anyone.
  */
 export async function aliasAvailable(): Promise<boolean> {
 	return (await activeConfig()) !== null;
@@ -83,13 +83,13 @@ export async function createAlias(site?: string): Promise<string> {
 	if (!config) {
 		// Locked and unconfigured are indistinguishable from here, and the remedy for the common
 		// one is what saving a new item already asks for.
-		throw new AliasError("auth", "Unlock Bramble to create an alias.");
+		throw new AliasError("auth", "Unlock Vautix to create an alias.");
 	}
 	// Empty for a provider with no account to authenticate against; its client ignores it.
 	const client = clientForConfig(config, config.apiKey ?? "");
 	const { address } = await client.create({
 		site,
-		description: site ? `Bramble (${site})` : "Bramble",
+		description: site ? `Vautix (${site})` : "Vautix",
 	});
 	return address;
 }

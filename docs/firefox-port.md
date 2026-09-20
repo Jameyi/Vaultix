@@ -75,7 +75,7 @@ on-device checks not yet crossed live are under "Remaining" below.
   The origin comes from the browser-set message `sender` (authoritative, per-frame), so it's cleaner
   than Chrome's active-tab guess. Codec round-trip + existing ceremony unit tests pass; both targets
   build clean; **device-verified on webauthn.io** (register + authenticate, locked and unlocked). The
-  corner card was polished alongside: Bramble glyph, per-account rows that authenticate on click, a
+  corner card was polished alongside: Vautix glyph, per-account rows that authenticate on click, a
   locked-state explainer line, and the unlock window auto-closes after a locked unlock so it doesn't
   cover the picker.
 
@@ -99,7 +99,7 @@ below for what it needs.
   writeText("")` may be rejected from an unfocused background page, and the usual `<textarea>` +
   `execCommand` fallback also needs a focused document the background lacks. May need a rethink
   (clear from the popup, or on next popup open). See "Risks / open items".
-- AMO listed submission: **done, publicly released**. The gecko id (`firefox@bramble.app`) is
+- AMO listed submission: **done, publicly released**. The gecko id (`firefox@vautix.app`) is
   therefore fixed: AMO has registered it, so changing it now would mean a new listing and
   abandoning existing users. It is an opaque identifier no user sees, so the fact that it names a
   domain we do not own is cosmetic and permanent.
@@ -279,7 +279,7 @@ relay" is a real lever, not a promise.
 
 ## Passkey provider (Chrome proxy; Firefox MAIN-world transport, device-verified)
 
-Bramble is a software WebAuthn authenticator: it creates and stores passkeys in the vault and signs
+Vautix is a software WebAuthn authenticator: it creates and stores passkeys in the vault and signs
 assertions with its own P-256 keys (see `docs/passkey-provider.md`). On Chrome this is delivered via
 **`chrome.webAuthenticationProxy`**: the browser routes a page's `navigator.credentials.create/get`
 calls to the extension, which runs the ceremony. Firefox has **no equivalent** to that proxy API, so
@@ -290,17 +290,17 @@ on Firefox against webauthn.io.**
 Three Firefox/WebAuthn facts, to keep the mechanisms straight (verified mid-2026):
 
 1. **WebAuthn client** (`navigator.credentials.create/get`, conditional UI): fully supported on
-   Firefox. This is a user signing into sites with passkeys, not Bramble acting as a provider.
+   Firefox. This is a user signing into sites with passkeys, not Vautix acting as a provider.
 2. **`webAuthenticationProxy`**: Chrome-only; absent from Firefox's WebExtension API surface. This
-   is the path Bramble currently uses.
+   is the path Vautix currently uses.
 3. **Extension WebAuthn with a custom RP ID** (Firefox 150 / Chrome 122): an extension may call
    `navigator.credentials.*` and specify an RP ID for any domain in its host permissions. Per MDN
    this lets the extension *make WebAuthn calls itself*; it does **not** intercept page requests,
-   and it would use the *platform* authenticator rather than Bramble's vault keys. Related, but not
+   and it would use the *platform* authenticator rather than Vautix's vault keys. Related, but not
    the provider path.
 
 This is how third-party managers (Bitwarden, Proton Pass, ...) provide passkeys in Firefox today.
-Because Bramble signs with its own vault keys, it needs no platform authenticator; only the transport
+Because Vautix signs with its own vault keys, it needs no platform authenticator; only the transport
 differs from Chrome.
 
 **Architecture (built).** The pieces split cleanly by trust and world:
@@ -350,14 +350,14 @@ Chrome/iOS via sync and vice-versa (the core bytes are identical, so it should j
 
 ## Security-key / platform-authenticator unlock (Firefox: disabled)
 
-Distinct from the passkey *provider* above: this is Bramble's **own vault unlock** via a WebAuthn
+Distinct from the passkey *provider* above: this is Vautix's **own vault unlock** via a WebAuthn
 credential (the PRF / hmac-secret extension derives a key that wraps the VEK). On Firefox it is
 **disabled** — the `securityKeys` capability (`flags.ts`) is false for firefox, so the option
 hides — because registering throws **"The operation is insecure"**: the default rpID is the
 `moz-extension://` origin, which Firefox rejects as a WebAuthn RP.
 
 **Platform-authenticator unlock is now measured working on Firefox** (2026-08-31, FF 154 on
-both macOS and Windows): explicit `rp.id: "bramble.sh"` plus
+both macOS and Windows): explicit `rp.id: "vautix.sh"` plus
 `authenticatorAttachment: "platform"` and `residentKey: "required"` returns a PRF secret in one
 tap, from Apple Passwords and Windows Hello respectively. See
 [security-keys.md](security-keys.md) for the full matrix. External-key (YubiKey) unlock stays
@@ -367,7 +367,7 @@ What it would take, and why it stayed deferred (verified 2026-07, confirmed by m
 2026-08-31):
 
 - **The rpID error is fixable (Firefox 150+).** An extension can specify an explicit `rp.id` for any
-  domain in its `host_permissions` (`<all_urls>` covers any), so `rp.id: "bramble.sh"` on Firefox is
+  domain in its `host_permissions` (`<all_urls>` covers any), so `rp.id: "vautix.sh"` on Firefox is
   accepted. Keep Chrome's *implicit* rpID (the extension origin) unchanged — changing it invalidates
   every already-registered Chrome user's key.
 - **The real blocker is PRF over external keys.** Firefox supports the PRF extension for **platform**
@@ -383,14 +383,14 @@ What it would take, and why it stayed deferred (verified 2026-07, confirmed by m
 
 **Version floor.** Claiming an rpID from `host_permissions` needs **Firefox 150+**, while
 `strict_min_version` is `128.0`. Older Firefox is refused both rpIDs (its own origin outright, and
-it cannot claim `bramble.sh`), so the shell installs none and `webauthnUnlockPossible()` reports
+it cannot claim `vautix.sh`), so the shell installs none and `webauthnUnlockPossible()` reports
 false, hiding the section rather than offering a button that always throws. Raising the manifest
 floor instead was rejected: it would cut 128-149 users off from every future update to fix one
 optional feature.
 
 Plan, now confirmed by measurement: enable on FF 150+ as **platform-authenticator** PRF unlock
-(explicit `bramble.sh` rpID, version-gated, Chrome untouched), leaving YubiKey unlock
-Chrome-only pending Firefox. The explicit rpID depends on `bramble.sh` being covered by
+(explicit `vautix.sh` rpID, version-gated, Chrome untouched), leaving YubiKey unlock
+Chrome-only pending Firefox. The explicit rpID depends on `vautix.sh` being covered by
 `host_permissions`; the manifest ships `<all_urls>`, so narrowing that would break this path.
 
 ## Namespace: `chrome.*` vs `browser.*`
@@ -452,7 +452,7 @@ Firefox ships **listed** (public store), not self-distributed. `pnpm run release
 submits the listed version and attaches the source archive; AMO reviews, signs, and hosts the
 `.xpi`. See `docs/release-signing.md` and `docs/amo-source-build.md`.
 
-- `gecko.id` (`firefox@bramble.app`) and `strict_min_version` are set in the manifest.
+- `gecko.id` (`firefox@vautix.app`) and `strict_min_version` are set in the manifest.
 - **Source submission is wired:** `sign-firefox.ts` attaches a `git archive` of the source for
   review; `docs/amo-source-build.md` is the reviewer build recipe (`rust-toolchain.toml` pins Rust).
 - Listing copy is localized under `packages/platform-extension/store/firefox/` and pushed via
@@ -497,7 +497,7 @@ pick up another device's edits). The user's Dropbox path cannot be targeted prog
    platform limitation). Smallest effort, honest; Firefox is a single-device tier with manual
    backup.
 3. **Auto-push mirror (partial).** `storage.local` live, plus a debounced auto-overwrite of
-   `Downloads/Bramble/vault.db` (with `downloads.erase()` to keep the panel clean); the user points
+   `Downloads/Vautix/vault.db` (with `downloads.erase()` to keep the panel clean); the user points
    a sync tool at that folder or symlinks it into Dropbox. Convenient backup to a synced folder, but
    pull is still manual, so multi-device editing silently diverges. Risk: users mistake it for real
    sync. Medium effort.
@@ -537,7 +537,7 @@ durability properties become load-bearing. Three facts to design around (verifie
   unbuilt (Phase 5b; see "Status").
 - **Eviction under disk pressure.** Firefox's Quota Manager can evict an origin's storage when
   the global limit is hit; only **persistent** buckets are exempt. `unlimitedStorage` lifts the
-  quota cap but does not clearly mark the bucket persistent. Bramble now calls
+  quota cap but does not clearly mark the bucket persistent. Vautix now calls
   `navigator.storage.persist()` on init/unlock to request a persistent bucket; confirming Firefox
   honors it is part of the remaining on-device pass. Silent eviction of the only copy is the failure
   most worth ruling out for a password manager.

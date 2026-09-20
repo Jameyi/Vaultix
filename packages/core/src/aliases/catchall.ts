@@ -10,7 +10,7 @@ import {
 // A domain the user owns, pointed at one inbox by a catch-all or forwarding rule (Migadu,
 // Cloudflare Email Routing, Fastmail, or any host with such a rule). Once that exists,
 // `anything@theirdomain` already arrives, so an alias is just a string nobody has used and
-// Bramble makes it here. No account, no API key, no request. See docs/email-aliases.md.
+// Vautix makes it here. No account, no API key, no request. See docs/email-aliases.md.
 
 export const CATCHALL_STYLES = ["words", "characters"] as const;
 export type CatchAllStyle = (typeof CATCHALL_STYLES)[number];
@@ -57,7 +57,7 @@ async function wordLocalPart(): Promise<string> {
 /**
  * Whether `domain` is shaped like a domain.
  *
- * Deliberately shallow. Bramble cannot tell whether a catch-all actually works without sending
+ * Deliberately shallow. Vautix cannot tell whether a catch-all actually works without sending
  * mail, and pretending otherwise would be worse than saying nothing: the UI asks the user to
  * check for themselves. This only catches the obvious slips, an empty box or a pasted address.
  */

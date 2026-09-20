@@ -8,7 +8,7 @@
 //   node scripts/metadata-firefox.ts --dry-run   # print what would be sent, send nothing
 //
 // Auth reuses the signing credentials: AMO_API_KEY + AMO_API_SECRET in the env, or the
-// age-encrypted ~/.config/bramble/amo-api-credentials.age (override AMO_CREDENTIALS_AGE)
+// age-encrypted ~/.config/vautix/amo-api-credentials.age (override AMO_CREDENTIALS_AGE)
 // holding { "apiKey": "...", "apiSecret": "..." }. See docs/release-signing.md.
 
 import { execFileSync } from "node:child_process";
@@ -28,7 +28,7 @@ const API_BASE = (process.env.AMO_BASE_URL ?? "https://addons.mozilla.org/api/v5
 );
 const HOME = process.env.HOME ?? "";
 const CREDS_AGE =
-	process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/bramble/amo-api-credentials.age");
+	process.env.AMO_CREDENTIALS_AGE ?? join(HOME, ".config/vautix/amo-api-credentials.age");
 
 // store dir code -> AMO locale code (AMO uses Mozilla codes: es-ES, pt-BR, en-US).
 const AMO_LOCALE: Record<string, string> = {
@@ -92,7 +92,7 @@ if (DRY_RUN) {
 // Resolve credentials: env first, else the age-encrypted JSON (YubiKey PIN + touch).
 let apiKey = process.env.AMO_API_KEY;
 let apiSecret = process.env.AMO_API_SECRET;
-const tmp = mkdtempSync(join(tmpdir(), "bramble-amo-meta-"));
+const tmp = mkdtempSync(join(tmpdir(), "vautix-amo-meta-"));
 try {
 	if (!apiKey || !apiSecret) {
 		if (!existsSync(CREDS_AGE))

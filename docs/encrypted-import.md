@@ -1,13 +1,13 @@
 # Encrypted vault imports
 
-How Bramble handles *encrypted* imports. Three formats are in play, at different
+How Vautix handles *encrypted* imports. Three formats are in play, at different
 levels of support:
 
-- **Bramble `.bramble`** — our own portable vault, sealed at export under a password
+- **Vautix `.vautix`** — our own portable vault, sealed at export under a password
   chosen for the file. The only import that keeps passkeys and password history,
-  since the entries arrive already normalized. See [below](#bramble-portable-vault).
+  since the entries arrive already normalized. See [below](#vautix-portable-vault).
 - **KeePass KDBX4** — fully decrypted inside WASM and imported. See below.
-- **Bitwarden encrypted JSON** — *not* decrypted. Bramble detects it and tells the
+- **Bitwarden encrypted JSON** — *not* decrypted. Vautix detects it and tells the
   user what to do, because one of the two Bitwarden encrypted formats can't be
   decrypted by anyone but Bitwarden. See [below](#bitwarden-encrypted-json).
 
@@ -23,9 +23,9 @@ is a different operation, restore-from-backup, described in
 
 ---
 
-# Bramble portable vault
+# Vautix portable vault
 
-A `.bramble` written by **Actions → Export selection** in the vault list. It is a
+A `.vautix` written by **Actions → Export selection** in the vault list. It is a
 VLT1 blob like any other, so the existing restore path reads it too, but its
 contents are a plain `{ entries }` payload rather than a vault's own
 `EntriesPayload` of DEK-sealed records.
@@ -53,7 +53,7 @@ Code: `seal_portable_vault` / `open_portable_vault` in
   every field is ciphertext, so `openPortableVaultFile` detects that shape and points
   the user at restore instead.
 - **Wrong password is not an error.** The core answers `None`/`null`, kept distinct
-  from a corrupt or non-Bramble file so the UI can say which happened.
+  from a corrupt or non-Vautix file so the UI can say which happened.
 
 The password prompt is the shared credential step (`KdbxUnlock`), with the key-file
 field off: only KeePass has those.
@@ -146,7 +146,7 @@ unexercised).
 
 # Bitwarden encrypted JSON
 
-Code: `packages/core/src/import/bitwarden.ts`. **Bramble does not decrypt Bitwarden
+Code: `packages/core/src/import/bitwarden.ts`. **Vautix does not decrypt Bitwarden
 encrypted exports** — it detects them and routes the user to a fixable path. This
 section records why, and what a future decrypt would take.
 
@@ -157,7 +157,7 @@ Bitwarden's "Encrypted export" has two variants, both with `encrypted: true`:
 - **Account-restricted** (no `passwordProtected`, no `salt`). Encrypted with the
   user's Bitwarden *account key*. It can **only** be re-imported into that same
   account, and rotating the account key makes it undecryptable even for Bitwarden.
-  **No password unlocks it**, so Bramble (or any third party) fundamentally cannot
+  **No password unlocks it**, so Vautix (or any third party) fundamentally cannot
   read it. Nothing we can do here but tell the user to re-export.
 - **Password-protected** (`passwordProtected: true`, plus `salt`, `kdfType`,
   `kdfIterations`, `encKeyValidation_DO_NOT_EDIT`, `data`). Encrypted with a

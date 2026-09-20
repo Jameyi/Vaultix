@@ -8,8 +8,8 @@
  * `externalBin`, which copies each entry into Contents/MacOS.
  *
  * The target-triple suffix is Tauri's convention for choosing the right binary per platform.
- * It strips the suffix when bundling, so `bramble-proxy-aarch64-apple-darwin` here lands as
- * `bramble-proxy` there, which is the name the manifest expects.
+ * It strips the suffix when bundling, so `vautix-proxy-aarch64-apple-darwin` here lands as
+ * `vautix-proxy` there, which is the name the manifest expects.
  *
  * A universal build needs more than the host slice. Tauri lipos the APP binary itself, but a
  * sidecar is copied, not built, so whatever is staged here is what ships: staging only the host
@@ -18,8 +18,8 @@
  *
  * Tauri does not combine them for us. It lipos the app's MAIN binary and nothing else, and the
  * proxy is both a [[bin]] in this crate and an externalBin, so a universal build wants it in two
- * places: `binaries/bramble-proxy-universal-apple-darwin` for the sidecar copy, and
- * `target/universal-apple-darwin/release/bramble-proxy` for the binary copy. Missing either one
+ * places: `binaries/vautix-proxy-universal-apple-darwin` for the sidecar copy, and
+ * `target/universal-apple-darwin/release/vautix-proxy` for the binary copy. Missing either one
  * fails at the bundling step, after everything has been compiled twice.
  *
  * Run automatically by beforeBuildCommand; safe to run by hand.
@@ -57,7 +57,7 @@ mkdirSync(staged, { recursive: true });
  * bundle would work but ship a much larger binary with debug info in it.
  */
 function build(forTriple) {
-	const args = ["build", "--release", "--bin", "bramble-proxy"];
+	const args = ["build", "--release", "--bin", "vautix-proxy"];
 	if (forTriple) args.push("--target", forTriple);
 	execFileSync("cargo", args, { cwd: tauri, stdio: "inherit" });
 	// cargo writes under target/<triple>/ whenever a target is in play, whether it came from our
@@ -65,12 +65,12 @@ function build(forTriple) {
 	// assuming target/release/ here looked for a binary that was one directory away.
 	const dir = forTriple ?? process.env.CARGO_BUILD_TARGET ?? "";
 	const root = process.env.CARGO_TARGET_DIR ?? join(tauri, "target");
-	return join(root, ...(dir ? [dir] : []), "release", "bramble-proxy");
+	return join(root, ...(dir ? [dir] : []), "release", "vautix-proxy");
 }
 
 // Set by build-macos.ts when it passes --target universal-apple-darwin. Read from our own
 // side rather than guessed from Tauri's environment, so it cannot silently stop being true.
-if (process.env.BRAMBLE_UNIVERSAL) {
+if (process.env.VAUTIX_UNIVERSAL) {
 	const slices = [];
 	for (const [forTriple, arch] of [
 		["aarch64-apple-darwin", "arm64"],
@@ -86,21 +86,21 @@ if (process.env.BRAMBLE_UNIVERSAL) {
 			console.error(`stage-proxy: the ${forTriple} proxy is not ${arch}:\n  ${info.trim()}`);
 			process.exit(1);
 		}
-		copyFileSync(built, join(staged, `bramble-proxy-${forTriple}`));
+		copyFileSync(built, join(staged, `vautix-proxy-${forTriple}`));
 		slices.push(built);
 	}
 
-	const fat = join(staged, "bramble-proxy-universal-apple-darwin");
+	const fat = join(staged, "vautix-proxy-universal-apple-darwin");
 	execFileSync("lipo", ["-create", "-output", fat, ...slices], { stdio: "inherit" });
 
 	// The same binary where the bundler looks for this crate's own bins. Tauri lipos only the
 	// main one, so for a multi-bin crate this is the gap nothing else fills.
 	const universalDir = join(tauri, "target", "universal-apple-darwin", "release");
 	mkdirSync(universalDir, { recursive: true });
-	copyFileSync(fat, join(universalDir, "bramble-proxy"));
+	copyFileSync(fat, join(universalDir, "vautix-proxy"));
 
-	console.log("stage-proxy: staged bramble-proxy for arm64, x86_64 and universal");
+	console.log("stage-proxy: staged vautix-proxy for arm64, x86_64 and universal");
 } else {
-	copyFileSync(build(null), join(staged, `bramble-proxy-${triple}`));
-	console.log(`stage-proxy: staged bramble-proxy-${triple}`);
+	copyFileSync(build(null), join(staged, `vautix-proxy-${triple}`));
+	console.log(`stage-proxy: staged vautix-proxy-${triple}`);
 }

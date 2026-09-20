@@ -34,9 +34,9 @@ function roundtrip(method: "create" | "get", payload: unknown): Promise<Transpor
 		}, ROUNDTRIP_TIMEOUT_MS);
 		function onMsg(ev: MessageEvent) {
 			if (ev.source !== window) return;
-			const d = ev.data as { __bramble_pk?: string; id?: string; result?: TransportResult } | null;
+			const d = ev.data as { __vautix_pk?: string; id?: string; result?: TransportResult } | null;
 			if (!d) return;
-			if (d.__bramble_pk !== "res" || d.id !== id) return;
+			if (d.__vautix_pk !== "res" || d.id !== id) return;
 			cleanup();
 			resolve(d.result ?? { passthrough: true });
 		}
@@ -45,7 +45,7 @@ function roundtrip(method: "create" | "get", payload: unknown): Promise<Transpor
 			window.removeEventListener("message", onMsg);
 		}
 		window.addEventListener("message", onMsg);
-		window.postMessage({ __bramble_pk: "req", id, method, payload }, location.origin);
+		window.postMessage({ __vautix_pk: "req", id, method, payload }, location.origin);
 	});
 }
 

@@ -33,7 +33,7 @@ async function invite(page: Page): Promise<string> {
 	const codeField = page.locator("input[readonly]");
 	await expect(codeField).toBeVisible();
 	const code = await codeField.inputValue();
-	expect(code).toMatch(/^bramble-pair-1\./);
+	expect(code).toMatch(/^vautix-pair-1\./);
 	return code;
 }
 
@@ -122,7 +122,7 @@ test("the extension and the mobile app pair over a real relay and share a vault"
 	// The code must name OUR relay, not the hosted default — otherwise the test would be
 	// silently exercising production infrastructure.
 	const decoded = JSON.parse(
-		Buffer.from(code.replace("bramble-pair-1.", ""), "base64").toString("utf8"),
+		Buffer.from(code.replace("vautix-pair-1.", ""), "base64").toString("utf8"),
 	) as { relay: string };
 	expect(decoded.relay).toContain(LOCAL_RELAY_HOST);
 

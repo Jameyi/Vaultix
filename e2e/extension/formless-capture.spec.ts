@@ -17,7 +17,7 @@ const COEP = {
 	"cross-origin-opener-policy": "same-origin",
 };
 
-const PROMPT = "#bramble-corner-prompt";
+const PROMPT = "#vautix-corner-prompt";
 
 /**
  * A formless login panel. `teardownMs` is how long after the click the panel is

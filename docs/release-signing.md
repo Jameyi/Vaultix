@@ -57,8 +57,8 @@ age-plugin-yubikey --generate
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /tmp/cws.pem
 
 # 3. Day-to-day copy: encrypt to the YubiKey recipient.
-mkdir -p ~/.config/bramble
-age -r age1yubikey1XXXX -o ~/.config/bramble/cws-signing-key.age /tmp/cws.pem
+mkdir -p ~/.config/vautix
+age -r age1yubikey1XXXX -o ~/.config/vautix/cws-signing-key.age /tmp/cws.pem
 
 # 4. Recovery copy: passphrase-encrypted, stored OFFLINE (not in the repo, not
 #    in CI). Use a long random passphrase kept somewhere separate. This is what
@@ -85,20 +85,20 @@ pnpm run release chromium 1.0.0
 ```
 
 It runs lint + tests, bumps the manifest, builds WASM, bundles, signs
-`bramble.crx` locally, tags, pushes, and publishes a GitHub release with the
+`vautix.crx` locally, tags, pushes, and publishes a GitHub release with the
 signed `.crx` (and `.zip`) attached. The signing key never leaves your machine. Publishing fires
 `.github/workflows/release.yml`, which only **verifies** the signed `.crx` is
 attached; CI never builds or signs.
 
-Then upload the release's `bramble_<platform>_<version>.crx` to the Chrome Web
+Then upload the release's `vautix_<platform>_<version>.crx` to the Chrome Web
 Store via **Upload New Package**, or the Update API with
 `X-Goog-Upload-Protocol: raw` and `X-Goog-Upload-File-Name: <name>.crx`. (The
 store upload stays manual, so CWS publish credentials never live in CI either.)
 
 ### Building without releasing
 
-`pnpm run bundle` builds and signs locally too (`dist` + `bramble.zip` +
-`bramble.crx`), via `sign --optional`: it packs the `.crx` when the key is
+`pnpm run bundle` builds and signs locally too (`dist` + `vautix.zip` +
+`vautix.crx`), via `sign --optional`: it packs the `.crx` when the key is
 present and **skips** (no error) when it is not. To force signing and error if
 the key is missing, run `pnpm run sign` on its own. Overrides: pass a dist path as
 the first arg to `sign`; set `CWS_KEY_AGE` to point at a different encrypted key.
@@ -112,20 +112,20 @@ needed.
 ```sh
 age -d cws-signing-key.backup.age > /tmp/cws.pem        # passphrase
 age-plugin-yubikey --generate                            # new YubiKey recipient
-age -r age1yubikey1NEW -o ~/.config/bramble/cws-signing-key.age /tmp/cws.pem
+age -r age1yubikey1NEW -o ~/.config/vautix/cws-signing-key.age /tmp/cws.pem
 rm -P /tmp/cws.pem
 ```
 
 ## Chrome Web Store — auto-publish (service account)
 
-`pnpm run release chromium <version>` uploads the signed `bramble.crx` to the store and publishes
+`pnpm run release chromium <version>` uploads the signed `vautix.crx` to the store and publishes
 it (→ CWS review → live), via `scripts/sign-cws.ts` and the Chrome Web Store **REST API v2**
 (`chromewebstore.googleapis.com`). Auth is a **Google Cloud service account** (the classic V1
 refresh-token flow is deprecated after 15 Oct 2026). The service-account JSON is the secret; it
 rides the same age + YubiKey scheme.
 
 The item has **Verified CRX Uploads** enabled, so the store only accepts a signed `.crx` (not a
-`.zip`): the upload sends `X-Goog-Upload-File-Name: bramble.crx`, and CWS verifies the `.crx`
+`.zip`): the upload sends `X-Goog-Upload-File-Name: vautix.crx`, and CWS verifies the `.crx`
 signature against the item's registered public key, then repackages under its own key. The `.crx`
 must be signed with the key whose public half you registered on the dashboard (Package → Verified
 CRX Uploads) — the same `cws-signing-key.age` `pnpm run sign` uses.
@@ -141,7 +141,7 @@ CRX Uploads) — the same `cws-signing-key.age` `pnpm run sign` uses.
 4. Encrypt the JSON to the YubiKey and destroy the plaintext:
 
 ```sh
-age -r age1yubikey1XXXX -o ~/.config/bramble/cws-service-account.age /path/to/downloaded-sa.json
+age -r age1yubikey1XXXX -o ~/.config/vautix/cws-service-account.age /path/to/downloaded-sa.json
 rm -P /path/to/downloaded-sa.json
 ```
 
@@ -149,13 +149,13 @@ The v2 API is publisher-scoped (`publishers/{id}/items/{id}`), so it also needs 
 id** — the developer-account id shown in the Developer Dashboard URL / Account page. It defaults in
 `scripts/sign-cws.ts` (next to `CWS_ITEM_ID`); override with `CWS_PUBLISHER_ID`. The item id also
 defaults there; override with `CWS_ITEM_ID`. Creds resolve from `CWS_SERVICE_ACCOUNT_JSON` (a
-plaintext path, for CI) else `~/.config/bramble/cws-service-account.age` (override
+plaintext path, for CI) else `~/.config/vautix/cws-service-account.age` (override
 `CWS_SERVICE_ACCOUNT_AGE`).
 
 ### Test / build without publishing
 
 ```sh
-pnpm run bundle              # build packages/platform-extension/bramble.zip
+pnpm run bundle              # build packages/platform-extension/vautix.zip
 pnpm run sign:cws --upload-only   # auth + upload only, no publish (safe dry run)
 ```
 
@@ -169,7 +169,7 @@ it (step 4). The service-account email and its CWS access are unchanged, so noth
 The Firefox add-on ships **listed on addons.mozilla.org** (the public store): we submit the built
 extension to AMO on the **listed** channel, a reviewer approves it, and AMO signs + hosts the
 `.xpi`. Users install and auto-update from the store; updates are matched by the add-on id
-(`firefox@bramble.app`). The GitHub release carries only the **source `.zip` + `SHA256SUMS`** for
+(`firefox@vautix.app`). The GitHub release carries only the **source `.zip` + `SHA256SUMS`** for
 transparency, not a signed build. (`--channel unlisted` still signs a self-distributed `.xpi`
 locally if ever needed.)
 
@@ -191,8 +191,8 @@ cat > /tmp/amo.json <<'JSON'
 JSON
 
 # 2. Day-to-day copy: encrypt to the YubiKey recipient (PIN + touch to use).
-mkdir -p ~/.config/bramble
-age -r age1yubikey1XXXX -o ~/.config/bramble/amo-api-credentials.age /tmp/amo.json
+mkdir -p ~/.config/vautix
+age -r age1yubikey1XXXX -o ~/.config/vautix/amo-api-credentials.age /tmp/amo.json
 
 # 3. Destroy the plaintext credentials.
 rm -P /tmp/amo.json
@@ -214,7 +214,7 @@ It runs lint + tests, bumps the firefox `manifest.json` version, builds WASM, bu
 submitting so a validation error fails for free, then **submits it to AMO on the listed channel**
 (`web-ext sign --channel listed`, with a source archive attached for review; see
 `docs/amo-source-build.md`), tags `1.0.0-firefox`, pushes, and publishes a GitHub release with the
-source `bramble_firefox_1.0.0.zip` + `SHA256SUMS`. Nothing is downloaded: AMO signs and publishes
+source `vautix_firefox_1.0.0.zip` + `SHA256SUMS`. Nothing is downloaded: AMO signs and publishes
 the `.xpi` itself once a reviewer approves it (track it in the Developer Hub). The credentials are
 decrypted to a temp file and wiped; they never touch the repo. CI verifies the source `.zip` +
 `SHA256SUMS` on the release; it never builds or signs.
@@ -250,7 +250,7 @@ fresh one at AMO and re-encrypt it. If you kept an offline backup, re-wrap that 
 ```sh
 age -d amo-api-credentials.backup.age > /tmp/amo.json    # passphrase (if you made a backup)
 age-plugin-yubikey --generate                            # new YubiKey recipient
-age -r age1yubikey1NEW -o ~/.config/bramble/amo-api-credentials.age /tmp/amo.json
+age -r age1yubikey1NEW -o ~/.config/vautix/amo-api-credentials.age /tmp/amo.json
 rm -P /tmp/amo.json
 ```
 
@@ -274,29 +274,29 @@ export KS_PW="$(openssl rand -base64 24)"; echo "$KS_PW"
 
 # 2. Generate a dedicated release key (RSA 4096, 30-year validity).
 keytool -genkeypair -v \
-  -keystore /tmp/bramble-release.jks -storetype PKCS12 -alias bramble \
-  -keyalg RSA -keysize 4096 -validity 10950 -dname "CN=Bramble" \
+  -keystore /tmp/vautix-release.jks -storetype PKCS12 -alias vautix \
+  -keyalg RSA -keysize 4096 -validity 10950 -dname "CN=Vautix" \
   -storepass "$KS_PW" -keypass "$KS_PW"
 
 # 3. Day-to-day copy: encrypt to the YubiKey recipient (PIN + touch to use).
-mkdir -p ~/.config/bramble
-age -r age1yubikey1XXXX -o ~/.config/bramble/android-release-keystore.age /tmp/bramble-release.jks
+mkdir -p ~/.config/vautix
+age -r age1yubikey1XXXX -o ~/.config/vautix/android-release-keystore.age /tmp/vautix-release.jks
 
 # 4. Recovery copy: passphrase-encrypted, stored OFFLINE (not in the repo, not in CI).
-age -p -o android-release-keystore.backup.age /tmp/bramble-release.jks
+age -p -o android-release-keystore.backup.age /tmp/vautix-release.jks
 
 # 4b. Optional, and the only option off macOS: encrypt the PASSWORD to the same YubiKey, so
 #     releases stop needing it in the environment. It decrypts beside the keystore, on the
 #     same touch. printf stores the exact bytes; the decrypt strips one trailing newline, so
 #     echo works too, but anything past that first newline is kept and will break signing.
-printf %s "$KS_PW" | age -r age1yubikey1XXXX -o ~/.config/bramble/android-keystore-password.age
+printf %s "$KS_PW" | age -r age1yubikey1XXXX -o ~/.config/vautix/android-keystore-password.age
 
 # 5. Record the cert SHA-256 (what users verify); paste it into the "Verifying a release APK"
 #    section of packages/platform-mobile/README.md (the single published source of truth).
-keytool -list -v -keystore /tmp/bramble-release.jks -alias bramble -storepass "$KS_PW" | grep "SHA256:"
+keytool -list -v -keystore /tmp/vautix-release.jks -alias vautix -storepass "$KS_PW" | grep "SHA256:"
 
 # 6. Destroy the plaintext keystore.
-rm -P /tmp/bramble-release.jks
+rm -P /tmp/vautix-release.jks
 ```
 
 Move `android-release-keystore.backup.age` to offline storage (not the repo, not CI).
@@ -308,7 +308,7 @@ pnpm run release android 1.1.0           # prompts for a YubiKey touch to decryp
 ```
 
 The keystore password resolves in this order: `ANDROID_KEYSTORE_PASSWORD`, then the macOS login
-Keychain (`bramble-android-keystore`), then `~/.config/bramble/android-keystore-password.age`
+Keychain (`vautix-android-keystore`), then `~/.config/vautix/android-keystore-password.age`
 from step 4b. Only the last works off macOS, and it is the one that keeps the password out of
 your shell history and environment entirely. The script checks up front that at least one source
 exists, so a missing password fails before the build rather than after it.
@@ -318,13 +318,13 @@ Mac**: web bundle → Rust FFI for the four ABIs (needs `cargo-ndk` + the NDK) �
 `gradlew assembleRelease` under JDK 21. Gradle has no signing config, so it emits
 `app-release-unsigned.apk`; the script then decrypts the keystore to a temp file, signs with
 `apksigner` (v2/v3 only — minSdk 24), wipes the key, prints the cert SHA-256, tags `1.1.0-android`,
-pushes, and publishes a GitHub release with `bramble_android_1.1.0.apk` + `SHA256SUMS`. The
+pushes, and publishes a GitHub release with `vautix_android_1.1.0.apk` + `SHA256SUMS`. The
 plaintext keystore exists for the seconds signing takes and never touches the repo or Gradle.
 
 A build failure rewinds the release commit for a clean retry. A *signing* failure (usually a missed
 YubiKey touch) keeps the commit and the unsigned APK: re-run with `--resume` to sign that same build
 without rebuilding. Env overrides: `ANDROID_KEYSTORE_AGE` (encrypted keystore path),
-`ANDROID_KEY_ALIAS` (default `bramble`), `ANDROID_KEY_PASSWORD` (defaults to the store password).
+`ANDROID_KEY_ALIAS` (default `vautix`), `ANDROID_KEY_PASSWORD` (defaults to the store password).
 CI verifies an APK + matching `SHA256SUMS` are attached; it never builds or signs.
 
 ### Verifying (what users run)
@@ -341,7 +341,7 @@ the signing cert) is unchanged, so installed apps keep updating normally.
 ```sh
 age -d android-release-keystore.backup.age > /tmp/ks.jks         # passphrase
 age-plugin-yubikey --generate                                    # new YubiKey recipient
-age -r age1yubikey1NEW -o ~/.config/bramble/android-release-keystore.age /tmp/ks.jks
+age -r age1yubikey1NEW -o ~/.config/vautix/android-release-keystore.age /tmp/ks.jks
 rm -P /tmp/ks.jks
 ```
 
@@ -351,7 +351,7 @@ Two different signings, and they protect different things.
 
 **Apple Developer ID** makes macOS willing to run the app at all. **The updater key** is what the
 installed app checks before applying an update, so it is the one that decides whether a binary
-downloaded from the internet gets to replace Bramble on someone's machine. That makes it the most
+downloaded from the internet gets to replace Vautix on someone's machine. That makes it the most
 consequential key in this file: the Chrome and AMO keys prove "the uploader is us" to a store that
 re-signs anyway, while this one is verified by end users' own copies.
 
@@ -395,7 +395,7 @@ Needs the YubiKey plugged in, and assumes you already made an age identity for i
 pnpm --filter @vault/platform-desktop exec tauri signer generate -w /tmp/updater.key
 
 # 2. Day-to-day copy, encrypted to the YubiKey.
-age -r age1yubikey1XXXX -o ~/.config/bramble/desktop-updater-key.age /tmp/updater.key
+age -r age1yubikey1XXXX -o ~/.config/vautix/desktop-updater-key.age /tmp/updater.key
 
 # 3. Recovery copy, passphrase-encrypted and stored OFFLINE. Without this, a lost YubiKey means
 #    no further updates can ever be signed for anyone already running the app.
@@ -447,11 +447,11 @@ unchanged, so the pubkey in the app still matches and users keep updating.
 ```sh
 age -d desktop-updater-key.backup.age > /tmp/updater.key        # passphrase
 age-plugin-yubikey --generate                                    # new recipient
-age -r age1yubikey1NEW -o ~/.config/bramble/desktop-updater-key.age /tmp/updater.key
+age -r age1yubikey1NEW -o ~/.config/vautix/desktop-updater-key.age /tmp/updater.key
 rm -P /tmp/updater.key
 ```
 
-## Linux APT repository (`apt.bramble.sh`)
+## Linux APT repository (`apt.vautix.sh`)
 
 Keys and their rationale here; the end-to-end flow, the runbook and the troubleshooting are in
 [apt-releases.md](apt-releases.md).
@@ -491,7 +491,7 @@ gpg --card-edit
 #    is cached by gpg-agent, so a compromised machine could sign silently.
 ykman openpgp keys set-touch sig on
 
-# 5. The fingerprint goes in .env.local as BRAMBLE_APT_GPG_KEY.
+# 5. The fingerprint goes in .env.local as VAUTIX_APT_GPG_KEY.
 gpg --list-secret-keys --keyid-format=long
 ```
 
@@ -519,7 +519,7 @@ it once, which is recoverable, unlike an updater-key loss.
 
 ### Hosting
 
-Cloudflare R2 (`bramble-apt`) behind the custom domain `apt.bramble.sh`. Not the website's
+Cloudflare R2 (`vautix-apt`) behind the custom domain `apt.vautix.sh`. Not the website's
 Cloudflare Pages deployment and not `website/public/`: each release adds a ~10 MB `.deb`, which in
 git is permanent, and Pages caps a file at 25 MiB anyway. R2 has no egress fees and the bucket is
 S3-compatible, so the release script pushes it with one `rclone sync`.
@@ -535,22 +535,22 @@ Two cache rules on that hostname, which matter more than they look:
 
 ```
 keys.asc
-bramble.sources
-pool/main/b/bramble/bramble_<version>_amd64.deb
+vautix.sources
+pool/main/b/vautix/vautix_<version>_amd64.deb
 dists/stable/main/binary-amd64/Packages{,.gz}
 dists/stable/{Release,InRelease}
 ```
 
-`bramble.sources` is deb822, and the `Signed-By` line is what scopes the key to this repository
+`vautix.sources` is deb822, and the `Signed-By` line is what scopes the key to this repository
 rather than trusting it for everything apt fetches:
 
 ```
 Types: deb
-URIs: https://apt.bramble.sh
+URIs: https://apt.vautix.sh
 Suites: stable
 Components: main
 Architectures: amd64
-Signed-By: /usr/share/keyrings/bramble-keyring.asc
+Signed-By: /usr/share/keyrings/vautix-keyring.asc
 ```
 
 ### Each release
@@ -568,7 +568,7 @@ pnpm run publish:apt      # host: aptly add + sign Release (a touch) + rclone sy
 `build:linux --unsigned` uses a throwaway updater key for iterating; the result installs fine and
 can never update, so it is not publishable.
 
-`publish:apt` needs three things in `.env.local`: `BRAMBLE_APT_GPG_KEY` (the fingerprint of the
+`publish:apt` needs three things in `.env.local`: `VAUTIX_APT_GPG_KEY` (the fingerprint of the
 repository key), and `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` from the R2 API
 token. rclone is configured from those variables rather than from an `rclone.conf`, so no
 credential is written to disk.
@@ -586,9 +586,9 @@ resolves, which catches a half-finished upload.
 ### What users run
 
 ```sh
-curl -fsSL https://apt.bramble.sh/keys.asc | sudo tee /usr/share/keyrings/bramble-keyring.asc > /dev/null
-curl -fsSL https://apt.bramble.sh/bramble.sources | sudo tee /etc/apt/sources.list.d/bramble.sources > /dev/null
-sudo apt update && sudo apt install bramble
+curl -fsSL https://apt.vautix.sh/keys.asc | sudo tee /usr/share/keyrings/vautix-keyring.asc > /dev/null
+curl -fsSL https://apt.vautix.sh/vautix.sources | sudo tee /etc/apt/sources.list.d/vautix.sources > /dev/null
+sudo apt update && sudo apt install vautix
 ```
 
 ### The updater has to stand down

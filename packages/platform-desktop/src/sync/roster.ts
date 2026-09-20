@@ -43,7 +43,7 @@ import { emit, report } from "./bus";
 import { deviceKeypair, publishSyncIdentity } from "./keys";
 import { linkPeerSource } from "./link-peers";
 
-const DEFAULT_RELAY = "wss://bramble-relay.flythenimbus.workers.dev";
+const DEFAULT_RELAY = "wss://vautix-relay.flythenimbus.workers.dev";
 const GROUP_KEY = "sync.group";
 const RELAY_KEY = "sync.relay";
 const ICE_KEY = "sync.iceUrl";

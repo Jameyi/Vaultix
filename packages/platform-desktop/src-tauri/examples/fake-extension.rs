@@ -20,7 +20,7 @@ use sha2::{Digest, Sha256};
 use vault_crypto::handshake;
 
 /// Must match `PSK_INFO` in src/pairing.rs.
-const PSK_INFO: &[u8] = b"bramble/desktop/extension-pairing/psk/v1";
+const PSK_INFO: &[u8] = b"vautix/desktop/extension-pairing/psk/v1";
 
 fn psk_for(code: &str) -> String {
     let mut hasher = Sha256::new();
@@ -58,7 +58,7 @@ fn key_file() -> std::path::PathBuf {
 /// because a real extension learns it during pairing and stores it.
 fn app_public_key() -> String {
     let home = std::env::var("HOME").expect("HOME");
-    let path = format!("{home}/Library/Application Support/app.bramble.desktop/pairing.json");
+    let path = format!("{home}/Library/Application Support/app.vautix.desktop/pairing.json");
     let raw = std::fs::read(path).expect("read pairing.json");
     let value: serde_json::Value = serde_json::from_slice(&raw).expect("parse pairing.json");
     value["publicKey"].as_str().expect("publicKey").to_string()
@@ -84,7 +84,7 @@ fn main() {
         // examples land in target/debug/examples, the proxy one level up.
         .parent()
         .expect("target dir")
-        .join("bramble-proxy");
+        .join("vautix-proxy");
     println!("proxy: {}", proxy.display());
 
     let mut child = Command::new(&proxy)
@@ -159,7 +159,7 @@ fn reconnect() {
         .expect("parent")
         .parent()
         .expect("target dir")
-        .join("bramble-proxy");
+        .join("vautix-proxy");
     let mut child = Command::new(&proxy)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())

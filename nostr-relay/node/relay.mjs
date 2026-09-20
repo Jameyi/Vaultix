@@ -46,7 +46,7 @@ const sockets = new Set();
 // handles the Upgrade handshake itself.
 const httpServer = createServer((_req, res) => {
 	res.writeHead(200, { "content-type": "text/plain" });
-	res.end("bramble signaling relay");
+	res.end("vautix signaling relay");
 });
 
 const wss = new WebSocketServer({ server: httpServer });
@@ -102,5 +102,5 @@ wss.on("connection", (ws) => {
 });
 
 httpServer.listen(PORT, () => {
-	console.log(`bramble signaling relay on ws://localhost:${PORT}`);
+	console.log(`vautix signaling relay on ws://localhost:${PORT}`);
 });

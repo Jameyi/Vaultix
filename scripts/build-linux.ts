@@ -29,7 +29,7 @@ import { signingKey } from "./desktop-signing-key.ts";
 import { dockerProblem } from "./docker-available.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const IMAGE = "bramble-linux-build";
+const IMAGE = "vautix-linux-build";
 const DOCKERFILE = "packages/platform-desktop/docker/linux-build.Dockerfile";
 const OUT = join(ROOT, "dist-linux");
 
@@ -46,7 +46,7 @@ type Arch = (typeof ARCHES)[number];
 
 /** Per architecture: cargo's target dir and pnpm's store are not portable between them, and one
  * shared volume would rebuild the world on every switch. */
-const volumeFor = (arch: Arch) => `bramble-linux-workspace-${arch}`;
+const volumeFor = (arch: Arch) => `vautix-linux-workspace-${arch}`;
 
 /** Where one architecture's bundles land before they are merged into dist-linux/. Kept between
  * runs: it is the record of which files that architecture owns, so the next build of it can
@@ -76,7 +76,7 @@ if (dockerIssue) fail(`${dockerIssue}\nSee docs/release-signing.md.`);
  * scratch dir and read straight back, because the generator has no stdout mode.
  */
 function throwawayKey(): string {
-	const tmp = mkdtempSync(join(tmpdir(), "bramble-linux-key-"));
+	const tmp = mkdtempSync(join(tmpdir(), "vautix-linux-key-"));
 	try {
 		const path = join(tmp, "throwaway.key");
 		execFileSync(

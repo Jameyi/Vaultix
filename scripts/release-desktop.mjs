@@ -18,7 +18,7 @@
 //
 // The updater endpoint is this file on the website, so it IS the update channel. Getting it wrong
 // does not break the download, it breaks updating for everyone already running the app, which is
-// the failure nobody notices until it matters. It is served from bramble.sh rather than the
+// the failure nobody notices until it matters. It is served from vautix.sh rather than the
 // GitHub release because `/releases/latest` means the newest release of ANY target, and this repo
 // ships chromium, firefox and android from the same tag namespace — the next extension release
 // would quietly point every desktop install at a 404.
@@ -78,7 +78,7 @@ const quiet = args.includes("--quiet");
 if (!resume) {
   // Inherited stdio, because the build wants a YubiKey PIN at the terminal and a swallowed
   // prompt looks exactly like a hang.
-  console.log(`building Bramble ${version}${universal ? " (universal)" : ""}…`);
+  console.log(`building Vautix ${version}${universal ? " (universal)" : ""}…`);
   try {
     execFileSync("pnpm", ["run", "build:macos", ...(universal ? [] : ["--aarch64"])], {
       stdio: "inherit",
@@ -94,7 +94,7 @@ if (!resume) {
  * The arches an archive serves, as the updater names them.
  *
  * A universal macOS archive runs on both, and its filename says neither: the bundler names it
- * `Bramble.app.tar.gz` exactly as it names an aarch64-only one. Keyed under one arch it would be
+ * `Vautix.app.tar.gz` exactly as it names an aarch64-only one. Keyed under one arch it would be
  * invisible to the other, and the updater errors with TargetNotFound rather than reporting no
  * update, so an Intel user would see a broken check rather than an update built for them.
  *
@@ -128,8 +128,8 @@ if (localEndpoint) {
   const host = new URL(localEndpoint).host;
   // The binary to scan, inside whatever the platform's bundle is.
   const binaries = MAC
-    ? [join(updaterDir, "Bramble.app/Contents/MacOS/bramble-desktop")]
-    : [join(TARGET, "release/bramble-desktop")];
+    ? [join(updaterDir, "Vautix.app/Contents/MacOS/vautix-desktop")]
+    : [join(TARGET, "release/vautix-desktop")];
   for (const path of binaries) {
     const binary = path.split("/").pop();
     if (existsSync(path) && readFileSync(path).includes(host)) {
@@ -167,7 +167,7 @@ for (const archive of archives) {
       signature: readFileSync(join(updaterDir, sig), "utf8").trim(),
       // Tags are `<version>-desktop` (the repo's shared namespace); the asset name is whatever
       // the bundler produced.
-      url: `https://github.com/flythenimbus/bramble/releases/download/${version}-desktop/${archive}`,
+      url: `https://github.com/flythenimbus/vautix/releases/download/${version}-desktop/${archive}`,
     };
 }
 
@@ -197,7 +197,7 @@ if (MAC) {
         : "linux-x86_64";
       platforms[key] = {
         signature: readFileSync(join(linuxDir, sig), "utf8").trim(),
-        url: `https://github.com/flythenimbus/bramble/releases/download/${version}-desktop/${image}`,
+        url: `https://github.com/flythenimbus/vautix/releases/download/${version}-desktop/${image}`,
       };
     }
   }
@@ -207,7 +207,7 @@ const manifest = {
   version,
   // Release notes come from the GitHub release body; the updater shows this instead, so keep it
   // short rather than duplicating a changelog nobody reads in a modal.
-  notes: `Bramble ${version}`,
+  notes: `Vautix ${version}`,
   pub_date: new Date().toISOString(),
   platforms,
 };

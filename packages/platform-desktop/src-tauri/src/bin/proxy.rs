@@ -1,6 +1,6 @@
 //! The native-messaging host Chrome spawns, and a pure byte pump.
 //!
-//! Native messaging inverts the lifecycle: the browser starts its host, but Bramble is
+//! Native messaging inverts the lifecycle: the browser starts its host, but Vautix is
 //! already running. So this relays between the browser's stdio and the app's local socket.
 //! Both sides use the same framing (4-byte little-endian length, then JSON), so this never
 //! parses a message, which is the point: it holds no key and cannot read or alter the Noise
@@ -29,7 +29,7 @@ mod socket_addr;
 /// and refusing it here keeps it off the socket entirely.
 const MAX_FRAME: u32 = 1024 * 1024;
 
-/// Reported to the extension when there is no app to reach, so it can say "open Bramble"
+/// Reported to the extension when there is no app to reach, so it can say "open Vautix"
 /// rather than showing a connection that hangs. Native messaging gives the extension a
 /// disconnect with no detail otherwise.
 fn report_unavailable() {
@@ -70,19 +70,19 @@ fn pump(mut src: impl Read, mut dst: impl Write) -> io::Result<()> {
 
 fn main() -> ExitCode {
     let Some(path) = socket_addr::default_socket_path() else {
-        eprintln!("bramble-proxy: unsupported platform");
+        eprintln!("vautix-proxy: unsupported platform");
         report_unavailable();
         return ExitCode::FAILURE;
     };
 
     let Ok(socket) = UnixStream::connect(&path) else {
-        // The ordinary case when Bramble is not running, not an error worth shouting about.
-        eprintln!("bramble-proxy: no app listening at {}", path.display());
+        // The ordinary case when Vautix is not running, not an error worth shouting about.
+        eprintln!("vautix-proxy: no app listening at {}", path.display());
         report_unavailable();
         return ExitCode::FAILURE;
     };
     let Ok(socket_out) = socket.try_clone() else {
-        eprintln!("bramble-proxy: could not split the socket");
+        eprintln!("vautix-proxy: could not split the socket");
         return ExitCode::FAILURE;
     };
 
@@ -92,7 +92,7 @@ fn main() -> ExitCode {
     let down = pump(socket, io::stdout().lock());
 
     if let Err(e) = down {
-        eprintln!("bramble-proxy: socket to browser: {e}");
+        eprintln!("vautix-proxy: socket to browser: {e}");
         return ExitCode::FAILURE;
     }
     // The browser-to-socket side is not joined on purpose. It is blocked reading a stdin that

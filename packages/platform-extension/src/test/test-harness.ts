@@ -254,7 +254,7 @@ function makeChrome(opts: ChromeMockOptions): { chrome: any; state: HarnessState
 		runtime: {
 			id: "testext",
 			getURL: (p: string) => `${EXT_ORIGIN}/${p}`,
-			getManifest: () => ({ name: "Bramble" }),
+			getManifest: () => ({ name: "Vautix" }),
 			onMessage: {
 				// Chrome supports multiple onMessage listeners; keep them all (the mock used to keep
 				// only the last, so a second listener like the SYNC_STATUS mirror clobbered the router).

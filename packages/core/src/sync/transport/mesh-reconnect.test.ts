@@ -45,7 +45,7 @@ class FakeSocket {
 const options = () => ({
 	relayUrl: "wss://relay.invalid",
 	groupKey: new Uint8Array(32).fill(7),
-	roomLabel: "bramble/sync",
+	roomLabel: "vautix/sync",
 	signer: {
 		pubkeyHex: "ab".repeat(32),
 		signer: { pubkeyHex: "ab".repeat(32), sign: async () => "cd".repeat(32) },

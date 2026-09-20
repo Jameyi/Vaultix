@@ -416,7 +416,7 @@ function LoginFields({ initialBreach }: EntryFieldsProps) {
 						))}
 					</div>
 					<p className="text-xs text-muted-foreground mt-1.5">
-						<Trans>Added when you create a passkey on a site with Bramble. Remove to delete.</Trans>
+						<Trans>Added when you create a passkey on a site with Vautix. Remove to delete.</Trans>
 					</p>
 				</div>
 			)}

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// End-to-end test of the published APT repository: install Bramble the way a user does, in a
+// End-to-end test of the published APT repository: install Vautix the way a user does, in a
 // container that has never seen it.
 //
 // Usage:

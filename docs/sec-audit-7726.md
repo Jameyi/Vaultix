@@ -196,7 +196,7 @@ corner-prompt and autofill in an unpacked build.
 > **STATUS - PENDING ANDROID DEVICE TESTING (no device available as of this branch).**
 > - **Landed:** the fail-loud logging robustness edit (`warnUnverifiedBrowserHash` in
 >   CredentialFulfillActivity) - when a caller supplies a `clientDataHash` but does not verify as a
->   privileged browser, logcat (`BrambleCredential` tag) prints the caller package + real signing
+>   privileged browser, logcat (`VautixCredential` tag) prints the caller package + real signing
 >   fingerprints. Compiles with the Android Studio JBR; host-JVM unit tests pass. Additive only.
 > - **Pending device:** the register+authenticate matrix (Chrome/Firefox/Edge/Brave/DDG/Opera Mini +
 >   one native caller) against a live RP. **`a266dfa7` must not ship to users until it passes.**

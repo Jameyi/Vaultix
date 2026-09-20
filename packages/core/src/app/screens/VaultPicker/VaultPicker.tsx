@@ -2,7 +2,7 @@ import { Trans } from "@lingui/react/macro";
 import { Plus } from "lucide-react";
 import { usePlatform } from "../../../context/PlatformContext";
 import { useVaultRegistry } from "../../../hooks/useVaultRegistry";
-import { BrambleGlyph } from "../../components/BrambleGlyph";
+import { VautixGlyph } from "../../components/VautixGlyph";
 import { Button } from "../../components/ui/button";
 import { VaultChoiceList } from "../../components/VaultChoiceList";
 
@@ -16,7 +16,7 @@ export function VaultPicker() {
 			<div className="min-h-full flex items-center justify-center p-6">
 				<div className="w-full max-w-md">
 					<div className="text-center mb-6">
-						<BrambleGlyph className="w-14 h-14 text-foreground mb-3 inline-block" />
+						<VautixGlyph className="w-14 h-14 text-foreground mb-3 inline-block" />
 						<h1 className="text-xl bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
 							<Trans>Choose a vault to unlock</Trans>
 						</h1>

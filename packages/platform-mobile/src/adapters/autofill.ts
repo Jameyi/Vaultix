@@ -9,7 +9,7 @@ import { mobileCrypto } from "./crypto";
 import { mobileStorage } from "./storage";
 
 // System autofill on mobile is the native iOS Credential Provider extension, not the
-// webview. This adapter is the main-app side of that bridge. To keep Bramble's "nothing
+// webview. This adapter is the main-app side of that bridge. To keep Vautix's "nothing
 // readable without authenticating" guarantee, the ENTIRE login list (names, usernames,
 // passwords) is encrypted under the VEK before it is written to the shared App Group, so
 // the extension reveals nothing until the user unlocks it. We also share the password
@@ -45,7 +45,7 @@ interface OneTimeCodeIdentity {
 	service: string;
 }
 
-// A passkey identity registered with the OS so it offers Bramble for that site's passkey
+// A passkey identity registered with the OS so it offers Vautix for that site's passkey
 // sign-in. All fields are non-secret metadata (the private key never leaves the encrypted
 // bundle); `credentialId`/`userHandle` are STANDARD base64 (as stored, what the OS wants
 // as Data). Unlike QuickType this is not opt-in: the OS cannot route a passkey get() to a

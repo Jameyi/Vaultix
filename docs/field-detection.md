@@ -1,6 +1,6 @@
 # Field detection
 
-How Bramble decides which inputs on a page are a username, password, card field,
+How Vautix decides which inputs on a page are a username, password, card field,
 OTP box, or custom field. Code: `packages/platform-extension/src/content/detection.ts`,
 exercised by real-site fixtures in `fixtures/sites.dom.test.ts`. How the detected
 fields are filled is in [autofill.md](autofill.md).

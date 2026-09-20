@@ -12,9 +12,9 @@ use std::{
 
 /// Must match `identifier` in tauri.conf.json: on macOS that is what names the app's data
 /// directory, and the proxy has no Tauri to ask.
-pub const APP_IDENTIFIER: &str = "app.bramble.desktop";
+pub const APP_IDENTIFIER: &str = "app.vautix.desktop";
 
-pub const SOCKET_NAME: &str = "bramble.sock";
+pub const SOCKET_NAME: &str = "vautix.sock";
 
 /// The app's data directory, derived the way Tauri derives it, from the values Tauri reads.
 ///
@@ -77,18 +77,18 @@ mod tests {
         let xdg = OsString::from("/data/xdg");
         assert_eq!(
             data_dir_from(Some(&xdg), Some(&home)).unwrap(),
-            PathBuf::from("/data/xdg/app.bramble.desktop")
+            PathBuf::from("/data/xdg/app.vautix.desktop")
         );
         assert_eq!(
             data_dir_from(None, Some(&home)).unwrap(),
-            PathBuf::from("/home/someone/.local/share/app.bramble.desktop")
+            PathBuf::from("/home/someone/.local/share/app.vautix.desktop")
         );
         // A relative XDG_DATA_HOME is to be ignored, not resolved: honouring it would put the
         // socket somewhere that depends on the working directory of whoever launched the app.
         let relative = OsString::from("relative/data");
         assert_eq!(
             data_dir_from(Some(&relative), Some(&home)).unwrap(),
-            PathBuf::from("/home/someone/.local/share/app.bramble.desktop")
+            PathBuf::from("/home/someone/.local/share/app.vautix.desktop")
         );
     }
 
@@ -98,7 +98,7 @@ mod tests {
         let home = OsString::from("/Users/someone");
         assert_eq!(
             data_dir_from(None, Some(&home)).unwrap(),
-            PathBuf::from("/Users/someone/Library/Application Support/app.bramble.desktop")
+            PathBuf::from("/Users/someone/Library/Application Support/app.vautix.desktop")
         );
     }
 

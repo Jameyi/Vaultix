@@ -4,7 +4,7 @@ import { base64UrlToBytes, bytesToBase64 } from "../util/bytes";
 import { toCxf } from "./to-cxf";
 import { type CxfCredential, cxfCredentialSchema } from "./types";
 
-const OPTS = { exporterRpId: "app.bramble.mobile", exporterDisplayName: "Bramble", now: 1_760_000 };
+const OPTS = { exporterRpId: "app.vautix.mobile", exporterDisplayName: "Vautix", now: 1_760_000 };
 
 const login = (over: Partial<Extract<Entry, { type: "login" }>> = {}): Entry => ({
 	id: "e1",
@@ -49,8 +49,8 @@ describe("toCxf: envelope", () => {
 	it("emits the wire shape Apple decodes: version object, UNIX-second timestamp", () => {
 		const { payload } = run(login());
 		expect(payload.version).toEqual({ major: 1, minor: 0 });
-		expect(payload.exporterRpId).toBe("app.bramble.mobile");
-		expect(payload.exporterDisplayName).toBe("Bramble");
+		expect(payload.exporterRpId).toBe("app.vautix.mobile");
+		expect(payload.exporterDisplayName).toBe("Vautix");
 		expect(payload.timestamp).toBe(1760);
 	});
 

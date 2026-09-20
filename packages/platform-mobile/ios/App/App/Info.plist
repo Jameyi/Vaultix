@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Bramble</string>
+        <string>Vautix</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -64,7 +64,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>app.bramble.mobile.otpauth</string>
+			<string>app.vautix.mobile.otpauth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>otpauth</string>
@@ -72,16 +72,16 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Bramble uses the camera to scan device pairing codes and 2FA QR codes.</string>
+	<string>Vautix uses the camera to scan device pairing codes and 2FA QR codes.</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>Bramble uses Face ID to unlock your vault on this device.</string>
+	<string>Vautix uses Face ID to unlock your vault on this device.</string>
 	<!-- Device sync connects your devices peer-to-peer over WebRTC. On iOS, LAN/mDNS ICE
 	     candidates (used when your devices are on the same network) are gated by the Local
 	     Network privacy permission; without this key iOS silently blocks them and the
 	     connection stalls. See docs/p2p-sync.md. -->
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Bramble connects your devices directly over your local network to sync your vault.</string>
-	<!-- Bramble uses only standard, export-exempt encryption (AES-256-GCM, Argon2id) for the
+	<string>Vautix connects your devices directly over your local network to sync your vault.</string>
+	<!-- Vautix uses only standard, export-exempt encryption (AES-256-GCM, Argon2id) for the
 	     user's own vault data. Declaring this skips the App Store Connect export-compliance
 	     prompt on every upload. Revisit if non-standard crypto is ever added. -->
 	<key>ITSAppUsesNonExemptEncryption</key>

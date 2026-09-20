@@ -88,7 +88,7 @@ const categories: Category[] = [
 				label: "Debian / Ubuntu",
 				icon: BrandDebian,
 				title: "Debian, Ubuntu and friends",
-				body: "Install from our APT repository and apt upgrade keeps Bramble current along with the rest of your system.",
+				body: "Install from our APT repository and apt upgrade keeps Vautix current along with the rest of your system.",
 				action: { shell: APT_INSTALL },
 				note: "The key is scoped to this repository alone, so it can never vouch for a package from anywhere else.",
 			},
@@ -101,7 +101,7 @@ const categories: Category[] = [
 				action: appImage,
 				meta: `Version ${DESKTOP_VERSION}`,
 				note: "Mark it executable first:",
-				noteCode: "chmod +x Bramble_*.AppImage",
+				noteCode: "chmod +x Vautix_*.AppImage",
 			},
 			{
 				id: "nix",
@@ -111,7 +111,7 @@ const categories: Category[] = [
 				body: "Built from source by the flake at the repository root, so nothing is fetched at build time and you get the same bytes twice.",
 				action: { shell: NIX_INSTALL },
 				note: "The flake also exposes an overlay for a system configuration. To try it without installing:",
-				noteCode: "nix run github:flythenimbus/bramble",
+				noteCode: "nix run github:flythenimbus/vautix",
 			},
 		],
 	},
@@ -190,7 +190,7 @@ const tab =
 			class="grid grid-cols-3 gap-1 p-2.5 md:flex md:flex-col"
 			role="tablist"
 			aria-orientation="vertical"
-			aria-label="Where you want Bramble"
+			aria-label="Where you want Vautix"
 			data-categories
 		>
 			{

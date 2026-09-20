@@ -137,7 +137,7 @@ struct HostManifest {
 fn manifest_for(proxy: &Path) -> HostManifest {
     HostManifest {
         name: HOST_NAME.to_string(),
-        description: "Bramble password manager".to_string(),
+        description: "Vautix password manager".to_string(),
         path: proxy.display().to_string(),
         kind: "stdio".to_string(),
         allowed_origins: ALLOWED_EXTENSION_IDS
@@ -162,7 +162,7 @@ fn manifest_for(proxy: &Path) -> HostManifest {
 /// stale path. There the proxy is copied somewhere durable and that copy is named instead.
 pub fn proxy_path() -> Option<PathBuf> {
     let exe = std::env::current_exe().ok()?;
-    let beside = exe.parent()?.join("bramble-proxy");
+    let beside = exe.parent()?.join("vautix-proxy");
     #[cfg(target_os = "linux")]
     {
         // Set by the AppImage runtime to the image's own path, and by nothing else.
@@ -189,7 +189,7 @@ fn copy_into(dir: &Path, mounted: &Path) -> Option<PathBuf> {
     use std::os::unix::fs::PermissionsExt;
 
     fs::create_dir_all(dir).ok()?;
-    let dest = dir.join("bramble-proxy");
+    let dest = dir.join("vautix-proxy");
     let tmp = dest.with_extension("tmp");
     fs::copy(mounted, &tmp).ok()?;
     fs::set_permissions(&tmp, fs::Permissions::from_mode(0o755)).ok()?;
@@ -288,7 +288,7 @@ mod tests {
     #[test]
     fn installs_only_for_browsers_that_exist() {
         let root = root_with(&[FIRST.1]);
-        let installed = install_all(root.path(), Path::new("/tmp/bramble-proxy"));
+        let installed = install_all(root.path(), Path::new("/tmp/vautix-proxy"));
 
         assert_eq!(installed, vec![FIRST.0]);
         // Never conjure up a profile directory for a browser that is not installed.
@@ -298,12 +298,12 @@ mod tests {
     #[test]
     fn the_manifest_has_the_shape_chrome_requires() {
         let root = root_with(&[FIRST.1]);
-        install_all(root.path(), Path::new("/opt/bramble/bramble-proxy"));
+        install_all(root.path(), Path::new("/opt/vautix/vautix-proxy"));
 
         let m = read_manifest(root.path(), FIRST.1);
         assert_eq!(m["name"], HOST_NAME);
         assert_eq!(m["type"], "stdio");
-        assert_eq!(m["path"], "/opt/bramble/bramble-proxy");
+        assert_eq!(m["path"], "/opt/vautix/vautix-proxy");
         // Chrome matches allowed_origins as origins; without the trailing slash it silently
         // ignores the entry and the connection is refused with no explanation.
         assert_eq!(
@@ -366,7 +366,7 @@ mod tests {
 
         let mount = tempfile::tempdir().unwrap();
         let data = tempfile::tempdir().unwrap();
-        let mounted = mount.path().join("bramble-proxy");
+        let mounted = mount.path().join("vautix-proxy");
         fs::write(&mounted, b"#!/bin/true\nfirst").unwrap();
 
         let first = copy_into(data.path(), &mounted).expect("copied");
@@ -380,7 +380,7 @@ mod tests {
         let second = copy_into(data.path(), &mounted).expect("copied again");
         assert_eq!(second, first);
         assert_eq!(fs::read(&second).unwrap(), b"#!/bin/true\nsecond");
-        assert!(!data.path().join("bramble-proxy.tmp").exists());
+        assert!(!data.path().join("vautix-proxy.tmp").exists());
     }
 
     #[test]
@@ -409,18 +409,18 @@ mod tests {
     fn a_rerun_rewrites_a_stale_proxy_path() {
         // What an app update, a drag to another folder, or a new AppImage mount leaves behind.
         let root = root_with(&[FIRST.1]);
-        install_all(root.path(), Path::new("/old/location/bramble-proxy"));
-        install_all(root.path(), Path::new("/new/location/bramble-proxy"));
+        install_all(root.path(), Path::new("/old/location/vautix-proxy"));
+        install_all(root.path(), Path::new("/new/location/vautix-proxy"));
 
         let m = read_manifest(root.path(), FIRST.1);
-        assert_eq!(m["path"], "/new/location/bramble-proxy");
+        assert_eq!(m["path"], "/new/location/vautix-proxy");
     }
 
     #[test]
     fn a_missing_hosts_directory_is_created() {
         let root = root_with(&[FIRST.1]);
         // A fresh browser profile has the support directory but no NativeMessagingHosts.
-        install_all(root.path(), Path::new("/tmp/bramble-proxy"));
+        install_all(root.path(), Path::new("/tmp/vautix-proxy"));
         assert!(root
             .path()
             .join(FIRST.1)

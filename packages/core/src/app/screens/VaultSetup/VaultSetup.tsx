@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useCryptoErrorMessage } from "../../../hooks/useCryptoErrorMessage";
 import type { JoinUnlock } from "../../../hooks/useVault";
-import { BrambleGlyph } from "../../components/BrambleGlyph";
+import { VautixGlyph } from "../../components/VautixGlyph";
 import { SasDisplay } from "../../components/SasDisplay";
 import { BackButton } from "../../components/ui/back-button";
 import { RestoreShell } from "../Restore/RestoreShell";
@@ -34,7 +34,7 @@ interface VaultSetupProps {
 	/** The same SAS as emoji indices, which is the form the user compares. Absent from a host that
 	 * predates the emoji SAS, leaving the digits as the only comparison. */
 	joinSasEmoji?: number[] | null;
-	/** Restore a .bramble backup (the "Restore from backup" tab; rendered inline like the others).
+	/** Restore a .vautix backup (the "Restore from backup" tab; rendered inline like the others).
 	 * Called on success so the parent drives the terminal screen; `addedNew` marks a restored-into-new
 	 * locked vault vs the first vault unlocked in place. Absent where restore isn't supported (mobile). */
 	onRestore?: (result: { addedNew: boolean }) => void;
@@ -48,7 +48,7 @@ interface VaultSetupProps {
 	onBack?: () => void;
 }
 
-/** Vault setup: pick create / restore / join, then set the master password (or restore a .bramble
+/** Vault setup: pick create / restore / join, then set the master password (or restore a .vautix
  * backup / paste a pairing code). The vault lives in the platform's own storage, no file-location step. */
 export function VaultSetup({
 	mode,
@@ -99,7 +99,7 @@ export function VaultSetup({
 		return (
 			<div className="min-h-screen bg-linear-to-br from-background via-background to-primary/5 flex items-center justify-center p-6">
 				<div className="w-full max-w-xl text-center">
-					<BrambleGlyph className="w-16 h-16 text-foreground mb-4 inline-block" />
+					<VautixGlyph className="w-16 h-16 text-foreground mb-4 inline-block" />
 					<h1 className="text-2xl mb-2">
 						{joinSas ? (
 							<Trans>Check this matches</Trans>

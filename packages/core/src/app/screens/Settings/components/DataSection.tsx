@@ -20,7 +20,7 @@ import { KdbxExportDialog } from "./KdbxExportDialog";
 import { Row, RowGroup, Section } from "./primitives";
 
 /**
- * Import & backup, split by whose format it is: our own `.bramble` (round-trips everything,
+ * Import & backup, split by whose format it is: our own `.vautix` (round-trips everything,
  * stays encrypted) above, other vendors' formats below. Each group pairs its import with its
  * export so the way in and the way out sit together.
  */
@@ -61,7 +61,7 @@ export function DataSection() {
 				<Row
 					icon={<ArchiveRestore className="w-4 h-4 text-primary" />}
 					title={t`Import a backup`}
-					subtitle={t`Restore an encrypted .bramble backup. This replaces the vault on this device.`}
+					subtitle={t`Restore an encrypted .vautix backup. This replaces the vault on this device.`}
 				>
 					<Button variant="secondary" size="sm" onClick={() => void shell.openSetup("restore")}>
 						<Trans>Restore</Trans>
@@ -71,7 +71,7 @@ export function DataSection() {
 					<Row
 						icon={<Download className="w-4 h-4 text-primary" />}
 						title={t`Export a backup`}
-						subtitle={t`Save an encrypted .bramble copy of your vault. It still needs your master password to open.`}
+						subtitle={t`Save an encrypted .vautix copy of your vault. It still needs your master password to open.`}
 					>
 						{/* Both groups render a button reading "Export"; the aria-label distinguishes them
 						    for screen readers, which would otherwise announce the pair identically. */}

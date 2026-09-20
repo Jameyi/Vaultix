@@ -31,7 +31,7 @@ document, and WebRTC connects them over loopback.
 ## Enroll a second device
 
 1. **A** (the seed vault, with some entries): **Add a device** -> a
-   `bramble-pair-1.…` pairing code appears and A starts listening. **Copy pairing
+   `vautix-pair-1.…` pairing code appears and A starts listening. **Copy pairing
    code** (use the button; the field scrolls).
 2. **B** (a throwaway vault — joining replaces its contents): paste the code, choose
    how to unlock this device — **Master password** (type one) or **Security key**

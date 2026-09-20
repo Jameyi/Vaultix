@@ -35,7 +35,7 @@ import { nativeSyncCrypto, type SyncCrypto } from "../native-crypto";
 import { secureStorage } from "../secure-storage";
 import { loadWasm } from "../wasm-loader";
 
-const DEFAULT_RELAY = "wss://bramble-relay.flythenimbus.workers.dev";
+const DEFAULT_RELAY = "wss://vautix-relay.flythenimbus.workers.dev";
 const GROUP_KEY = "sync.group";
 const RELAY_KEY = "sync.relay";
 const ICE_KEY = "sync.iceUrl";

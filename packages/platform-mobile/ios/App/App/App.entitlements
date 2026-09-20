@@ -6,11 +6,11 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.app.bramble.mobile</string>
+		<string>group.app.vautix.mobile</string>
 	</array>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)app.bramble.mobile.shared</string>
+		<string>$(AppIdentifierPrefix)app.vautix.mobile.shared</string>
 	</array>
 </dict>
 </plist>

@@ -159,7 +159,7 @@ export function SupportSection() {
 		<Section icon={<Heart className="w-4 h-4 text-primary" />} title={t`Support`}>
 			<p className="text-sm text-muted-foreground">
 				<Trans>
-					Bramble is free and open source. If it's useful to you, a tip helps keep it going. Scan a
+					Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a
 					code with your wallet, or copy the address. Thank you.
 				</Trans>
 			</p>

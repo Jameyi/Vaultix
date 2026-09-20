@@ -14,7 +14,7 @@ import { Row, Section } from "./primitives";
  * cannot be mistaken for one that still works. */
 const CODE_TTL_SECONDS = 180;
 
-const DEFAULT_RELAY = "wss://bramble-relay.flythenimbus.workers.dev";
+const DEFAULT_RELAY = "wss://vautix-relay.flythenimbus.workers.dev";
 
 /** Pair this app with a browser extension. Rendered only where the platform provides a
  * pairing adapter, which today is desktop. See docs/desktop-port.md. */
@@ -195,7 +195,7 @@ export function BrowserPairingSection() {
 					<Row
 						icon={<Chrome className="w-4 h-4 text-primary" />}
 						title={t`Connect a browser`}
-						subtitle={t`Sync this vault to the Bramble extension and fill from it without unlocking twice.`}
+						subtitle={t`Sync this vault to the Vautix extension and fill from it without unlocking twice.`}
 					>
 						<Button variant="secondary" size="sm" onClick={begin}>
 							<Trans>Connect</Trans>
@@ -236,7 +236,7 @@ export function BrowserPairingSection() {
 					    to guess at, and a code with nowhere obvious to go reads as a dead end. */}
 					<p className="text-sm text-muted-foreground">
 						<Trans>
-							In the Bramble extension, open Settings → Sync → Desktop app and enter this code.
+							In the Vautix extension, open Settings → Sync → Desktop app and enter this code.
 						</Trans>
 					</p>
 					{/* Spaced and monospaced because it is read off this screen and typed into

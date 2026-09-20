@@ -41,42 +41,42 @@
         }
       }
     },
-    "Bramble has no passkey for this site.": {
+    "Vautix has no passkey for this site.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble hat keinen Passkey für diese Seite."
+            "value": "Vautix hat keinen Passkey für diese Seite."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble has no passkey for this site."
+            "value": "Vautix has no passkey for this site."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble no tiene una clave de acceso para este sitio."
+            "value": "Vautix no tiene una clave de acceso para este sitio."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble ne possède aucune clé de passe pour ce site."
+            "value": "Vautix ne possède aucune clé de passe pour ce site."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble non ha una chiave di accesso per questo sito."
+            "value": "Vautix non ha una chiave di accesso per questo sito."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Bramble não possui chave de acesso para este site."
+            "value": "O Vautix não possui chave de acesso para este site."
           }
         }
       }
@@ -671,42 +671,42 @@
         }
       }
     },
-    "No logins saved yet.\nAdd one in Bramble.": {
+    "No logins saved yet.\nAdd one in Vautix.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Es wurden noch keine Anmeldungen gespeichert.\nFügen Sie eine in Bramble hinzu."
+            "value": "Es wurden noch keine Anmeldungen gespeichert.\nFügen Sie eine in Vautix hinzu."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No logins saved yet.\nAdd one in Bramble."
+            "value": "No logins saved yet.\nAdd one in Vautix."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aún no hay inicios de sesión guardados.\nAgregue uno en Bramble."
+            "value": "Aún no hay inicios de sesión guardados.\nAgregue uno en Vautix."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun identifiant enregistré pour l'instant.\nAgrégez-en un dans Bramble."
+            "value": "Aucun identifiant enregistré pour l'instant.\nAgrégez-en un dans Vautix."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nessun login salvato ancora.\nAggiungine uno in Bramble."
+            "value": "Nessun login salvato ancora.\nAggiungine uno in Vautix."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nenhuma credencial salva ainda.\nAdicione uma no Bramble."
+            "value": "Nenhuma credencial salva ainda.\nAdicione uma no Vautix."
           }
         }
       }
@@ -976,42 +976,42 @@
         }
       }
     },
-    "This vault has no master password, or it hasn't synced. Open Bramble, unlock it once, then retry.": {
+    "This vault has no master password, or it hasn't synced. Open Vautix, unlock it once, then retry.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dieses Tresor hat kein Masterpasswort oder er wurde nicht synchronisiert. Öffnen Sie Bramble, entsperren Sie ihn einmal und versuchen Sie es erneut."
+            "value": "Dieses Tresor hat kein Masterpasswort oder er wurde nicht synchronisiert. Öffnen Sie Vautix, entsperren Sie ihn einmal und versuchen Sie es erneut."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This vault has no master password, or it hasn't synced. Open Bramble, unlock it once, then retry."
+            "value": "This vault has no master password, or it hasn't synced. Open Vautix, unlock it once, then retry."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Esta bóveda no tiene contraseña maestra o aún no se ha sincronizado. Abra Bramble, desbloquéela una vez y luego inténtelo de nuevo."
+            "value": "Esta bóveda no tiene contraseña maestra o aún no se ha sincronizado. Abra Vautix, desbloquéela una vez y luego inténtelo de nuevo."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ce coffre-fort ne possède pas de mot de passe maître ou il n'a pas été synchronisé. Ouvrez Bramble, déverrouillez-le une fois, puis réessayez."
+            "value": "Ce coffre-fort ne possède pas de mot de passe maître ou il n'a pas été synchronisé. Ouvrez Vautix, déverrouillez-le une fois, puis réessayez."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Questo vault non ha una password principale o non è stato sincronizzato. Apri Bramble, sbloccalo una volta e riprova."
+            "value": "Questo vault non ha una password principale o non è stato sincronizzato. Apri Vautix, sbloccalo una volta e riprova."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Este cofre não possui senha mestra ou ainda não sincronizou. Abra o Bramble, desbloqueie-o uma vez e tente novamente."
+            "value": "Este cofre não possui senha mestra ou ainda não sincronizou. Abra o Vautix, desbloqueie-o uma vez e tente novamente."
           }
         }
       }
@@ -1096,42 +1096,42 @@
         }
       }
     },
-    "Unlock Bramble": {
+    "Unlock Vautix": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bramble entsperren"
+            "value": "Vautix entsperren"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock Bramble"
+            "value": "Unlock Vautix"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquear Bramble"
+            "value": "Desbloquear Vautix"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déverrouiller Bramble"
+            "value": "Déverrouiller Vautix"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca Bramble"
+            "value": "Sblocca Vautix"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquear Bramble"
+            "value": "Desbloquear Vautix"
           }
         }
       }
@@ -1216,42 +1216,42 @@
         }
       }
     },
-    "Your biometric enrolment changed. Open Bramble and turn on biometric unlock again.": {
+    "Your biometric enrolment changed. Open Vautix and turn on biometric unlock again.": {
       "localizations": {
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ihre biometrische Registrierung hat sich geändert. Öffnen Sie Bramble und aktivieren Sie die biometrische Entsperrung erneut."
+            "value": "Ihre biometrische Registrierung hat sich geändert. Öffnen Sie Vautix und aktivieren Sie die biometrische Entsperrung erneut."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your biometric enrolment changed. Open Bramble and turn on biometric unlock again."
+            "value": "Your biometric enrolment changed. Open Vautix and turn on biometric unlock again."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Su registro biométrico ha cambiado. Abra Bramble y vuelva a activar el desbloqueo biométrico."
+            "value": "Su registro biométrico ha cambiado. Abra Vautix y vuelva a activar el desbloqueo biométrico."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Votre enregistrement biométrique a changé. Ouvrez Bramble et réactivez le déverrouillage biométrique."
+            "value": "Votre enregistrement biométrique a changé. Ouvrez Vautix et réactivez le déverrouillage biométrique."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "La tua registrazione biometrica è cambiata. Apri Bramble e riattiva lo sblocco biometrico."
+            "value": "La tua registrazione biometrica è cambiata. Apri Vautix e riattiva lo sblocco biometrico."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Seu cadastro biométrico mudou. Abra o Bramble e ative o desbloqueio biométrico novamente."
+            "value": "Seu cadastro biométrico mudou. Abra o Vautix e ative o desbloqueio biométrico novamente."
           }
         }
       }

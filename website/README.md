@@ -1,6 +1,6 @@
-# Bramble website
+# Vautix website
 
-The marketing site for [bramble.sh](https://bramble.sh): an [Astro](https://astro.build)
+The marketing site for [vautix.sh](https://vautix.sh): an [Astro](https://astro.build)
 static site styled with [Starwind UI](https://starwind.dev) (Astro + Tailwind v4).
 
 It uses the exact same design tokens as the browser extension and mobile apps,
@@ -15,8 +15,8 @@ is visually identical to the product.
 
 Pages are emitted as flat `.html` files (`build.format: "file"`). Cloudflare
 Pages serves them at the clean `/privacy` and `/support` paths (the canonical
-URLs) and redirects the legacy `bramble.sh/privacy.html` /
-`bramble.sh/support.html` URLs to them, so both keep working.
+URLs) and redirects the legacy `vautix.sh/privacy.html` /
+`vautix.sh/support.html` URLs to them, so both keep working.
 
 ## Commands
 
@@ -44,14 +44,14 @@ Biome so `starwind update` stays clean.
 `website/dist` to **Cloudflare Pages** with `wrangler pages deploy`, using an API
 token (Cloudflare's GitHub integration is deliberately not used). It is a fully
 static build, so no Cloudflare adapter is needed. `wrangler.jsonc` supplies the
-project name (`bramble-website`) and the `dist` output dir.
+project name (`vautix-website`) and the `dist` output dir.
 
 ### One-time setup
 
 1. **Create the Pages project** (Direct Upload), authenticated locally once:
 
    ```sh
-   pnpm --filter @vault/website exec wrangler pages project create bramble-website \
+   pnpm --filter @vault/website exec wrangler pages project create vautix-website \
      --production-branch main
    ```
 
@@ -70,7 +70,7 @@ project name (`bramble-website`) and the `dist` output dir.
    - `CLOUDFLARE_API_TOKEN` - the token from step 2
    - `CLOUDFLARE_ACCOUNT_ID` - the ID from step 3
 
-5. **Custom domain.** Add `bramble.sh` under the Pages project's **Custom domains**
+5. **Custom domain.** Add `vautix.sh` under the Pages project's **Custom domains**
    tab and point its DNS at the project.
 
 After that, every push to `main` touching `website/**` (or `packages/theme/**`)
@@ -86,7 +86,7 @@ CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… pnpm --filter @vault/website 
 
 The privacy policy now lives at `/privacy` (was the root), and support at
 `/support`, so update the privacy-policy and support URLs in the Chrome /
-Firefox / App Store listings if any still point at `bramble.sh/` or at the old
-`flythenimbus.github.io/bramble/` pages. The legacy static `website/index.html`
+Firefox / App Store listings if any still point at `vautix.sh/` or at the old
+`flythenimbus.github.io/vautix/` pages. The legacy static `website/index.html`
 and `website/support.html` are no longer served (Cloudflare publishes `dist/`)
 but are left in place.

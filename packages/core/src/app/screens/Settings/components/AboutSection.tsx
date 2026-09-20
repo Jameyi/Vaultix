@@ -5,7 +5,7 @@ import { Section } from "./primitives";
 
 // Public repository. External-origin links open in a new tab on the extension and in the
 // system browser on mobile (Capacitor's default for cross-origin links).
-const GITHUB_URL = "https://github.com/flythenimbus/bramble";
+const GITHUB_URL = "https://github.com/flythenimbus/vautix";
 
 const linkClass = "text-primary hover:underline";
 

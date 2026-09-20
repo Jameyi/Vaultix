@@ -8,7 +8,7 @@
  */
 import manifest from "../public/desktop/latest.json";
 
-const REPO = "https://github.com/flythenimbus/bramble";
+const REPO = "https://github.com/flythenimbus/vautix";
 
 export const DESKTOP_VERSION: string = manifest.version;
 
@@ -25,7 +25,7 @@ export const DOWNLOADS = {
 	 * disk image, so the manifest does not name it. `scripts/release.ts` asserts the build produced
 	 * exactly this filename — a mismatch here is a 404 on the main macOS download.
 	 */
-	macos: `${REPO}/releases/download/${TAG}/Bramble_${DESKTOP_VERSION}_universal.dmg`,
+	macos: `${REPO}/releases/download/${TAG}/Vautix_${DESKTOP_VERSION}_universal.dmg`,
 
 	/**
 	 * Straight out of the manifest: it is the exact file the updater fetches, so it is known to
@@ -37,22 +37,22 @@ export const DOWNLOADS = {
 
 /**
  * Three commands because they are three trust decisions: fetch the key, scope it to this one
- * repository, install. The `Signed-By` line inside `bramble.sources` is the scoping, without
- * which a key added for Bramble would authenticate packages from anywhere. See
+ * repository, install. The `Signed-By` line inside `vautix.sources` is the scoping, without
+ * which a key added for Vautix would authenticate packages from anywhere. See
  * docs/apt-releases.md.
  */
 export const APT_INSTALL = [
-	"curl -fsSL https://apt.bramble.sh/keys.asc | sudo tee /usr/share/keyrings/bramble-keyring.asc > /dev/null",
-	"curl -fsSL https://apt.bramble.sh/bramble.sources | sudo tee /etc/apt/sources.list.d/bramble.sources > /dev/null",
-	"sudo apt update && sudo apt install bramble",
+	"curl -fsSL https://apt.vautix.sh/keys.asc | sudo tee /usr/share/keyrings/vautix-keyring.asc > /dev/null",
+	"curl -fsSL https://apt.vautix.sh/vautix.sources | sudo tee /etc/apt/sources.list.d/vautix.sources > /dev/null",
+	"sudo apt update && sudo apt install vautix",
 ].join("\n");
 
 /** Built from source by the flake at the repository root. See docs/desktop-port.md. */
-export const NIX_INSTALL = "nix profile install github:flythenimbus/bramble";
+export const NIX_INSTALL = "nix profile install github:flythenimbus/vautix";
 
 /**
  * In homebrew-cask itself, so there is no tap to add first. The canonical copy of the cask lives
- * at `packages/platform-desktop/homebrew/bramble.rb` and is checked against the live release by
+ * at `packages/platform-desktop/homebrew/vautix.rb` and is checked against the live release by
  * `pnpm run test:brew`. See docs/desktop-port.md.
  */
-export const BREW_INSTALL = "brew install --cask bramble";
+export const BREW_INSTALL = "brew install --cask vautix";

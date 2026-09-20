@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace = "app.bramble.mobile"
+    namespace = "app.vautix.mobile"
     compileSdk = rootProject.ext.compileSdkVersion
     // Match the Java 21 source/target the Capacitor template sets in capacitor.build.gradle.
     kotlinOptions {
         jvmTarget = '21'
     }
     defaultConfig {
-        applicationId "app.bramble.mobile"
+        applicationId "app.vautix.mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // versionCode is committed (not computed at build) so a rebuild of a tag carries the same

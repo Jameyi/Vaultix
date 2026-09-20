@@ -28,10 +28,10 @@ function vaultTag(vaultId: string): string {
 	return vaultId.replace(/-/g, "").slice(0, 8);
 }
 
-/** Object key: `<prefix>/bramble-<stamp>-<shorthash>[-v<tag>].bramble` (sorts chronologically). */
+/** Object key: `<prefix>/vautix-<stamp>-<shorthash>[-v<tag>].vautix` (sorts chronologically). */
 export function backupKey(prefix: string, stamp: string, hash: string, vaultId?: string): string {
 	const tag = vaultId ? `-v${vaultTag(vaultId)}` : "";
-	return `${prefix}/bramble-${stamp}-${hash.slice(0, 8)}${tag}.bramble`;
+	return `${prefix}/vautix-${stamp}-${hash.slice(0, 8)}${tag}.vautix`;
 }
 
 /**
@@ -54,10 +54,10 @@ export function selectForPruning(
 	// it `slice(0)` returns every snapshot and the caller deletes the lot. Nothing could reach 0
 	// through the UI before, which is exactly why it was safe to be wrong about.
 	if (keep <= 0) return [];
-	const tag = vaultId ? `-v${vaultTag(vaultId)}.bramble` : undefined;
+	const tag = vaultId ? `-v${vaultTag(vaultId)}.vautix` : undefined;
 	const backups = objects.filter((o) => {
-		if (!o.key.includes("/bramble-")) return false;
-		if (!tag) return !/-v[0-9a-f]{8}\.bramble$/i.test(o.key);
+		if (!o.key.includes("/vautix-")) return false;
+		if (!tag) return !/-v[0-9a-f]{8}\.vautix$/i.test(o.key);
 		return o.key.endsWith(tag);
 	});
 	const newestFirst = [...backups].sort((a, b) => (a.key < b.key ? 1 : a.key > b.key ? -1 : 0));
@@ -73,7 +73,7 @@ export async function runBackup(
 	blob: Uint8Array,
 	opts: { prefix?: string; keep?: number; now?: Date; vaultId?: string } = {},
 ): Promise<BackupResult> {
-	const prefix = opts.prefix ?? "bramble";
+	const prefix = opts.prefix ?? "vautix";
 	const keep = opts.keep ?? 30;
 	const hash = await sha256Hex(blob);
 	const key = backupKey(prefix, compactStamp(opts.now ?? new Date()), hash, opts.vaultId);

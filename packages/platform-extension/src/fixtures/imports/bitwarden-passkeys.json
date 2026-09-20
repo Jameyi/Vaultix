@@ -70,7 +70,7 @@
       "id": "aaaaaaaa-3333-4333-8333-333333333333",
       "type": 1,
       "name": "Fastmail",
-      "notes": "Two passkeys on one login. The second is marked non-discoverable, which Bramble promotes; the third has a non-zero counter, which must import as 0.",
+      "notes": "Two passkeys on one login. The second is marked non-discoverable, which Vautix promotes; the third has a non-zero counter, which must import as 0.",
       "favorite": false,
       "login": {
         "uris": [{ "match": null, "uri": "https://app.fastmail.com" }],

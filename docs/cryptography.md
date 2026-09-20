@@ -1,6 +1,6 @@
 # Cryptography: the VEK / slot / KEK wrapping model
 
-This is the core of how Bramble protects vault data. All of it lives in
+This is the core of how Vautix protects vault data. All of it lives in
 `packages/core-rust/src/lib.rs` (the Rust/WASM crypto) and is driven from
 `packages/core/src/hooks/useVault.tsx` (the orchestration).
 
@@ -47,7 +47,7 @@ wrapped VEK). The only thing that differs is how the KEK is produced:
   authenticator, domain-separated by the info string `titanpass/webauthn/v1`
   (`derive_kek_hkdf`). The authenticator owns the entropy; HKDF just shapes it
   into a KEK that cannot collide with other HKDF callers. That info string names
-  the product Bramble was called before it was renamed, and is frozen: it is a
+  the product Vautix was called before it was renamed, and is frozen: it is a
   domain separator rather than a label, and changing it would change every
   derived KEK and strand every enrolled security key. See
   [security-keys.md](security-keys.md).
@@ -108,7 +108,7 @@ zero state would silently drop the old key.
 
 `seal_portable_vault` / `open_portable_vault` are the one pair of calls that
 encrypt vault data under a key that is **not** the VEK. Exporting a selection as a
-`.bramble` generates a fresh 32-byte key for that file, seals the entries under it,
+`.vautix` generates a fresh 32-byte key for that file, seals the entries under it,
 and wraps it in a password slot keyed by the password the user chose for the export.
 
 This is a deliberate departure from everything above, and the reason is the threat

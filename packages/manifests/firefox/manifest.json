@@ -1,12 +1,12 @@
 {
 	"manifest_version": 3,
-	"name": "Bramble",
+	"name": "Vautix",
 	"version": "1.25.0",
 	"default_locale": "en",
 	"description": "__MSG_extDescription__",
 	"browser_specific_settings": {
 		"gecko": {
-			"id": "firefox@bramble.app",
+			"id": "firefox@vautix.app",
 			"strict_min_version": "128.0",
 			"data_collection_permissions": {
 				"required": ["none"]
@@ -15,7 +15,7 @@
 	},
 	"action": {
 		"default_popup": "popup.html",
-		"default_title": "Bramble",
+		"default_title": "Vautix",
 		"default_icon": {
 			"16": "icons/icon-16.png",
 			"32": "icons/icon-32.png"

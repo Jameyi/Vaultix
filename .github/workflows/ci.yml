@@ -115,6 +115,37 @@ jobs:
           path: packages/platform-extension/dist-chromium
           retention-days: 1
 
+  # Dependency audit: known-CVE gate for both dependency trees. Kept as its own job so a
+  # vulnerability advisory fails THIS job and is visible as such, without re-running the build.
+  # `--prod` on pnpm scopes to runtime deps (dev-tool advisories would otherwise drown the signal).
+  # Both Rust lockfiles are audited: core-rust (wasm + uniffi crypto) and the desktop shell's
+  # src-tauri, which has its own lockfile no other CI step installs from.
+  # New advisories surface here first; add a targeted `ignore` with a dated comment, never a blanket disable.
+  audit:
+    name: Security (dependency audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+      - name: pnpm audit (production deps)
+        run: pnpm audit --prod
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit@0.21.2
+      - name: cargo audit (core-rust)
+        run: cargo audit --locked
+        working-directory: packages/core-rust
+      - name: cargo audit (desktop src-tauri)
+        run: cargo audit --locked
+        working-directory: packages/platform-desktop/src-tauri
+
   transport-contract-chromium:
     name: Security (document-bound transport, Chromium)
     runs-on: ubuntu-latest
@@ -130,7 +161,7 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
       # This fixture proves the browser's response-channel/navigation primitive only. Production
-      # content/background unit tests enforce Bramble's direct request/reply transport on top of it.
+      # content/background unit tests enforce Vautix's direct request/reply transport on top of it.
       - name: Prove request/reply browser primitive
         run: pnpm run test:transport-race --project=chromium
 

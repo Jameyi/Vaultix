@@ -30,7 +30,7 @@ if (!fs.existsSync(EXTENSION)) {
 
 /** One run: load the page, scroll it, and report what the main thread spent. */
 async function run(withExtension) {
-	const profile = fs.mkdtempSync(path.join(os.tmpdir(), "bramble-perf-"));
+	const profile = fs.mkdtempSync(path.join(os.tmpdir(), "vautix-perf-"));
 	const launchArgs = ["--autoplay-policy=no-user-gesture-required", "--mute-audio", "--headless=new"];
 	if (withExtension) {
 		launchArgs.push(`--disable-extensions-except=${EXTENSION}`, `--load-extension=${EXTENSION}`);

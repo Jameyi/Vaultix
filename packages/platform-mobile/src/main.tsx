@@ -49,7 +49,7 @@ let deviceLocale: string | undefined;
 
 function Root() {
 	// "app" = vault/unlock UI; "setup" = create/open a vault; "import" = import wizard;
-	// "restore" = restore a .bramble backup. All but "app" render OptionsApp and dismiss
+	// "restore" = restore a .vautix backup. All but "app" render OptionsApp and dismiss
 	// back to "app" on completion/close.
 	const [view, setView] = useState<"app" | "setup" | "import" | "restore">("app");
 	const [pendingLogin, setPendingLogin] = useState<PendingLogin | null>(null);

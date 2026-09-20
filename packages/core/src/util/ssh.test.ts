@@ -6,7 +6,7 @@ describe("sshFingerprint", () => {
 	// fingerprint cross-checked via `ssh-keygen -lf`. Embedded so a regression
 	// in our base64 decode / digest / encode path breaks the suite immediately.
 	const PUB =
-		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZ8zKL37kT+SI/th45WgrIvgPV9VCC7M/9P3NqPeAls bramble-fingerprint-test@example";
+		"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZ8zKL37kT+SI/th45WgrIvgPV9VCC7M/9P3NqPeAls vautix-fingerprint-test@example";
 	const EXPECTED = "SHA256:gRfjhrKWa8WDZPh6GB3WW3kX4m38DSqsahQGlH0JPzk";
 
 	it("matches ssh-keygen -lf for a known ed25519 key", async () => {

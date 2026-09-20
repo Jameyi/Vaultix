@@ -1,6 +1,6 @@
-# Bramble design docs
+# Vautix design docs
 
-High-level architecture and security design notes for the Bramble password
+High-level architecture and security design notes for the Vautix password
 manager. These docs hold the reasoning that used to live in long code comments:
 the "why" behind the crypto, the unlock flows, and the autofill behaviour. Code
 comments point here instead of repeating it.
@@ -9,6 +9,7 @@ comments point here instead of repeating it.
 
 | Doc | Topic |
 |-----|-------|
+| [threat-model.md](threat-model.md) | Unified threat model: assets, adversaries, trust boundaries, threat→defense summary consolidating the sec-audit notes, accepted residuals, and change checklists |
 | [cryptography.md](cryptography.md) | The VEK / slot / KEK wrapping model, key derivation, verifier-based unlock, the password-change vs rotation tradeoff |
 | [vek-residency-hardening.md](vek-residency-hardening.md) | Plan: shrink where the in-memory VEK exists outside the Rust core (drop unused returns, MTE, mlock, native-only biometric gate, enrollment last) and why allocator hardening is declined |
 | [auth-and-unlock.md](auth-and-unlock.md) | Unlock flows, the slot-policy invariant (always one primary method), verify-without-unlock, error sanitization |
@@ -22,7 +23,7 @@ comments point here instead of repeating it.
 | [field-detection.md](field-detection.md) | Page field detection heuristics and fixtures |
 | [field-inventory.md](field-inventory.md) | Plan: collapse the repeated whole-page detector walks into one composed-preorder inventory per parse, without moving any detector result |
 | [storage.md](storage.md) | The chrome.storage.local vault backend, crash recovery, legacy FSA migration, durability |
-| [encrypted-import.md](encrypted-import.md) | Encrypted imports: the `.bramble` portable vault, KDBX4 internals, Bitwarden encrypted-JSON handling, and the dedup every import shares |
+| [encrypted-import.md](encrypted-import.md) | Encrypted imports: the `.vautix` portable vault, KDBX4 internals, Bitwarden encrypted-JSON handling, and the dedup every import shares |
 | [credential-exchange.md](credential-exchange.md) | FIDO credential exchange (CXF/CXP) on iOS: the wire format, the OS handoff, and why Android is out |
 | [passkey-import.md](passkey-import.md) | Importing passkeys from a file or an OS transfer: what is stored vs what arrives, and every reason one is skipped |
 | [lastpass-import.md](lastpass-import.md) | The LastPass CSV export format: two header variants, typed secure notes and their traps, note templates, and the Google signature collision |
@@ -38,7 +39,7 @@ comments point here instead of repeating it.
 | [desktop-port.md](desktop-port.md) | Plan: Tauri 2 desktop app; the spotlight mini app, browser IPC over native messaging, auto-type, SSH agent |
 | [macos-credential-provider.md](macos-credential-provider.md) | Plan: an AutoFill credential provider extension in the macOS app, for Safari and native-app fill; what carries over from iOS, and the packaging and App Group unknowns |
 | [release-signing.md](release-signing.md) | Chrome Web Store packaging + signing |
-| [apt-releases.md](apt-releases.md) | The Debian/Ubuntu channel end to end: R2 behind apt.bramble.sh, the container build, signing the index with a YubiKey-held key, and every failure hit getting there |
+| [apt-releases.md](apt-releases.md) | The Debian/Ubuntu channel end to end: R2 behind apt.vautix.sh, the container build, signing the index with a YubiKey-held key, and every failure hit getting there |
 | [i18n.md](i18n.md) | Localization across core/iOS/Android/fastlane: Lingui macros, the LLM translation pipeline, commands, and CI/release gates |
 
 ## Vocabulary

@@ -53,7 +53,7 @@ async function connectOAuth(message: {
 	const targetId = message.payload?.targetId;
 	if (!providerId || !OAUTH_PROVIDERS[providerId]) return { ok: false, error: "Unknown provider." };
 	// Wrapping the refresh token needs the VEK, so the vault must be unlocked.
-	if (vaultLocked()) return { ok: false, error: "Unlock Bramble first, then connect." };
+	if (vaultLocked()) return { ok: false, error: "Unlock Vautix first, then connect." };
 
 	const meta = OAUTH_PROVIDERS[providerId];
 	const redirectUri = api.identity.getRedirectURL();
@@ -106,7 +106,7 @@ async function connectOAuth(message: {
 
 	// The target belongs to the vault that connected it (unlocked, so there is an active id).
 	const activeVaultId = getActiveVaultId();
-	if (!activeVaultId) return { ok: false, error: "Unlock Bramble first, then connect." };
+	if (!activeVaultId) return { ok: false, error: "Unlock Vautix first, then connect." };
 	const targetsKey = backupTargetsKeyFor(activeVaultId);
 
 	// Add a new target, or re-wrap an existing one's creds (reconnect).

@@ -29,28 +29,28 @@ function mockTarget() {
 
 describe("backup orchestrator", () => {
 	it("builds a short, sortable object key", () => {
-		expect(backupKey("bramble", "20260710T224759Z", "deadbeefcafe")).toBe(
-			"bramble/bramble-20260710T224759Z-deadbeef.bramble",
+		expect(backupKey("vautix", "20260710T224759Z", "deadbeefcafe")).toBe(
+			"vautix/vautix-20260710T224759Z-deadbeef.vautix",
 		);
 	});
 
 	it("selects the oldest keys beyond keep for pruning", () => {
 		const objs: BackupObject[] = [
-			{ key: "bramble/bramble-20260101T000000Z-aaaaaaaa.bramble", size: 1 },
-			{ key: "bramble/bramble-20260102T000000Z-bbbbbbbb.bramble", size: 1 },
-			{ key: "bramble/bramble-20260103T000000Z-cccccccc.bramble", size: 1 },
+			{ key: "vautix/vautix-20260101T000000Z-aaaaaaaa.vautix", size: 1 },
+			{ key: "vautix/vautix-20260102T000000Z-bbbbbbbb.vautix", size: 1 },
+			{ key: "vautix/vautix-20260103T000000Z-cccccccc.vautix", size: 1 },
 		];
 		expect(selectForPruning(objs, 2)).toEqual([
-			"bramble/bramble-20260101T000000Z-aaaaaaaa.bramble",
+			"vautix/vautix-20260101T000000Z-aaaaaaaa.vautix",
 		]);
 		expect(selectForPruning(objs, 5)).toEqual([]);
 	});
 
 	it("tags a key with the vault it belongs to, still sorting chronologically", () => {
-		const key = backupKey("bramble", "20260710T224759Z", "deadbeefcafe", "9f2c1a44-0000-4000");
-		expect(key).toBe("bramble/bramble-20260710T224759Z-deadbeef-v9f2c1a44.bramble");
+		const key = backupKey("vautix", "20260710T224759Z", "deadbeefcafe", "9f2c1a44-0000-4000");
+		expect(key).toBe("vautix/vautix-20260710T224759Z-deadbeef-v9f2c1a44.vautix");
 		// The stamp is still the first thing that varies, so lexical order stays chronological.
-		const earlier = backupKey("bramble", "20260709T000000Z", "ffff", "9f2c1a44-0000-4000");
+		const earlier = backupKey("vautix", "20260709T000000Z", "ffff", "9f2c1a44-0000-4000");
 		expect([key, earlier].sort()).toEqual([earlier, key]);
 	});
 
@@ -59,14 +59,14 @@ describe("backup orchestrator", () => {
 	// vault's prune counted the other's snapshots towards keep-N and deleted them.
 	it("never prunes another vault's snapshots from a shared folder", () => {
 		const objs: BackupObject[] = [
-			{ key: "bramble/bramble-20260101T000000Z-aaaaaaaa-vaaaaaaaa.bramble", size: 1 },
-			{ key: "bramble/bramble-20260102T000000Z-bbbbbbbb-vbbbbbbbb.bramble", size: 1 },
-			{ key: "bramble/bramble-20260103T000000Z-cccccccc-vbbbbbbbb.bramble", size: 1 },
-			{ key: "bramble/bramble-20260104T000000Z-dddddddd-vbbbbbbbb.bramble", size: 1 },
+			{ key: "vautix/vautix-20260101T000000Z-aaaaaaaa-vaaaaaaaa.vautix", size: 1 },
+			{ key: "vautix/vautix-20260102T000000Z-bbbbbbbb-vbbbbbbbb.vautix", size: 1 },
+			{ key: "vautix/vautix-20260103T000000Z-cccccccc-vbbbbbbbb.vautix", size: 1 },
+			{ key: "vautix/vautix-20260104T000000Z-dddddddd-vbbbbbbbb.vautix", size: 1 },
 		];
 		// Vault B is over its keep of 2, but vault A's lone (older) snapshot is not its to delete.
 		expect(selectForPruning(objs, 2, "bbbbbbbb-0000-4000")).toEqual([
-			"bramble/bramble-20260102T000000Z-bbbbbbbb-vbbbbbbbb.bramble",
+			"vautix/vautix-20260102T000000Z-bbbbbbbb-vbbbbbbbb.vautix",
 		]);
 		// And vault A, with one snapshot and keep 2, deletes nothing at all.
 		expect(selectForPruning(objs, 2, "aaaaaaaa-0000-4000")).toEqual([]);
@@ -76,13 +76,13 @@ describe("backup orchestrator", () => {
 	// tagged run must leave them alone, and an untagged run must not sweep up tagged ones.
 	it("keeps tagged and untagged snapshots in separate retention pools", () => {
 		const objs: BackupObject[] = [
-			{ key: "bramble/bramble-20260101T000000Z-aaaaaaaa.bramble", size: 1 },
-			{ key: "bramble/bramble-20260102T000000Z-bbbbbbbb.bramble", size: 1 },
-			{ key: "bramble/bramble-20260103T000000Z-cccccccc-vdddddddd.bramble", size: 1 },
+			{ key: "vautix/vautix-20260101T000000Z-aaaaaaaa.vautix", size: 1 },
+			{ key: "vautix/vautix-20260102T000000Z-bbbbbbbb.vautix", size: 1 },
+			{ key: "vautix/vautix-20260103T000000Z-cccccccc-vdddddddd.vautix", size: 1 },
 		];
 		expect(selectForPruning(objs, 1, "dddddddd-0000-4000")).toEqual([]);
 		expect(selectForPruning(objs, 1)).toEqual([
-			"bramble/bramble-20260101T000000Z-aaaaaaaa.bramble",
+			"vautix/vautix-20260101T000000Z-aaaaaaaa.vautix",
 		]);
 	});
 
@@ -113,13 +113,13 @@ describe("backup orchestrator", () => {
 	});
 });
 
-// Deleting is the one thing Bramble asks a provider for that can lose the user something, and it
+// Deleting is the one thing Vautix asks a provider for that can lose the user something, and it
 // exists only to serve keep-N. Giving that up is what lets someone hand over a credential that
 // cannot destroy their backup history, so these pin the behaviour that makes it possible.
 describe("append-only: keep everything", () => {
 	it("prunes nothing at keep 0, rather than everything", () => {
 		const objs: BackupObject[] = [1, 2, 3].map((n) => ({
-			key: `bramble/bramble-2026010${n}T000000Z-aaaaaaaa.bramble`,
+			key: `vautix/vautix-2026010${n}T000000Z-aaaaaaaa.vautix`,
 			size: 1,
 		}));
 		// `slice(0)` is every element: without the guard this deleted the lot, and 0 was only safe

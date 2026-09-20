@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { chat, modelInfo } from "./i18n/ollama.mjs";
 
 const SYSTEM =
-	"You write release notes for Bramble, an open-source password manager. You are given the " +
+	"You write release notes for Vautix, an open-source password manager. You are given the " +
 	"commit subjects for one release. Write what a user would want to know.\n\n" +
 	"Rules:\n" +
 	"- At most five bullets, one sentence each. Fewer is better. If one change matters more than " +
@@ -104,7 +104,7 @@ function openInEditor(body) {
 		console.error("note: no $EDITOR set, publishing the draft as it is.");
 		return body;
 	}
-	const dir = mkdtempSync(join(tmpdir(), "bramble-notes-"));
+	const dir = mkdtempSync(join(tmpdir(), "vautix-notes-"));
 	const file = join(dir, "RELEASE_NOTES.md");
 	writeFileSync(file, body);
 	try {

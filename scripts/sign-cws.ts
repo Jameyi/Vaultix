@@ -1,7 +1,7 @@
 // Publish the built Chromium extension to the Chrome Web Store via the Publish API V2
-// (service-account auth). Uploads the signed packages/platform-extension/bramble.crx to the item,
+// (service-account auth). Uploads the signed packages/platform-extension/vautix.crx to the item,
 // then publishes it (it goes to CWS review, then live). The Chrome analog of sign-firefox.ts (AMO).
-//   node scripts/sign-cws.ts [path/to/bramble.crx] [--upload-only]
+//   node scripts/sign-cws.ts [path/to/vautix.crx] [--upload-only]
 //   --upload-only  upload the new package but don't publish (dry run for the auth + upload)
 //
 // The item has "Verified CRX Uploads" enabled, so the store requires a signed .crx. Uploads use the
@@ -15,7 +15,7 @@
 // Auth: a Google Cloud service account with the Chrome Web Store API enabled, added to the CWS
 // publisher (Developer Dashboard -> Account). The v2 API takes the same auth/chromewebstore scope
 // and supports service accounts. Credentials resolve from CWS_SERVICE_ACCOUNT_JSON (a path to the
-// plaintext SA JSON, for CI) else the age-encrypted ~/.config/bramble/cws-service-account.age
+// plaintext SA JSON, for CI) else the age-encrypted ~/.config/vautix/cws-service-account.age
 // (override CWS_SERVICE_ACCOUNT_AGE), unlocked by your YubiKey (PIN + touch). Item id: CWS_ITEM_ID;
 // publisher id: CWS_PUBLISHER_ID (your developer-account id). See docs/release-signing.md.
 
@@ -29,7 +29,7 @@ import { notifyYubiKeyTouch } from "./yubikey-notify.ts";
 const argv = process.argv.slice(2);
 const uploadOnly = argv.includes("--upload-only");
 const CRX = resolve(
-	argv.find((a) => !a.startsWith("--")) ?? "packages/platform-extension/bramble.crx",
+	argv.find((a) => !a.startsWith("--")) ?? "packages/platform-extension/vautix.crx",
 );
 const ITEM_ID = process.env.CWS_ITEM_ID ?? "kmokhdhoggbdcgoepifeckhgbfakaknm";
 // The v2 API is publisher-scoped: publishers/{PUBLISHER_ID}/items/{ITEM_ID}. The publisher id is
@@ -37,7 +37,7 @@ const ITEM_ID = process.env.CWS_ITEM_ID ?? "kmokhdhoggbdcgoepifeckhgbfakaknm";
 const PUBLISHER_ID = process.env.CWS_PUBLISHER_ID ?? "38b433bd-8538-4d67-aedf-a1297d133309";
 const HOME = process.env.HOME ?? "";
 const SA_AGE =
-	process.env.CWS_SERVICE_ACCOUNT_AGE ?? join(HOME, ".config/bramble/cws-service-account.age");
+	process.env.CWS_SERVICE_ACCOUNT_AGE ?? join(HOME, ".config/vautix/cws-service-account.age");
 
 const fail = (msg: string): never => {
 	console.error(`error: ${msg}`);
@@ -60,7 +60,7 @@ if (!PUBLISHER_ID)
 	);
 
 // 0700 scratch dir; the plaintext service-account key never leaves it and is wiped in finally.
-const tmp = mkdtempSync(join(tmpdir(), "bramble-cws-"));
+const tmp = mkdtempSync(join(tmpdir(), "vautix-cws-"));
 try {
 	// Resolve the service-account JSON: env path first (CI), else decrypt the age file (YubiKey).
 	let saJson: string;

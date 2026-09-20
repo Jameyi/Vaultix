@@ -48,8 +48,8 @@ function stubChrome(
 		runtime: {
 			onMessage: { addListener: vi.fn() },
 			onConnect: { addListener: vi.fn() },
-			id: "bramble-test",
-			getURL: (p: string) => `https://bramble-test.example/${p}`,
+			id: "vautix-test",
+			getURL: (p: string) => `https://vautix-test.example/${p}`,
 		},
 	});
 }

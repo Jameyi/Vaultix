@@ -15,7 +15,7 @@ const login: Entry = {
 
 function adapter(over: Partial<CredentialExchangeAdapter> = {}): CredentialExchangeAdapter {
 	return {
-		exporterId: "app.bramble.mobile",
+		exporterId: "app.vautix.mobile",
 		availability: async () => ({ available: true, providerEnabled: true }),
 		exportToApp: async (build) => {
 			await build("1.0");
@@ -76,10 +76,10 @@ describe("exportToOs", () => {
 				built = await build("1.0");
 			},
 		});
-		await exportToOs(ex, [login], "Bramble", 1_760_000);
+		await exportToOs(ex, [login], "Vautix", 1_760_000);
 		const payload = JSON.parse(built ?? "{}");
-		expect(payload.exporterRpId).toBe("app.bramble.mobile");
-		expect(payload.exporterDisplayName).toBe("Bramble");
+		expect(payload.exporterRpId).toBe("app.vautix.mobile");
+		expect(payload.exporterDisplayName).toBe("Vautix");
 		expect(payload.accounts[0].items[0].title).toBe("GitHub");
 	});
 
@@ -91,7 +91,7 @@ describe("exportToOs", () => {
 			publicKey: "ssh-ed25519 AAAA",
 			privateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nx\n-----END OPENSSH PRIVATE KEY-----",
 		};
-		const warnings = await exportToOs(adapter(), [ssh], "Bramble", 1_760_000);
+		const warnings = await exportToOs(adapter(), [ssh], "Vautix", 1_760_000);
 		expect(warnings[0]).toMatch(/SSH key/);
 	});
 
@@ -101,6 +101,6 @@ describe("exportToOs", () => {
 				throw new Error("cancelled");
 			},
 		});
-		await expect(exportToOs(ex, [login], "Bramble")).rejects.toThrow("cancelled");
+		await expect(exportToOs(ex, [login], "Vautix")).rejects.toThrow("cancelled");
 	});
 });

@@ -1,8 +1,8 @@
 import { App as CapacitorApp } from "@capacitor/app";
 
-// An `otpauth://` key the OS hands us: iOS routes it here when Bramble is the app picked
+// An `otpauth://` key the OS hands us: iOS routes it here when Vautix is the app picked
 // under Settings > Apps > Passwords > "Set Up Codes In", Android when the user picks
-// Bramble from the chooser for an otpauth:// link. Registration is the whole mechanism on
+// Vautix from the chooser for an otpauth:// link. Registration is the whole mechanism on
 // both (a CFBundleURLTypes entry, an intent filter); there is no API for either list.
 // See docs/totp-uri-handler.md.
 //
@@ -32,7 +32,7 @@ function readLaunchUrl(): Promise<string | undefined> {
 
 /**
  * Subscribe to handed-over authenticator keys. Fires for the cold-launch URL once, then
- * for every URL opened while running. Non-`otpauth://` URLs are ignored: Bramble
+ * for every URL opened while running. Non-`otpauth://` URLs are ignored: Vautix
  * registers no other scheme, but the listener is shared with anything Capacitor routes.
  * Returns an unsubscribe.
  */

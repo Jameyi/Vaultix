@@ -23,7 +23,7 @@ const CODE_LENGTH = 8;
  * each check is a round trip that can spawn a host process; the app arms an invite for minutes. */
 const OFFER_POLL_MS = 4000;
 
-/** Link this browser to the Bramble desktop app. Rendered only where the platform provides a
+/** Link this browser to the Vautix desktop app. Rendered only where the platform provides a
  * desktop-link adapter, which today is the extension. See docs/desktop-port.md. */
 export function DesktopLinkSection() {
 	const { desktopLink, shell, storage } = usePlatform();
@@ -102,7 +102,7 @@ export function DesktopLinkSection() {
 		setError(null);
 		const granted = await desktopLink.permission.request().catch(() => false);
 		if (granted) location.reload();
-		else setError(t`Bramble needs that permission to talk to the desktop app.`);
+		else setError(t`Vautix needs that permission to talk to the desktop app.`);
 	}, [desktopLink, t]);
 
 	useEffect(() => {
@@ -307,7 +307,7 @@ export function DesktopLinkSection() {
 									? t`Linked to this browser, but the app shares a different vault, not this one.`
 									: status.pairedAt
 										? t`Linked ${formatDate(status.pairedAt)}`
-										: t`Linked to the Bramble desktop app.`
+										: t`Linked to the Vautix desktop app.`
 						}
 					>
 						{/* Two different things can be meant by "disconnect", and only one of them is
@@ -356,7 +356,7 @@ export function DesktopLinkSection() {
 				<div className="space-y-3">
 					<p className="text-sm text-muted-foreground">
 						<Trans>
-							Bramble needs your permission to talk to the desktop app on this computer. Your
+							Vautix needs your permission to talk to the desktop app on this computer. Your
 							browser will ask you to confirm.
 						</Trans>
 					</p>
@@ -368,7 +368,7 @@ export function DesktopLinkSection() {
 				<div className="space-y-3">
 					<p className="text-sm text-muted-foreground">
 						<Trans>
-							Open Bramble on this computer, go to Settings and choose Connect a browser, then enter
+							Open Vautix on this computer, go to Settings and choose Connect a browser, then enter
 							the code it shows.
 						</Trans>
 					</p>

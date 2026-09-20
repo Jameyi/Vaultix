@@ -12,8 +12,8 @@ Both end at the same place: `crypto.passkeyImportPkcs8`, the Rust `passkey_impor
 parses the PKCS#8 key and rebuilds the COSE public half. That is deliberately the same code
 that mints a passkey, so an imported credential cannot drift in shape from a created one.
 
-A `.bramble` portable vault is the exception and skips all of this: its passkeys were minted by
-Bramble and are stored in Bramble's own representation, so they are carried verbatim with no
+A `.vautix` portable vault is the exception and skips all of this: its passkeys were minted by
+Vautix and are stored in Vautix's own representation, so they are carried verbatim with no
 conversion and nothing to drop. Everything below is about the conversion the other two paths
 need. See [encrypted-import.md](encrypted-import.md).
 
@@ -87,12 +87,12 @@ paths (the XML export and the .kdbx) carry them and both reach the same converte
 database that uses it, so it is tolerance rather than a format we can point at.
 
 The flags are dropped: we set backup-eligible and backed-up unconditionally when asserting,
-because Bramble syncs, so storing them would be recording a value we ignore.
+because Vautix syncs, so storing them would be recording a value we ignore.
 
 **Ed25519 is the normal case, not the exception.** KeePassXC supports EC2, EdDSA and RSA and
 picks EdDSA whenever the relying party offers it, which most do. That is why the core gained
 Ed25519 (COSE -8) import and assertion; without it, importing KeePassXC passkeys would have
-skipped nearly all of them. Bramble still only ever *mints* ES256.
+skipped nearly all of them. Vautix still only ever *mints* ES256.
 
 **Verified end to end on 2026-08-30**, against a real KeePassXC 2.7.12 database on all three
 surfaces. Extension: imported, then signed in on webauthn.io with KeePassXC-Browser disconnected,
@@ -133,7 +133,7 @@ not dedupe against each other.
 ## Where these limits come from, and which are ours to relax
 
 The caps exist to bound what crosses the bridge, not to enforce the WebAuthn spec on someone
-else's data. Bramble stores and replays these bytes; it is not the relying party. So some of
+else's data. Vautix stores and replays these bytes; it is not the relying party. So some of
 them are stricter than they need to be.
 
 **The user handle cap was relaxed from 64 bytes to 1023**, matching the credential ID. 64 is
@@ -159,7 +159,7 @@ precede one.
 
 ## Discoverability
 
-Bitwarden's `discoverable` hint is ignored on import: Bramble has no stored equivalent, so a
+Bitwarden's `discoverable` hint is ignored on import: Vautix has no stored equivalent, so a
 credential marked `discoverable: false` is promoted into the discoverable model. It keeps the
 same credential ID and key pair, so allow-list sign-in still works, but it may additionally
 appear in username-less and conditional pickers.

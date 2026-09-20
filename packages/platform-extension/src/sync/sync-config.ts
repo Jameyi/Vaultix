@@ -119,7 +119,7 @@ export async function storeGroup(group: GroupConfig, ctx: SyncVaultCtx): Promise
 }
 
 const RELAY_KEY = "sync.relay";
-const DEFAULT_RELAY = "wss://bramble-relay.flythenimbus.workers.dev";
+const DEFAULT_RELAY = "wss://vautix-relay.flythenimbus.workers.dev";
 
 /** The signaling relay URL the background uses for ongoing sync. */
 export async function getStoredRelay(): Promise<string> {

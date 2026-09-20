@@ -2,7 +2,7 @@
 # Check the Homebrew cask against the live release.
 #
 # Run by scripts/test-brew-cask.ts, natively on macOS and in the homebrew/brew container anywhere
-# else. Runnable by hand: $1 is the released version, $2 the cask (default /cask/bramble.rb, where
+# else. Runnable by hand: $1 is the released version, $2 the cask (default /cask/vautix.rb, where
 # the container mounts it).
 #
 # Homebrew refuses to *install* a cask on Linux, and that is the only part of this that needs a
@@ -27,8 +27,8 @@
 set -euo pipefail
 
 EXPECTED="${1:?the released version, from website/public/desktop/latest.json}"
-CASK="${2:-/cask/bramble.rb}"
-FULL=flythenimbus/bramble/bramble
+CASK="${2:-/cask/vautix.rb}"
+FULL=flythenimbus/vautix/vautix
 
 say() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 ok() { printf '  ok: %s\n' "$1"; }
@@ -60,21 +60,21 @@ fi
 
 # audit wants a tap, and a tap is a git repository. Removed on the way out, whatever happens.
 say "a throwaway tap"
-TAP="$(brew --repository)/Library/Taps/flythenimbus/homebrew-bramble"
+TAP="$(brew --repository)/Library/Taps/flythenimbus/homebrew-vautix"
 # Guarded because what follows is an rm -rf, and on macOS this is a real Homebrew.
 case "$TAP" in */Library/Taps/*) ;; *) die "unexpected tap path: $TAP" ;; esac
 trap 'rm -rf "$TAP"' EXIT
 mkdir -p "$TAP/Casks"
-cp "$CASK" "$TAP/Casks/bramble.rb"
+cp "$CASK" "$TAP/Casks/vautix.rb"
 git -C "$TAP" init -q .
 git -C "$TAP" add -A
-git -C "$TAP" -c user.email=test@bramble.sh -c user.name=test commit -qm "cask under test"
+git -C "$TAP" -c user.email=test@vautix.sh -c user.name=test commit -qm "cask under test"
 ok "$TAP"
 
 # Both of these exit non-zero on an offence and are noisy on success (developer-mode warnings, a
 # JSON API download), so the output is shown only when they fail.
 say "brew style"
-brew style "$TAP/Casks/bramble.rb" > /tmp/style.log 2>&1 || {
+brew style "$TAP/Casks/vautix.rb" > /tmp/style.log 2>&1 || {
 	cat /tmp/style.log >&2
 	die "style offenses"
 }
@@ -107,30 +107,30 @@ INFO="$(brew info --cask --json=v2 "$FULL" 2>/dev/null)"
 [ -n "$INFO" ] || die "brew info produced nothing"
 read -r TOKEN VERSION SHA AUTO URL <<<"$(echo "$INFO" | jq -r '.casks[0] | "\(.token) \(.version) \(.sha256) \(.auto_updates) \(.url)"')"
 
-[ "$TOKEN" = "bramble" ] || die "token is $TOKEN"
+[ "$TOKEN" = "vautix" ] || die "token is $TOKEN"
 ok "token: $TOKEN"
 
 # The app self-updates on macOS, so without this brew fights it on every release.
 [ "$AUTO" = "true" ] || die "auto_updates is $AUTO; brew would try to manage a self-updating app"
 ok "auto_updates: true"
 
-echo "$INFO" | jq -e '.casks[0].artifacts[] | select(.app) | .app[0] == "Bramble.app"' > /dev/null ||
-	die "no Bramble.app artifact"
-ok "installs Bramble.app"
+echo "$INFO" | jq -e '.casks[0].artifacts[] | select(.app) | .app[0] == "Vautix.app"' > /dev/null ||
+	die "no Vautix.app artifact"
+ok "installs Vautix.app"
 
 echo "$INFO" | jq -e '.casks[0].artifacts[] | select(.zap)' > /dev/null || die "no zap stanza"
 ok "has a zap stanza"
 
 say "the cask points at the current release"
 [ "$VERSION" = "$EXPECTED" ] ||
-	die "cask is $VERSION but the update manifest says $EXPECTED; bump packages/platform-desktop/homebrew/bramble.rb"
+	die "cask is $VERSION but the update manifest says $EXPECTED; bump packages/platform-desktop/homebrew/vautix.rb"
 ok "$VERSION matches the update manifest"
 
 # The published SHA256SUMS is the release's own record of what it shipped. Comparing against it
 # catches a cask edited to a checksum that belongs to nothing, which `brew fetch` alone would
 # report only as a mismatch against whatever the URL happens to serve.
 say "the checksum matches the release's own SHA256SUMS"
-SUMS="https://github.com/flythenimbus/bramble/releases/download/${VERSION}-desktop/SHA256SUMS"
+SUMS="https://github.com/flythenimbus/vautix/releases/download/${VERSION}-desktop/SHA256SUMS"
 DMG="$(basename "$URL")"
 PUBLISHED="$(curl -fsSL "$SUMS" | awk -v f="$DMG" '$2 == f { print $1 }')"
 [ -n "$PUBLISHED" ] || die "$DMG is not in $SUMS; did the release rename the disk image?"
@@ -151,7 +151,7 @@ say "brew fetch"
 brew fetch --cask --force "$FULL" > /dev/null 2>&1 || die "download or checksum verification failed"
 ok "downloaded and verified"
 
-printf '\n\033[1;32mPASS\033[0m bramble %s\n' "$VERSION"
+printf '\n\033[1;32mPASS\033[0m vautix %s\n' "$VERSION"
 if $MAC; then
 	printf 'Still to do by hand: brew install --cask, launching it past Gatekeeper, uninstall --zap.\n'
 else

@@ -49,7 +49,7 @@ function Wrapper({
 }
 
 /**
- * Restore a .bramble backup: validate the VLT1 blob and verify the backup's master password
+ * Restore a .vautix backup: validate the VLT1 blob and verify the backup's master password
  * (non-destructively). If no vault exists yet, it fills the first vault and unlocks it. If a vault
  * already exists, it is added as a NEW vault (never overwriting an existing one) and left locked to
  * open from the picker. Opened in the setup tab via shell.openSetup("restore"). See
@@ -109,7 +109,7 @@ export function RestoreShell({
 		setBusy(true);
 		try {
 			if (file.size > MAX_RESTORE_MB * 1024 * 1024) {
-				setError(t`This file is too large to be a Bramble backup.`);
+				setError(t`This file is too large to be a Vautix backup.`);
 				return;
 			}
 			const bytes = new Uint8Array(await file.arrayBuffer());
@@ -117,7 +117,7 @@ export function RestoreShell({
 			try {
 				slot = findPasswordSlot(decodeVaultBlob(bytes));
 			} catch {
-				setError(t`That doesn't look like a Bramble backup (.bramble) file.`);
+				setError(t`That doesn't look like a Vautix backup (.vautix) file.`);
 				return;
 			}
 			if (!slot) {
@@ -231,7 +231,7 @@ export function RestoreShell({
 						<Trans>Restore a backup</Trans>
 					</h1>
 					<p className="text-sm text-muted-foreground mt-1">
-						<Trans>Open an encrypted .bramble backup and make it the vault on this device.</Trans>
+						<Trans>Open an encrypted .vautix backup and make it the vault on this device.</Trans>
 					</p>
 				</div>
 			)}
@@ -239,9 +239,9 @@ export function RestoreShell({
 			{!picked ? (
 				<>
 					<FilePickerRow
-						accept=".bramble"
+						accept=".vautix"
 						icon={<ArchiveRestore className="w-5 h-5 text-primary" />}
-						title={<Trans>Choose a .bramble file</Trans>}
+						title={<Trans>Choose a .vautix file</Trans>}
 						subtitle={<Trans>The one you saved with Export a backup, or a cloud backup.</Trans>}
 						onPick={onFile}
 					/>

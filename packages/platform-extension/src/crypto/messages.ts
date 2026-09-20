@@ -79,7 +79,7 @@ export const CryptoSaveKdbxSchema = z.object({
 	password: z.string(),
 });
 
-// Portable vault (.bramble export/import). No VEK field: the core seals under a key it
+// Portable vault (.vautix export/import). No VEK field: the core seals under a key it
 // generates per file, so these never touch the session key and carry no vaultId.
 const portableVaultBlob = z.object({
 	slotId: z.string(),

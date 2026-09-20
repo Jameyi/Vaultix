@@ -173,7 +173,7 @@ export function useAliasProvider() {
 			);
 			const { address } = await client.create({
 				site,
-				description: site ? `Bramble (${site})` : "Bramble",
+				description: site ? `Vautix (${site})` : "Vautix",
 				// Only the catch-all provider reads this: it has no server to reject a duplicate, so
 				// the vault's own addresses are the only thing standing between two logins sharing one.
 				taken: takenAddresses(),

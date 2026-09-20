@@ -25,7 +25,7 @@ enum CredentialExchangeInbox {
 	/// Key for the `UUID` in the activity's userInfo (`ASCredentialImportToken`).
 	static let tokenKey = "ASCredentialImportToken"
 	/// Posted when a token lands, so the plugin can wake the webview if it is already up.
-	static let didArrive = Notification.Name("BrambleCredentialExchangeTokenDidArrive")
+	static let didArrive = Notification.Name("VautixCredentialExchangeTokenDidArrive")
 
 	private static let lock = NSLock()
 	private static var pending: UUID?
@@ -102,7 +102,7 @@ public class CredentialExchangePlugin: CAPPlugin, CAPBridgedPlugin {
 			return
 		}
 		// The exchange capability is declared by our credential-provider extension, so the
-		// OS only offers us once the user has enabled Bramble under AutoFill. Reported
+		// OS only offers us once the user has enabled Vautix under AutoFill. Reported
 		// separately from `available` so the UI can say which of the two is missing.
 		ASCredentialIdentityStore.shared.getState { state in
 			call.resolve([

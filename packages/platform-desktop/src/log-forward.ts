@@ -1,7 +1,7 @@
 import { debug, error, info, warn } from "@tauri-apps/plugin-log";
 
 // Send the webview's console into the Rust logger, so it lands in the same file the backend
-// already writes (~/Library/Logs/app.bramble.desktop/Bramble.log and the per-OS equivalents).
+// already writes (~/Library/Logs/app.vautix.desktop/Vautix.log and the per-OS equivalents).
 //
 // The backend log exists because a refused pairing had nowhere to explain itself (see lib.rs).
 // Half of pairing is up here though: enrollment, the SAS approval and the whole sync handshake

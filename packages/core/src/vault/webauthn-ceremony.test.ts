@@ -83,10 +83,10 @@ describe("explicit rpID (Firefox)", () => {
 		// No PRF at create forces the second ceremony, which must target the same rpID.
 		const create = vi.fn(async () => credential({ prf: { enabled: true } }));
 		const api = stubCredentials({ create });
-		await createPrfCredential("Touch ID", { kind: "platform", rpId: "bramble.sh" });
+		await createPrfCredential("Touch ID", { kind: "platform", rpId: "vautix.sh" });
 
-		expect(publicKeyArg(api.create).rp).toEqual({ name: "Vault", id: "bramble.sh" });
-		expect(publicKeyArg(api.get).rpId).toBe("bramble.sh");
+		expect(publicKeyArg(api.create).rp).toEqual({ name: "Vault", id: "vautix.sh" });
+		expect(publicKeyArg(api.get).rpId).toBe("vautix.sh");
 	});
 
 	it("omits rp.id entirely on Chromium, which must keep its implicit extension rpID", async () => {
@@ -99,17 +99,17 @@ describe("explicit rpID (Firefox)", () => {
 
 	it("uses the rpID the platform installed, so callers do not thread it", async () => {
 		const api = stubCredentials();
-		setWebauthnRpId("bramble.sh");
+		setWebauthnRpId("vautix.sh");
 		await createPrfCredential("Touch ID", { kind: "platform" });
 
-		expect(publicKeyArg(api.create).rp).toEqual({ name: "Vault", id: "bramble.sh" });
+		expect(publicKeyArg(api.create).rp).toEqual({ name: "Vault", id: "vautix.sh" });
 	});
 
 	it("leaves security keys on the implicit rpID even once a shared one is installed", async () => {
 		// Moving them would invalidate every already-registered key, and buys nothing: Firefox
 		// has no PRF for external keys, so there is no roaming to gain.
 		const api = stubCredentials();
-		setWebauthnRpId("bramble.sh");
+		setWebauthnRpId("vautix.sh");
 		await createPrfCredential("YubiKey", { kind: "securityKey" });
 
 		expect(publicKeyArg(api.create).rp).toEqual({ name: "Vault" });
@@ -120,7 +120,7 @@ describe("explicit rpID (Firefox)", () => {
 			throw Object.assign(new Error("The operation is insecure."), { name: "SecurityError" });
 		});
 		stubCredentials({ create });
-		setWebauthnRpId("bramble.sh");
+		setWebauthnRpId("vautix.sh");
 
 		await expect(createPrfCredential("Touch ID", { kind: "platform" })).rejects.toThrow(
 			/Chrome 122 or Firefox 150/,
@@ -141,10 +141,10 @@ describe("explicit rpID (Firefox)", () => {
 	it("passes rpId through getPrfSecret for unlock", async () => {
 		const api = stubCredentials();
 		await getPrfSecret([{ credentialId: new Uint8Array([9]) }], new Uint8Array(32), {
-			rpId: "bramble.sh",
+			rpId: "vautix.sh",
 		});
 
-		expect(publicKeyArg(api.get).rpId).toBe("bramble.sh");
+		expect(publicKeyArg(api.get).rpId).toBe("vautix.sh");
 	});
 });
 
@@ -246,7 +246,7 @@ describe("passkey-provider interception", () => {
 			}
 		});
 
-		await createPrfCredential("Touch ID", { kind: "platform", rpId: "bramble.sh" });
+		await createPrfCredential("Touch ID", { kind: "platform", rpId: "vautix.sh" });
 
 		expect(order).toEqual(["pause", "resume", "pause", "resume"]);
 	});
@@ -296,33 +296,33 @@ describe("unlock failures across browsers", () => {
 
 describe("rpID selection", () => {
 	it("routes platform keys to the shared rpID and security keys to the implicit one", () => {
-		setWebauthnRpId("bramble.sh");
-		expect(rpIdFor("platform")).toBe("bramble.sh");
+		setWebauthnRpId("vautix.sh");
+		expect(rpIdFor("platform")).toBe("vautix.sh");
 		expect(rpIdFor("securityKey")).toBeUndefined();
 	});
 
 	it("tries the platform rpID first when this device registered a platform key", () => {
-		setWebauthnRpId("bramble.sh");
-		expect(unlockRpIdOrder(true)).toEqual(["bramble.sh", undefined]);
+		setWebauthnRpId("vautix.sh");
+		expect(unlockRpIdOrder(true)).toEqual(["vautix.sh", undefined]);
 	});
 
 	it("tries the implicit rpID first otherwise, so existing security-key users keep one prompt", () => {
-		setWebauthnRpId("bramble.sh");
-		expect(unlockRpIdOrder(false)).toEqual([undefined, "bramble.sh"]);
+		setWebauthnRpId("vautix.sh");
+		expect(unlockRpIdOrder(false)).toEqual([undefined, "vautix.sh"]);
 	});
 
 	it("never offers Firefox an rpID it is refused outright", () => {
 		// Firefox rejects its own moz-extension:// origin as an RP with SecurityError - a hard
 		// refusal, not a miss - so offering it is not a cheap wrong guess. It has no security keys
 		// registered under an implicit rpID either, so there is nothing to lose by dropping it.
-		setWebauthnRpId("bramble.sh", { implicitUsable: false });
-		expect(unlockRpIdOrder(true)).toEqual(["bramble.sh"]);
-		expect(unlockRpIdOrder(false)).toEqual(["bramble.sh"]);
+		setWebauthnRpId("vautix.sh", { implicitUsable: false });
+		expect(unlockRpIdOrder(true)).toEqual(["vautix.sh"]);
+		expect(unlockRpIdOrder(false)).toEqual(["vautix.sh"]);
 	});
 
 	it("still offers the implicit rpID where it works, for existing security keys", () => {
-		setWebauthnRpId("bramble.sh", { implicitUsable: true });
-		expect(unlockRpIdOrder(false)).toEqual([undefined, "bramble.sh"]);
+		setWebauthnRpId("vautix.sh", { implicitUsable: true });
+		expect(unlockRpIdOrder(false)).toEqual([undefined, "vautix.sh"]);
 	});
 
 	it("falls back to the implicit rpID when no explicit one is installed", () => {
@@ -354,11 +354,11 @@ describe("unlocking across both rpIDs", () => {
 	}
 
 	it("falls through to the second rpID and reports which one worked", async () => {
-		const get = getForRpId("bramble.sh");
+		const get = getForRpId("vautix.sh");
 		stubCredentials({ get });
 
-		const r = await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "bramble.sh"]);
-		expect(r.rpId).toBe("bramble.sh");
+		const r = await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "vautix.sh"]);
+		expect(r.rpId).toBe("vautix.sh");
 		expect(get).toHaveBeenCalledTimes(2);
 	});
 
@@ -366,7 +366,7 @@ describe("unlocking across both rpIDs", () => {
 		const get = getForRpId(undefined);
 		stubCredentials({ get });
 
-		const r = await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "bramble.sh"]);
+		const r = await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "vautix.sh"]);
 		expect(r.rpId).toBeUndefined();
 		expect(get).toHaveBeenCalledOnce();
 	});
@@ -374,10 +374,10 @@ describe("unlocking across both rpIDs", () => {
 	it("does not blame the user for an intermediate miss", async () => {
 		// The first rpID failing means "no credential here", not "you dismissed it". Surfacing
 		// that would accuse the user of cancelling a prompt they are about to be shown.
-		const get = getForRpId("bramble.sh");
+		const get = getForRpId("vautix.sh");
 		stubCredentials({ get });
 
-		await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "bramble.sh"]);
+		await getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "vautix.sh"]);
 		const firstCall = get.mock.calls[0]![0] as { publicKey: { rpId?: string } };
 		expect(firstCall.publicKey.rpId).toBeUndefined();
 	});
@@ -388,7 +388,7 @@ describe("unlocking across both rpIDs", () => {
 		});
 		stubCredentials({ get });
 
-		await expect(getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "bramble.sh"])).rejects.toThrow(
+		await expect(getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "vautix.sh"])).rejects.toThrow(
 			/registered per browser/,
 		);
 		expect(get).toHaveBeenCalledTimes(2);
@@ -402,7 +402,7 @@ describe("unlocking across both rpIDs", () => {
 		});
 		stubCredentials({ get });
 
-		await expect(getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "bramble.sh"])).rejects.toThrow(
+		await expect(getPrfSecretAcrossRpIds(ALLOW, SALT, [undefined, "vautix.sh"])).rejects.toThrow(
 			/proxy detached/,
 		);
 		expect(get).toHaveBeenCalledOnce();
@@ -427,7 +427,7 @@ describe("whether webauthn unlock is offerable at all", () => {
 	});
 
 	it("is on for Firefox 150+, which can claim the shared rpID", () => {
-		setWebauthnRpId("bramble.sh", { implicitUsable: false });
+		setWebauthnRpId("vautix.sh", { implicitUsable: false });
 		expect(webauthnUnlockPossible()).toBe(true);
 	});
 

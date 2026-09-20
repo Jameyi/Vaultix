@@ -25,7 +25,7 @@ async function activeTabOrigin(): Promise<string | null> {
 	}
 }
 
-// Pause the proxy while Bramble runs its OWN WebAuthn (security-key PRF) ceremony, so
+// Pause the proxy while Vautix runs its OWN WebAuthn (security-key PRF) ceremony, so
 // attach()'s browser-wide interception doesn't hijack our unlock. The popup/options send
 // PAUSE before navigator.credentials and RESUME after (see webauthn-ceremony pauser).
 // Depth-counted, but nothing nests today: createPrfCredential's create() and its fallback
@@ -51,7 +51,7 @@ async function failInFlightRequests(): Promise<void> {
 			requestId,
 			error: {
 				name: "NotAllowedError",
-				message: "Bramble paused passkey handling to unlock its own vault. Try again.",
+				message: "Vautix paused passkey handling to unlock its own vault. Try again.",
 			},
 		};
 		const done =
@@ -168,7 +168,7 @@ registerListeners();
 
 /**
  * Attach the proxy. Gated behind a Settings pref (default off): attach() intercepts ALL browser
- * WebAuthn, including Bramble's own security-key unlock, which is why we pause around our own
+ * WebAuthn, including Vautix's own security-key unlock, which is why we pause around our own
  * ceremonies. Idempotent in Chrome (a redundant attach returns no error). Needs a real Chrome
  * end-to-end.
  */

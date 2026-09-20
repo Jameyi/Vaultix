@@ -1,6 +1,6 @@
 # Desktop app (Tauri 2) plan: feasibility findings
 
-Research notes on shipping Bramble as a native macOS + Windows + Linux app built with Tauri 2,
+Research notes on shipping Vautix as a native macOS + Windows + Linux app built with Tauri 2,
 reusing the existing codebase. Captures what is already portable, what needs a new platform
 implementation, the genuine blockers, and a phased plan.
 
@@ -141,7 +141,7 @@ nor the scroller's own `scrollHeight` reports the content height), and even work
 window move about under the user. Nothing about user-driven resizing needs that measurement.
 
 **Two constraints this took on.** Transparency for the spotlight panel needs Tauri's
-`macos-private-api` feature, which rules out the Mac App Store; Bramble ships direct downloads,
+`macos-private-api` feature, which rules out the Mac App Store; Vautix ships direct downloads,
 so no channel is given up, but it is now a real constraint. And `Accessory` policy means the
 app leaves Cmd+Tab while its window is hidden, and that with no Dock icon there is nothing to
 click, so the tray is the only route back.
@@ -269,7 +269,7 @@ A search input with results below it, combobox-style:
 |---|---|
 | `↑` / `↓` | Move selection |
 | `Enter` | Fill |
-| `Cmd/Ctrl+O` | Open the Bramble main window focused on that entry |
+| `Cmd/Ctrl+O` | Open the Vautix main window focused on that entry |
 | `Cmd/Ctrl+E` | Edit that entry |
 
 Show `⌘` on macOS and `Ctrl` elsewhere rather than hardcoding either.
@@ -305,7 +305,7 @@ must pick one. Default to the last-unlocked vault, with a small switcher.
 
 ### The macOS activation trap
 
-If the spotlight window activates the app, Bramble becomes the frontmost application and the
+If the spotlight window activates the app, Vautix becomes the frontmost application and the
 information auto-type needs (which app to type into) is destroyed. Two fixes, and both are wanted:
 capture the frontmost app *before* showing the window, and convert the window to a non-activating
 `NSPanel` so it takes keyboard focus without stealing activation. Tauri v2 has no first-class API
@@ -316,13 +316,13 @@ for the latter; the usual routes are `objc2` directly or the `tauri-nspanel` com
 
 ### Native messaging needs a proxy, and the proxy is what creates the security problem
 
-Native messaging inverts the lifecycle: the browser spawns the host process, but Bramble is
+Native messaging inverts the lifecycle: the browser spawns the host process, but Vautix is
 resident. The standard shape, used by 1Password, KeePassXC, and Bitwarden, is a thin spawned relay:
 
 ```
-extension  --native messaging (stdio)-->  bramble-proxy (small spawned binary)
+extension  --native messaging (stdio)-->  vautix-proxy (small spawned binary)
                                               |
-                                              +-- unix socket / named pipe --> bramble (resident)
+                                              +-- unix socket / named pipe --> vautix (resident)
 ```
 
 The proxy is a small Rust binary shipped with the app. It needs a native-messaging host manifest per
@@ -507,7 +507,7 @@ a field.** `packages/core/src/vault/autofill-index.ts` already defines `APP_URI_
 `appIdFromUri` currently has no caller; desktop native-app matching would be its first, keyed on
 bundle id (macOS), executable path or AUMID (Windows), or window class (Linux).
 
-Note the deliberate constraint recorded in that commit and in `autofill.md`: Bramble does **not**
+Note the deliberate constraint recorded in that commit and in `autofill.md`: Vautix does **not**
 infer a domain from a package name, because the inference works for
 `se.skanetrafiken.washington` and fails for `com.google.android.youtube`, and nothing stops an app
 claiming someone else's namespace. Desktop must not reintroduce that inference for bundle ids.
@@ -688,7 +688,7 @@ lives in this process.
 
 Verified on KWin by driving the compositor rather than by clicking: a KWin script calling
 `closeWindow()` on the window (the same request the titlebar X sends) then `com.canonical.dbusmenu`
-`Event` on the tray's "Open Bramble" item. Across three cycles the close was received every time,
+`Event` on the tray's "Open Vautix" item. Across three cycles the close was received every time,
 including on rebuilt windows, which is precisely what hide-and-show could not do; the window left
 `workspace.windowList()` entirely; the process survived; and tray Quit still exited. The
 autostart-hidden launch was checked the same way and comes up with no window at all rather than a
@@ -715,7 +715,7 @@ a launch. It is debounced, idempotent, and timed into the log.
 **Native messaging works on Linux, and the AppImage needed more than a path table.** Manifests go
 under XDG_CONFIG_HOME rather than Application Support, and the browsers read that variable
 themselves, so a user who moves it takes their profiles with them and the manifests have to
-follow. The socket is `$XDG_DATA_HOME/app.bramble.desktop/bramble.sock`, which is Tauri's own app
+follow. The socket is `$XDG_DATA_HOME/app.vautix.desktop/vautix.sock`, which is Tauri's own app
 data directory on Linux, the same rule the macOS side already used.
 
 The AppImage is the awkward one. A host manifest carries an absolute path to the proxy, and an
@@ -825,7 +825,7 @@ rather than a nicety: there is no store to push a fix through, so without an in-
 security fix reaches only the people who happen to check the repository.
 
 `plugins.updater` in `tauri.conf.json` points at `latest.json` on the latest release, and
-`createUpdaterArtifacts` makes the bundler emit `Bramble.app.tar.gz` plus a `.sig`. The plugin
+`createUpdaterArtifacts` makes the bundler emit `Vautix.app.tar.gz` plus a `.sig`. The plugin
 verifies that signature against the public key compiled into the INSTALLED build before applying
 anything, which is what makes downloading a binary and running it acceptable: a substituted or
 tampered asset fails verification and is discarded.
@@ -897,7 +897,7 @@ filename. See `website/src/downloads.ts`.
 ### Homebrew
 
 A **cask**, not a formula: it is a GUI app shipped as a disk image. The canonical copy is
-`packages/platform-desktop/homebrew/bramble.rb`. Keeping it here is what lets `pnpm run test:brew`
+`packages/platform-desktop/homebrew/vautix.rb`. Keeping it here is what lets `pnpm run test:brew`
 check it against the live release, and it means a release that renames an artifact fails a test
 rather than a stranger's `brew install`.
 
@@ -914,7 +914,7 @@ Four stanzas in it are decisions rather than boilerplate:
   Verified by deliberately breaking it: it reported `0.14.0`. `strategy :github_releases` fixed
   that and was what we submitted, but a homebrew-cask maintainer pointed out the lighter answer on
   review. With no strategy at all, livecheck auto-selects `Git`, rewrites the download URL to
-  `https://github.com/flythenimbus/bramble.git` and matches the regex against `git ls-remote`
+  `https://github.com/flythenimbus/vautix.git` and matches the regex against `git ls-remote`
   tags: one request rather than a walk through the releases API, same answer, because the regex was
   always anchored on `-desktop` rather than on anything the strategy did. What keeps this honest is
   the assertion in `test:brew` that livecheck's answer equals the update manifest's version.
@@ -925,7 +925,7 @@ Four stanzas in it are decisions rather than boilerplate:
   instead. Detecting a brew install from inside the bundle would be the alternative, and there is
   no reliable marker for it.
 - **`zap` deletes the vault.** `data_dir()` is Tauri's `app_data_dir`, so
-  `~/Library/Application Support/app.bramble.desktop` holds the vault and `brew uninstall --zap`
+  `~/Library/Application Support/app.vautix.desktop` holds the vault and `brew uninstall --zap`
   trashes it. That is what zap is for and it is opt-in, but it deserved a conscious yes. It cannot
   reach the Keychain, so backup credentials survive it. The globs beside it remove the
   native-messaging manifests the app writes into other browsers' support directories, which would
@@ -967,13 +967,13 @@ rather than hashing the disk image a second time, and commits it beside the upda
 release exists. A `--aarch64` release skips the bump and says so, because the cask links the
 universal disk image and that build produces none; `test:brew` then fails until a universal release
 is cut, which is the intended noise rather than a surprise. The *published* copy is a separate bump:
-`brew bump-cask-pr --version X.Y.Z bramble` does it in one command and computes the checksum itself,
+`brew bump-cask-pr --version X.Y.Z vautix` does it in one command and computes the checksum itself,
 and for a cask with a working livecheck their bot usually opens that PR before you do.
 
 `uninstall` carries a `launchctl:` beside its `quit:`, because autostart landed as a launch agent:
 `autostart.rs` uses `MacosLauncher::LaunchAgent`, so enabling it writes
-`~/Library/LaunchAgents/Bramble.plist`. The label is the trap. auto-launch names both the plist and
-the label after `productName`, so it is `Bramble` rather than `app.bramble.desktop` like every
+`~/Library/LaunchAgents/Vautix.plist`. The label is the trap. auto-launch names both the plist and
+the label after `productName`, so it is `Vautix` rather than `app.vautix.desktop` like every
 other identifier in the file. brew unloads the service and deletes the plist on a plain
 `brew uninstall`, which is the right moment for it: left behind, it is a login item pointing at an
 app that is gone. Note this only shows up in a test if autostart was enabled at least once, since
@@ -989,13 +989,13 @@ install, launch past Gatekeeper, plain uninstall, and `--zap`. Four things it co
 amount of `test:brew` could. Gatekeeper accepts the notarization on a machine that did not build
 the app: the only prompt is the ordinary quarantine one, and it says Apple found nothing.
 `launchctl:` removes the launch agent and `quit:` the tray process, while a plain uninstall leaves
-`~/Library/Application Support/app.bramble.desktop` alone, which is the line a password manager
+`~/Library/Application Support/app.vautix.desktop` alone, which is the line a password manager
 must not cross. `zap` reaches the vault directory *and* the native-messaging manifests, several
 browsers' worth, which is the glob pair doing its job. And `zap trash:` is a move to the Trash
 rather than a delete, so the vault it takes is recoverable until the Trash is emptied. Worth
 knowing before running it, and worth remembering when reviewing those paths.
 
-The PR is then `Casks/b/bramble.rb`, titled `bramble <version> (new cask)`.
+The PR is then `Casks/b/vautix.rb`, titled `vautix <version> (new cask)`.
 
 **Submitted as Homebrew/homebrew-cask#282145 on 2026-08-20, and closed the same day by a maintainer
 with no comment.** Every CI check passed, the template was complete, and it was not the bot that
@@ -1007,14 +1007,14 @@ Of the last twenty closed `new cask` PRs at that point, four merged. The
 [acceptance policy](https://docs.brew.sh/Package-Acceptance-Policy) now asks a self-submission by
 the repository's owner for 90 forks, 90 watchers or **225 stars** rather than the usual 75, and says
 in as many words that meeting the criteria does not guarantee acceptance and that new submissions
-may be held to a higher standard. Bramble clears the star threshold (315) while sitting at 14 forks
+may be held to a higher standard. Vautix clears the star threshold (315) while sitting at 14 forks
 and 4 watchers, on a repository created 2026-06-01, which is the shape that invites the discretion
 clause. A maintainer told a comparable submitter the same week that scrutiny had gone up, that
 "packages submitted by the developer are held to a higher notability standard", and to use a
 third-party tap for now.
 
-So the realistic path is **our own tap**, `flythenimbus/homebrew-bramble`, giving users
-`brew tap flythenimbus/bramble && brew install --cask bramble`. Everything already built carries
+So the realistic path is **our own tap**, `flythenimbus/homebrew-vautix`, giving users
+`brew tap flythenimbus/vautix && brew install --cask vautix`. Everything already built carries
 over unchanged: the cask, `test:brew`, and the release-time bump. What a tap gives up is
 BrewTestBot's autobump, which costs nothing here because `pnpm release desktop` bumps the cask
 itself. Resubmitting upstream is worth revisiting when forks and watchers catch up with the stars,
@@ -1035,7 +1035,7 @@ globs reach into other applications' support directories.
 nixpkgs:
 
 ```bash
-nix build github:flythenimbus/bramble      # or `nix run`
+nix build github:flythenimbus/vautix      # or `nix run`
 ```
 
 and it exposes `overlays.default` for a system configuration. `pnpm run test:nix` builds it in a
@@ -1099,7 +1099,7 @@ consistent and simply describe the wrong software. `--universal` builds both arc
 `.sig`, because publishing one would leave a release that looks complete while updating silently
 fails for everyone.
 
-**`latest.json` is served from `https://bramble.sh/desktop/latest.json`, not the GitHub release.**
+**`latest.json` is served from `https://vautix.sh/desktop/latest.json`, not the GitHub release.**
 GitHub's `/releases/latest` means the newest release of ANY target, and this repo ships chromium,
 firefox and android out of the same tag namespace — the endpoint resolved to `1.11.3-firefox` and
 404'd. Even once a desktop release carried the manifest, the next extension release would take the
@@ -1136,7 +1136,7 @@ The menu item emits an event and the webview does the work, because the webview 
 updater adapter, the dialog copy and the progress UI; a second implementation in Rust would be a
 second answer to "is there an update" that could disagree. A check from the menu differs from the
 launch prompt in two ways: it ignores the dismissed version, since asking again is the point, and
-it always answers — "Bramble is up to date" when there is nothing, and the error when the check
+it always answers — "Vautix is up to date" when there is nothing, and the error when the check
 fails. On launch those are silent, because nobody asked.
 
 **Being told an update exists.** Settings has a Check button, but a manual check is only found by
@@ -1171,7 +1171,7 @@ something Gatekeeper blocks everywhere but the machine that built it, so the scr
 updater at `http://127.0.0.1:8787` and turns off the https requirement, and `pnpm updater:smoke`
 serves that build back to itself as a newer version. It skips notarization: the build never leaves
 the machine, so it would buy nothing and cost an upload, a wait, and a submission record.
-(`BRAMBLE_SKIP_NOTARIZE=1` does the same for any other local build.) Run the app out of
+(`VAUTIX_SKIP_NOTARIZE=1` does the same for any other local build.) Run the app out of
 `target/release/bundle/macos/` rather than `/Applications`, so replacing the bundle needs no
 privileges, and watch the server log: a request for `latest.json` then one for the archive is the
 whole handshake.
@@ -1206,8 +1206,8 @@ build that ran the whole test suite first.
 
 The sidecar is the awkward part, and none of it fails early. Tauri lipos the app's MAIN binary and
 nothing else, while `externalBin` entries are copied rather than built, so a universal build wants
-the proxy in two places at once: `binaries/bramble-proxy-universal-apple-darwin` for the sidecar
-copy, and `target/universal-apple-darwin/release/bramble-proxy` for the binary copy it does for
+the proxy in two places at once: `binaries/vautix-proxy-universal-apple-darwin` for the sidecar
+copy, and `target/universal-apple-darwin/release/vautix-proxy` for the binary copy it does for
 this crate's own bins. stage-proxy writes both. Staging only the host arch would have produced a
 universal app with an Apple-Silicon-only proxy, where the app launches on Intel and the browser
 link simply never works. `build.rs` also names its placeholder after the triple being compiled
@@ -1306,7 +1306,7 @@ explains why the answer is what it is.
 
 - ~~**Distribution.**~~ **Answered.** Direct download (`.dmg`) plus a Homebrew cask on macOS; on
   Linux, native packages and an AppImage, published through an APT repository at
-  `apt.bramble.sh`, plus a Nix flake. Flatpak was ruled out for the reason predicted: it is hostile
+  `apt.vautix.sh`, plus a Nix flake. Flatpak was ruled out for the reason predicted: it is hostile
   to native messaging, whose manifest has to reach the browser's own sandbox, and to global input
   capture. Windows is still unbuilt and still the MSI-or-winget question. See
   [Linux artifacts](#linux-artifacts), [Homebrew](#homebrew), [NixOS](#nixos) and

@@ -199,7 +199,7 @@ export interface ShellAdapter {
 	};
 	/**
 	 * True where something else keeps this install current: a Linux package manager, for a .deb or
-	 * .rpm from apt.bramble.sh. `updates` is then absent, because the app genuinely cannot replace
+	 * .rpm from apt.vautix.sh. `updates` is then absent, because the app genuinely cannot replace
 	 * a dpkg-managed binary, and the Updates section says who does instead of disappearing — an
 	 * absent section reads as "this app has no way to update", which is the opposite of true.
 	 */

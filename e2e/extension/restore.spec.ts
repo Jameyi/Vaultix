@@ -4,7 +4,7 @@ import path from "node:path";
 import { expect, test } from "./fixtures";
 import { backgroundWorker, createVault, optionsUrl, STRONG_PW } from "./helpers";
 
-// Restoring a .bramble backup when a vault already exists must ADD a new vault, never overwrite the
+// Restoring a .vautix backup when a vault already exists must ADD a new vault, never overwrite the
 // vault on this device (the old code did an id-less write straight over the primary - a data-loss
 // footgun reachable from Settings -> Data -> Restore from backup).
 test("restoring a backup when a vault exists adds a new vault, never overwrites", async ({
@@ -14,8 +14,8 @@ test("restoring a backup when a vault exists adds a new vault, never overwrites"
 	const setup = await context.newPage();
 	await createVault(setup, extensionId);
 
-	// A .bramble backup is just a VLT1 blob. Reuse vault 1's own blob as the backup file (same
-	// password), written to a temp .bramble the file picker can accept.
+	// A .vautix backup is just a VLT1 blob. Reuse vault 1's own blob as the backup file (same
+	// password), written to a temp .vautix the file picker can accept.
 	const sw = await backgroundWorker(context);
 	const b64 = await sw.evaluate(async () => {
 		const reg = (await chrome.storage.local.get("vault.registry"))["vault.registry"] as {
@@ -24,8 +24,8 @@ test("restoring a backup when a vault exists adds a new vault, never overwrites"
 		const key = `vault-blob-b64:${reg.vaults[0]!.id}`;
 		return (await chrome.storage.local.get(key))[key] as string;
 	});
-	const dir = mkdtempSync(path.join(tmpdir(), "bramble-backup-"));
-	const file = path.join(dir, "backup.bramble");
+	const dir = mkdtempSync(path.join(tmpdir(), "vautix-backup-"));
+	const file = path.join(dir, "backup.vautix");
 	writeFileSync(file, Buffer.from(b64, "base64"));
 
 	const page = await context.newPage();
@@ -66,8 +66,8 @@ test("restoring a backup with no vault on the device fills the first vault and u
 		const key = `vault-blob-b64:${reg.vaults[0]!.id}`;
 		return (await chrome.storage.local.get(key))[key] as string;
 	});
-	const dir = mkdtempSync(path.join(tmpdir(), "bramble-backup-"));
-	const file = path.join(dir, "backup.bramble");
+	const dir = mkdtempSync(path.join(tmpdir(), "vautix-backup-"));
+	const file = path.join(dir, "backup.vautix");
 	writeFileSync(file, Buffer.from(b64, "base64"));
 
 	// Take the vault away, leaving the backup file: the issue's repro, and equivalent to a fresh
@@ -100,7 +100,7 @@ test("restoring a backup with no vault on the device fills the first vault and u
 	expect(state).toEqual({ count: 1, hasBlob: true });
 });
 
-// The "Add a vault" screen (shown once a vault exists) offers restoring a .bramble backup as a
+// The "Add a vault" screen (shown once a vault exists) offers restoring a .vautix backup as a
 // new vault, via a tab that opens the restore flow.
 test("the Add-a-vault screen offers restoring a backup", async ({ context, extensionId }) => {
 	const setup = await context.newPage();

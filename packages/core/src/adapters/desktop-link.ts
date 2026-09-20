@@ -1,5 +1,5 @@
 /**
- * The extension's side of the link to the Bramble desktop app.
+ * The extension's side of the link to the Vautix desktop app.
  *
  * The mirror of `PairingAdapter`: the desktop app *shows* a code, this *types* one. Two
  * adapters rather than one because the roles are not symmetric, and an interface covering both

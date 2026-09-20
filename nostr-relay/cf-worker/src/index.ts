@@ -1,4 +1,4 @@
-// Bramble signaling relay as a Cloudflare Worker + Durable Object.
+// Vautix signaling relay as a Cloudflare Worker + Durable Object.
 //
 // Behaviourally identical to signaling/relay.mjs (the node self-host version):
 // a minimal Nostr subset (REQ / EVENT / CLOSE) that fans out *ephemeral* events
@@ -105,7 +105,7 @@ export class Relay extends DurableObject {
 	async fetch(req: Request): Promise<Response> {
 		// Non-WebSocket hits (health probe) get the banner, same as the node relay.
 		if (req.headers.get("Upgrade") !== "websocket")
-			return new Response("bramble signaling relay", { status: 200 });
+			return new Response("vautix signaling relay", { status: 200 });
 
 		const [client, server] = Object.values(new WebSocketPair());
 		this.ctx.acceptWebSocket(server); // hibernatable

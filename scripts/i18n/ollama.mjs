@@ -20,7 +20,7 @@ const GUIDANCE =
 	`"Créer un compte", "Creare un account") — not as an instruction addressed to the user. ` +
 	`Where a string IS a full sentence, use a FORMAL register ("Sie", "usted", "vous", "Lei"); ` +
 	`never use informal address. Preserve placeholders verbatim and in place ({appName}, %s, ` +
-	`%d, %@, %lld, %1$s and similar). Never translate brand or standard terms (Bramble, ` +
+	`%d, %@, %lld, %1$s and similar). Never translate brand or standard terms (Vautix, ` +
 	`Face ID, Touch ID, Optic ID, AES-256-GCM, KeePass, TOTP).`;
 
 // Appended to the translation prompts: a cheap self-review pass catches the failures we
@@ -147,7 +147,7 @@ export async function fitToLimit(language, text, limit, kind) {
 					`MOST ${limit} characters total (counting commas) by dropping the least valuable ` +
 					`keywords and preferring shorter synonyms. Keep it comma-separated with NO spaces ` +
 					`after commas, keep the highest-value search terms, keep brand/standard terms ` +
-					`(Bramble, TOTP, KeePass). ${GUIDANCE} Output ONLY the keyword list.`
+					`(Vautix, TOTP, KeePass). ${GUIDANCE} Output ONLY the keyword list.`
 				: `You are editing App Store copy in ${language}. Rewrite the text so it is AT MOST ` +
 					`${limit} characters while preserving the core meaning and a natural, formal tone. ` +
 					`Be concise; drop secondary clauses if needed. ${GUIDANCE} Output ONLY the rewritten text.`;

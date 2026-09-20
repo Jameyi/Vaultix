@@ -5,7 +5,7 @@ import { usePlatform } from "../../context/PlatformContext";
 import { useVault } from "../../hooks/useVault";
 import { useVaultRegistry } from "../../hooks/useVaultRegistry";
 import { displayLabel } from "../../vault/vault-registry";
-import { BrambleGlyph } from "../components/BrambleGlyph";
+import { VautixGlyph } from "../components/VautixGlyph";
 import { PasskeySavedToast } from "../components/PasskeySavedToast";
 import { BackButton } from "../components/ui/back-button";
 import { Button } from "../components/ui/button";
@@ -61,7 +61,7 @@ export function AppLayout() {
 								className="flex items-center gap-2.5 rounded-lg active:scale-[0.98]"
 								aria-label={t`Go to vault`}
 							>
-								<BrambleGlyph className="w-9 h-9 text-foreground shrink-0" />
+								<VautixGlyph className="w-9 h-9 text-foreground shrink-0" />
 								<div className="flex items-center gap-2 min-w-0">
 									<h1 className="text-lg bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
 										{shell.appName}

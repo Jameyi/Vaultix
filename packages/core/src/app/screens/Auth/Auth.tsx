@@ -22,7 +22,7 @@ import { useVault } from "../../../hooks/useVault";
 import { useVaultRegistry } from "../../../hooks/useVaultRegistry";
 import { effectiveAllowPasscode, StaleBiometricCacheError } from "../../../vault/biometric-unlock";
 import { displayLabel } from "../../../vault/vault-registry";
-import { BrambleGlyph } from "../../components/BrambleGlyph";
+import { VautixGlyph } from "../../components/VautixGlyph";
 import { Button } from "../../components/ui/button";
 import { PasswordField } from "../../components/ui/password-field";
 import { usePopOut } from "../../hooks/usePopOut";
@@ -334,7 +334,7 @@ export function Auth() {
 				<div className="w-full max-w-md mx-auto">
 					<div className="mb-5">
 						<div className="flex justify-center mb-3">
-							<BrambleGlyph className="w-16 h-16 text-foreground" />
+							<VautixGlyph className="w-16 h-16 text-foreground" />
 						</div>
 						<h1 className="text-xl bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
 							{firstRun
@@ -541,7 +541,7 @@ export function Auth() {
 
 					<div className="mt-6 p-4 rounded-lg border border-border/30 bg-card/30 backdrop-blur-sm">
 						<div className="flex items-start gap-3">
-							<BrambleGlyph className="w-6 h-6 text-primary shrink-0" />
+							<VautixGlyph className="w-6 h-6 text-primary shrink-0" />
 							<div>
 								<h4 className="text-xs mb-1">
 									<Trans>Encrypted on your device</Trans>

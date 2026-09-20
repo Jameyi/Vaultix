@@ -35,7 +35,7 @@
             </intent-filter>
 
             <!-- Inbound 2FA setup: another app or a browser hands us an otpauth:// URI and
-                 Android offers Bramble in the chooser. Any app on the device can fire this,
+                 Android offers Vautix in the chooser. Any app on the device can fire this,
                  so an arriving URI only ever prefills a form the user submits; it never
                  writes to the vault. Deliberately MainActivity, not the :autofill process,
                  so it is nowhere near a decrypted VEK. See docs/totp-uri-handler.md. -->
@@ -64,7 +64,7 @@
             android:name=".AutofillUnlockActivity"
             android:exported="false"
             android:process=":autofill"
-            android:theme="@style/BrambleAutofillTheme"
+            android:theme="@style/VautixAutofillTheme"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:windowSoftInputMode="adjustResize|stateHidden" />
@@ -72,7 +72,7 @@
         <!-- System autofill provider. Runs in a dedicated :autofill process so its decrypted
              VEK never touches the app's webview session. -->
         <service
-            android:name=".BrambleAutofillService"
+            android:name=".VautixAutofillService"
             android:exported="true"
             android:label="@string/app_name"
             android:process=":autofill"
@@ -91,7 +91,7 @@
             android:name=".CredentialFulfillActivity"
             android:exported="false"
             android:process=":autofill"
-            android:theme="@style/BrambleAutofillTheme"
+            android:theme="@style/VautixAutofillTheme"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:windowSoftInputMode="adjustResize|stateHidden" />
@@ -99,9 +99,9 @@
         <!-- Passkey provider via the Credential Manager (Android 14 / API 34+; the system only
              binds it there, dormant on older OSes). Same dedicated :autofill process as the
              classic service so a decrypted VEK never touches the webview session. Passkeys only;
-             passwords stay on BrambleAutofillService. See docs/passkey-provider.md. -->
+             passwords stay on VautixAutofillService. See docs/passkey-provider.md. -->
         <service
-            android:name=".BrambleCredentialService"
+            android:name=".VautixCredentialService"
             android:exported="true"
             android:label="@string/app_name"
             android:process=":autofill"

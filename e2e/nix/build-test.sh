@@ -27,47 +27,47 @@ rm -rf node_modules dist dist-linux dist-chromium packages/*/node_modules \
 	packages/platform-desktop/src-tauri/target packages/core-rust/target
 ok "tree at /tmp/build"
 
-say "nix build .#bramble"
-OUT="$("${NIX[@]}" build .#bramble --no-link --print-out-paths)"
+say "nix build .#vautix"
+OUT="$("${NIX[@]}" build .#vautix --no-link --print-out-paths)"
 [ -n "$OUT" ] || die "no output path"
 ok "$OUT"
 
 say "what the derivation installed"
-[ -x "$OUT/bin/bramble-desktop" ] || die "no executable at bin/bramble-desktop"
-ok "bin/bramble-desktop"
+[ -x "$OUT/bin/vautix-desktop" ] || die "no executable at bin/vautix-desktop"
+ok "bin/vautix-desktop"
 
 # The same property the .deb test checks: manifest.rs resolves the native-messaging proxy as a
 # sibling of the running executable, so a package that installs one without the other leaves the
 # browser link silently broken.
-[ -x "$OUT/bin/bramble-proxy" ] || die "no proxy beside the binary"
-ok "bin/bramble-proxy is beside it"
+[ -x "$OUT/bin/vautix-proxy" ] || die "no proxy beside the binary"
+ok "bin/vautix-proxy is beside it"
 
-[ -f "$OUT/share/applications/Bramble.desktop" ] || die "no .desktop entry"
-ok "share/applications/Bramble.desktop"
+[ -f "$OUT/share/applications/Vautix.desktop" ] || die "no .desktop entry"
+ok "share/applications/Vautix.desktop"
 find "$OUT/share/icons" -name '*.png' | grep -q . || die "no icons installed"
 ok "icons installed"
 
 # wrapGAppsHook3 replaces the binary with a wrapper that sets the GTK/webkit environment. Without
 # it the app starts and then cannot render, which is not a failure any build-time check would see.
 say "the launcher is wrapped"
-grep -q "bramble-desktop-wrapped" "$OUT/bin/bramble-desktop" 2>/dev/null ||
-	file "$OUT/bin/bramble-desktop" | grep -q "shell script" ||
-	die "bin/bramble-desktop is not a wrapper; the GTK environment would be unset"
-[ -x "$OUT/bin/.bramble-desktop-wrapped" ] || die "no wrapped binary behind the launcher"
-ok "wrapper + .bramble-desktop-wrapped"
+grep -q "vautix-desktop-wrapped" "$OUT/bin/vautix-desktop" 2>/dev/null ||
+	file "$OUT/bin/vautix-desktop" | grep -q "shell script" ||
+	die "bin/vautix-desktop is not a wrapper; the GTK environment would be unset"
+[ -x "$OUT/bin/.vautix-desktop-wrapped" ] || die "no wrapped binary behind the launcher"
+ok "wrapper + .vautix-desktop-wrapped"
 
 # A store path is read-only, so the updater could never replace anything, and the app knows: it
 # reports no updater unless APPIMAGE is set. The string is compiled in either way; what this
 # checks is that the binary is the real one and not a stub.
 say "the binary is real"
-SIZE="$(stat -c%s "$OUT/bin/.bramble-desktop-wrapped")"
+SIZE="$(stat -c%s "$OUT/bin/.vautix-desktop-wrapped")"
 [ "$SIZE" -gt 5000000 ] || die "binary is only $SIZE bytes; a stub, not a build"
 ok "$((SIZE / 1024 / 1024)) MB"
 
 # Nix patches the interpreter and rpath; anything unresolved here would be a missing buildInput
 # that happens to exist on the builder.
-if ldd "$OUT/bin/.bramble-desktop-wrapped" 2>/dev/null | grep -q "not found"; then
-	ldd "$OUT/bin/.bramble-desktop-wrapped" | grep "not found"
+if ldd "$OUT/bin/.vautix-desktop-wrapped" 2>/dev/null | grep -q "not found"; then
+	ldd "$OUT/bin/.vautix-desktop-wrapped" | grep "not found"
 	die "unresolved shared libraries"
 fi
 ok "no unresolved shared libraries"

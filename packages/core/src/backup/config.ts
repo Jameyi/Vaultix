@@ -156,14 +156,14 @@ export function toProviderConfig(cfg: BackupTargetConfig, secrets: BackupSecrets
 }
 
 /**
- * The folder backups live under, else "bramble". This is the user's own folder field:
+ * The folder backups live under, else "vautix". This is the user's own folder field:
  * `prefix` on S3, `path` on WebDAV (where it used to be baked into the base URL, which
  * nested snapshots one level deeper than the user asked for). Dropbox is excluded: its
- * `path` is a container folder inside the app folder and keeps the "bramble" subfolder.
+ * `path` is a container folder inside the app folder and keeps the "vautix" subfolder.
  */
 export function backupPrefix(cfg: BackupTargetConfig): string {
 	const folder = cfg.provider === "webdav" ? cfg.path : cfg.prefix;
-	return folder?.trim().replace(/^\/+|\/+$/g, "") || "bramble";
+	return folder?.trim().replace(/^\/+|\/+$/g, "") || "vautix";
 }
 
 /**

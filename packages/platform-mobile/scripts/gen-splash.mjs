@@ -1,5 +1,5 @@
-// Regenerates the native splash assets: a full-black screen with the white Bramble
-// mark + "Bramble" wordmark centered (the "<icon> Bramble" lockup). Source mark is
+// Regenerates the native splash assets: a full-black screen with the white Vautix
+// mark + "Vautix" wordmark centered (the "<icon> Vautix" lockup). Source mark is
 // the app icon's white foreground (icon/android/.../ic_launcher_foreground.png).
 //
 // Run: node scripts/gen-splash.mjs   (from packages/platform-mobile)
@@ -20,7 +20,7 @@ const FG = "#ffffff";
 // Lockup geometry, in the lockup's own pixel space (then scaled per target).
 const LOGO_H = 440; // logo mark height
 const GAP = 120; // space between mark and wordmark
-const TEXT_H = 220; // visual height of the "Bramble" wordmark
+const TEXT_H = 220; // visual height of the "Vautix" wordmark
 const FONT = "Helvetica Neue, Helvetica, Arial, sans-serif";
 // Lockup width as a fraction of the target's shorter side (keeps it proportional
 // on both portrait phones and the square iOS launch image).
@@ -39,7 +39,7 @@ const logoMeta = await sharp(logo).metadata();
 
 // Wordmark rendered as SVG text, then trimmed to its ink bounds and scaled to TEXT_H.
 const textSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="600">
-  <text x="0" y="450" font-family="${FONT}" font-size="420" font-weight="600" fill="${FG}">Bramble</text>
+  <text x="0" y="450" font-family="${FONT}" font-size="420" font-weight="600" fill="${FG}">Vautix</text>
 </svg>`;
 const text = await sharp(Buffer.from(textSvg))
 	.trim()

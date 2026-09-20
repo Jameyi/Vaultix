@@ -458,13 +458,13 @@ mod tests {
             },
             Some(s3_secrets().as_str()),
             "GET",
-            "https://s3.example.com/mybucket?prefix=bramble%2Fsub%20dir&list-type=2",
+            "https://s3.example.com/mybucket?prefix=vautix%2Fsub%20dir&list-type=2",
             vec![],
             b"",
             STAMP,
         )
         .unwrap();
-        assert_eq!(url.query(), Some("list-type=2&prefix=bramble%2Fsub%20dir"));
+        assert_eq!(url.query(), Some("list-type=2&prefix=vautix%2Fsub%20dir"));
         // Same vector as the TS signer and core-rust's own tests.
         assert!(header(&headers, "Authorization").ends_with(
             "Signature=12298afe7ab9cedfe97718ba079224eb453fea81f57fcd8912b6061d51281a1e"
@@ -527,12 +527,12 @@ mod tests {
             Some(
             stored(
                 "http://localhost:8080",
-                r#"{"username":"admin","password":"Bramble-test-123"}"#,
+                r#"{"username":"admin","password":"Vautix-test-123"}"#,
                 )
                 .as_str(),
             ),
             "PROPFIND",
-            "http://localhost:8080/remote.php/dav/files/admin/bramble/",
+            "http://localhost:8080/remote.php/dav/files/admin/vautix/",
             vec![("Depth".into(), "1".into())],
             b"",
             STAMP,
@@ -540,7 +540,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             url.as_str(),
-            "http://localhost:8080/remote.php/dav/files/admin/bramble/"
+            "http://localhost:8080/remote.php/dav/files/admin/vautix/"
         );
         assert_eq!(
             header(&headers, "Authorization"),
@@ -600,7 +600,7 @@ mod tests {
     fn a_credential_is_accepted_anywhere_under_its_own_origin() {
         for url in [
             "https://cloud.example.com/remote.php/dav/files/me/",
-            "https://cloud.example.com/remote.php/dav/files/me/bramble/x.bramble",
+            "https://cloud.example.com/remote.php/dav/files/me/vautix/x.vautix",
         ] {
             assert!(
                 prepare(
@@ -632,7 +632,7 @@ mod tests {
         let (_, headers) = prepare(
             &AuthSpec::BasicInline {
                 username: "admin".into(),
-                password: "Bramble-test-123".into(),
+                password: "Vautix-test-123".into(),
             },
             None,
             "PUT",
@@ -691,16 +691,16 @@ mod tests {
     #[test]
     #[ignore = "needs the MinIO from docker compose"]
     fn signs_a_request_minio_accepts() {
-        let base = std::env::var("BRAMBLE_IT_S3").unwrap_or("http://localhost:9000".into());
-        let bucket = std::env::var("BRAMBLE_IT_S3_BUCKET").unwrap_or("bramble-test".into());
+        let base = std::env::var("VAUTIX_IT_S3").unwrap_or("http://localhost:9000".into());
+        let bucket = std::env::var("VAUTIX_IT_S3_BUCKET").unwrap_or("vautix-test".into());
         let stored = stored(
             &base,
-            r#"{"accessKeyId":"bramble","secretAccessKey":"bramble-test-secret"}"#,
+            r#"{"accessKeyId":"vautix","secretAccessKey":"vautix-test-secret"}"#,
         );
         let auth = AuthSpec::S3 {
             region: "us-east-1".into(),
         };
-        let key = format!("{base}/{bucket}/it-rust-signer.bramble");
+        let key = format!("{base}/{bucket}/it-rust-signer.vautix");
         let body = b"sealed vault bytes".to_vec();
 
         let send = |method: &str, url: &str, body: Vec<u8>| {

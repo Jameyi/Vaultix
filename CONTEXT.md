@@ -1,4 +1,4 @@
-# Bramble domain vocabulary
+# Vautix domain vocabulary
 
 Shared names for the concepts the codebase is built around. Architecture reviews
 and refactors should use these terms exactly. Crypto/storage terms live in
@@ -66,7 +66,7 @@ module-level concepts that name good seams.
   routes its `CRYPTO_*` IPC messages through it. Each platform's `wasm-loader`
   only owns instantiation; the `VaultCrypto` interface (the wasm surface) is
   declared once in `core/wasm.ts`.
-- **PortableVault** — a `.bramble` file holding a subset of entries, sealed under a
+- **PortableVault** — a `.vautix` file holding a subset of entries, sealed under a
   key generated for that file alone (`seal_portable_vault` / `open_portable_vault`
   in core-rust, framed as VLT1 by `core/export/portable-vault.ts`). The key is the
   whole point: sealing under the session VEK would make any exported file a second

@@ -75,7 +75,7 @@ const permission = {
 const NATIVE_PROXY_PORT = "link-native-proxy";
 
 /** Must match `HOST_NAME` in ./background/desktop-link.ts. */
-const HOST_NAME = "app.bramble.desktop";
+const HOST_NAME = "app.vautix.desktop";
 
 /**
  * Lend the background a native pipe this context can open and it cannot.

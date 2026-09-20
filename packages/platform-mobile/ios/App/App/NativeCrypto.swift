@@ -251,7 +251,7 @@ public class NativeCryptoPlugin: CAPPlugin, CAPBridgedPlugin {
 		} catch { fail(call, error) }
 	}
 
-	// --- portable vault (.bramble export/import) ---
+	// --- portable vault (.vautix export/import) ---
 	// Sealed under a key the core generates per file, so neither call reads or writes the
 	// session VEK; both work on a locked vault.
 

@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    bramble_desktop_lib::run();
+    vautix_desktop_lib::run();
 }

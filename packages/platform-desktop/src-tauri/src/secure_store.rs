@@ -24,7 +24,7 @@ use zeroize::Zeroizing;
 type Res<T> = Result<T, String>;
 
 /// Shared with `pairing`, which was here first.
-const SERVICE: &str = "app.bramble.desktop";
+const SERVICE: &str = "app.vautix.desktop";
 
 /// Which store is answering on this machine.
 ///

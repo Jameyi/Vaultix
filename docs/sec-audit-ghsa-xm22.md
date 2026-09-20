@@ -71,7 +71,7 @@ What the fix has to achieve, and what now achieves it.
 | Tab switch, browser-window deactivation, hidden document | Pending fill intent and pending auto-submit are cancelled; final application requires a focused, visible document. An authenticated picker iframe's internal focus transfer is not mistaken for tab/window deactivation. |
 | Stale service-worker response or out-of-order query | Only the latest local operation generation may update cache/UI or fill. A closed request channel is a quiet cancellation and is never retried. |
 | Lock, lock to unlock ABA, active-vault change | A background session generation plus an in-progress transition flag rejects an operation crossing the transition; content clears local operations on both lock-state broadcasts. |
-| Synthetic page events | They cannot select a picker row. Synthetic input/change events emitted by Bramble do not cancel their own fill; only trusted user input does. |
+| Synthetic page events | They cannot select a picker row. Synthetic input/change events emitted by Vautix do not cancel their own fill; only trusted user input does. |
 | User interaction or DOM replacement during a request | Trusted input/focus/pointer actions cancel; final validation requires the exact stored element and current kind/writability. |
 | Delayed auto-submit | The 50 ms timer rechecks the bound document and field, operation generation, focus/visibility, background session generation, and CAPTCHA before submitting. |
 
@@ -248,7 +248,7 @@ replacement, disable or read-only, kind change, focus or pointer change, hidden 
 window deactivation, trusted input, lock or unlock, `pagehide`, teardown, malformed response and
 supersession each make a late response inert; bfcache `pagehide` then `pageshow.persisted` cannot
 revive a response or an auto-submit; page-generated untrusted input neither cancels nor authorizes,
-while Bramble's own synthetic events do not cancel their own fill; auto-submit is suppressed by
+while Vautix's own synthetic events do not cancel their own fill; auto-submit is suppressed by
 lock, trusted input, focus or visibility loss, `pagehide`, field replacement, or a late CAPTCHA.
 
 ```sh
@@ -264,7 +264,7 @@ pnpm --filter @vault/platform-extension lint:firefox
 
 ### Real-browser gate
 
-A tiny test-only WebExtension fixture, never Bramble, implements the selected request/reply
+A tiny test-only WebExtension fixture, never Vautix, implements the selected request/reply
 primitive: a hostile parent embeds child document A, A makes a request, and the background holds
 the response until the parent has replaced the same child frame with B. Three cases run in both
 engines: B on the same origin, B cross-origin, and a Back navigation restoring A from bfcache after

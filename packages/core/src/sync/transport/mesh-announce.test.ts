@@ -73,7 +73,7 @@ async function mesh(onPeer: (p: PeerSession) => void = () => {}) {
 	const m = await joinMesh({
 		relayUrl: "wss://relay.invalid",
 		groupKey: GROUP_KEY,
-		roomLabel: "bramble/sync",
+		roomLabel: "vautix/sync",
 		signer: {
 			pubkeyHex: "ab".repeat(32),
 			signer: { pubkeyHex: "ab".repeat(32), sign: async () => "cd".repeat(32) },

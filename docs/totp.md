@@ -1,6 +1,6 @@
 # TOTP (stored authenticator keys)
 
-A login entry can carry an authenticator key so Bramble generates the live 2FA
+A login entry can carry an authenticator key so Vautix generates the live 2FA
 code at fill time. Parsing and code generation are in
 `packages/core/src/util/totp.ts`; the fill-time computation runs in the
 background service worker.

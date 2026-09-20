@@ -1,7 +1,7 @@
 import { html } from "../template";
 
 // Colours reference the local --tp-* tokens defined below, never literals. The tokens mirror the
-// @vault/theme scale (packages/theme/theme.css); the on-page UI has no Bramble app shell to read a
+// @vault/theme scale (packages/theme/theme.css); the on-page UI has no Vautix app shell to read a
 // `.dark` class, so light/dark follows the OS via prefers-color-scheme. Keep values in sync with
 // theme.css. The iframe renderer (autofill-ui.ts) carries a byte-identical copy for its flat bundle.
 export const dropdownStyles = html`

@@ -26,7 +26,7 @@ import { Row, Section } from "./primitives";
 
 const inputClass =
 	"w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-border bg-transparent focus:outline-none focus:border-primary/50";
-const DEFAULT_RELAY = "wss://bramble-relay.flythenimbus.workers.dev";
+const DEFAULT_RELAY = "wss://vautix-relay.flythenimbus.workers.dev";
 
 interface SyncGroup {
 	groupKey: string;
@@ -265,7 +265,7 @@ export function SyncConnectSection() {
 	const paired = others.length > 0;
 	// Roster entries carry an Ed25519 signature since 2026-07-09, but only devices that have
 	// created, joined or invited since then have one: nothing re-signs on its own, so a device that
-	// predates it stays unsigned until Bramble is opened on it (the backfill in useSyncEnrollment).
+	// predates it stays unsigned until Vautix is opened on it (the backfill in useSyncEnrollment).
 	// Surfaced because enforcement is what phase 2 turns on. See docs/p2p-sync-revocation-hardening.md.
 	const unsigned = devices.filter((d) => !d.sigKey);
 	// "This device" first, then most-recently-added.
@@ -371,8 +371,8 @@ export function SyncConnectSection() {
 						<p className="-mt-2 text-xs text-amber-600 dark:text-amber-500">
 							<Plural
 								value={unsigned.length}
-								one="# device has not signed its roster entry yet. Each device signs itself the next time Bramble opens on it; until then the others cannot tell it from an impostor."
-								other="# devices have not signed their roster entries yet. Each device signs itself the next time Bramble opens on it; until then the others cannot tell them from an impostor."
+								one="# device has not signed its roster entry yet. Each device signs itself the next time Vautix opens on it; until then the others cannot tell it from an impostor."
+								other="# devices have not signed their roster entries yet. Each device signs itself the next time Vautix opens on it; until then the others cannot tell them from an impostor."
 							/>
 						</p>
 					)}
@@ -435,7 +435,7 @@ export function SyncConnectSection() {
 
 					{!paired && (
 						<p className="text-xs text-muted-foreground">
-							<Trans>Open Bramble on your other device and scan the code, or paste it there.</Trans>
+							<Trans>Open Vautix on your other device and scan the code, or paste it there.</Trans>
 						</p>
 					)}
 

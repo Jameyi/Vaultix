@@ -1,7 +1,7 @@
 # Email aliases (planned)
 
 Design note for the per-site email alias generation asked for in issue #74:
-Bramble holds an API key for an alias provider the user already has, and creates
+Vautix holds an API key for an alias provider the user already has, and creates
 a fresh address at signup time so every site gets its own. It records the
 provider surfaces, where the key lives, and which platform can reach which host,
 so the shape is decided before any code.
@@ -15,7 +15,7 @@ was not tried.
 
 ## What this is, and is not
 
-Bramble is not an alias service. It holds a bearer token for the user's own
+Vautix is not an alias service. It holds a bearer token for the user's own
 provider and makes one call on their behalf; the mail never touches us, and
 neither does the forwarding configuration. The provider account is the user's
 and stays the user's.
@@ -141,10 +141,10 @@ Two steps, because JMAP discovers before it acts.
     ["MaskedEmail/set", {
       "accountId": "{accountId}",
       "create": {
-        "bramble": {
+        "vautix": {
           "state": "enabled",
           "forDomain": "example.com",
-          "description": "Bramble"
+          "description": "Vautix"
         }
       }
     }, "0"]
@@ -152,13 +152,13 @@ Two steps, because JMAP discovers before it acts.
 }
 ```
 
-The address comes back at `methodResponses[0][1].created.bramble.email`, under
+The address comes back at `methodResponses[0][1].created.vautix.email`, under
 whatever creation id was sent. `emailPrefix` is create-only and optional;
 `createdBy`, `createdAt`, `id` and `email` are server-set.
 
 `state` is set explicitly to `enabled`. The default is `pending`, which is for
 integrators that mint an address speculatively and confirm it when the user
-actually uses it. Bramble's generate is already an explicit click, so the
+actually uses it. Vautix's generate is already an explicit click, so the
 address should work the moment it is filled. (Confirm in the spike: a `pending`
 address that is never confirmed is understood to expire, and shipping that by
 accident would produce aliases that quietly stop working weeks later, which is
@@ -238,7 +238,7 @@ Built. It inverts most of the constraints above, which is what makes it cheap.
 Plenty of mail hosts let you point a whole domain at one inbox: Migadu, Fastmail,
 Cloudflare Email Routing, and any host with a catch-all rule. Once that is set up,
 `anything@yourdomain` already arrives, and an alias is just a string nobody has
-used before. Bramble would generate one locally and fill it. That is the entire
+used before. Vautix would generate one locally and fill it. That is the entire
 feature: no account, no API key, no quota, no network call, and nothing to fail.
 
 **Everything that makes the API providers awkward disappears.** No key to store,
@@ -247,7 +247,7 @@ is no CORS question, no rate limit, no `402`, no provider message to render, and
 no spinner, because generation is instant. The in-page row would have exactly one
 state. And it is the only provider that works with no network whatsoever.
 
-**Bramble's involvement stops at the string.** No listing, no disabling, no
+**Vautix's involvement stops at the string.** No listing, no disabling, no
 forwarding rules. The other providers are scoped that way for v1; this one is
 scoped that way permanently, because there is no API to grow into. Turning an
 alias off means a rule at the user's own host.
@@ -274,7 +274,7 @@ Every other provider answers a create, so a typo surfaces at once. Here a mistyp
 domain produces a plausible address that quietly black-holes, and the user finds
 out when a password reset never arrives.
 
-Bramble cannot verify a catch-all without sending mail, and an MX lookup over
+Vautix cannot verify a catch-all without sending mail, and an MX lookup over
 DNS-over-HTTPS would reintroduce exactly the egress this provider otherwise
 avoids. So it does not pretend: `looksLikeDomain` catches only the slips someone
 actually makes in that box (an empty field, a whole address pasted in, a URL), and
@@ -481,7 +481,7 @@ override rather than something we must always supply. The create also moved
 "1 of 10 used" line in settings costs one field of an endpoint already called.
 
 **SimpleLogin's `hostname` shapes the address, not just the dashboard.** Passing
-`bramble-spike.example.com` produced `example.reentry351@simplelogin.com`. The
+`vautix-spike.example.com` produced `example.reentry351@simplelogin.com`. The
 site name is lifted into the local part, which has two consequences the design
 has to take a position on.
 

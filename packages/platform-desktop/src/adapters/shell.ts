@@ -52,7 +52,7 @@ export function registerOpenSetup(fn: (screen?: OptionsScreen) => void): void {
 }
 
 export const desktopShell: ShellAdapter = {
-	appName: "Bramble",
+	appName: "Vautix",
 
 	// The webview's user agent describes WKWebView, so sniffing it named this app "Browser on
 	// Mac": wrong, and indistinguishable from a real browser in the device list.
@@ -89,7 +89,7 @@ export const desktopShell: ShellAdapter = {
 	// updated by the store. See ./updates.
 	//
 	// A getter, and absent rather than disabled, when a package manager owns this install (a .deb
-	// or .rpm from apt.bramble.sh). The updater cannot replace a dpkg-managed binary, so offering
+	// or .rpm from apt.vautix.sh). The updater cannot replace a dpkg-managed binary, so offering
 	// the check would tell someone they are out of date and hand them no way to act on it. Every
 	// consumer already treats this as optional: the Settings section renders itself away.
 	get updates() {

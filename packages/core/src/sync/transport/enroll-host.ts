@@ -49,10 +49,10 @@ const VAULT_ACK_TIMEOUT_MS = 60_000;
 const REJECT_ACK_TIMEOUT_MS = 5_000;
 
 /** The joiner's "I got your last frame". Content-free: a flush barrier, not an identity claim. */
-export const RECEIPT = "bramble/enroll/received";
+export const RECEIPT = "vautix/enroll/received";
 
 /** Sent on rejection so the joiner fails now instead of waiting out its approval budget. */
-export const ENROLL_REJECTED = "bramble/enroll/rejected";
+export const ENROLL_REJECTED = "vautix/enroll/rejected";
 
 /** The XXpsk3 enrollment handshake exports. Returns are Awaitable so the native
  * plugin (async bridge) and the in-webview WASM module share one interface. */
@@ -167,7 +167,7 @@ export async function startEnroll(role: EnrollRole, opts: EnrollOptions): Promis
 		relayUrl: opts.relayUrl,
 		iceUrl: opts.iceUrl,
 		groupKeyB64: opts.groupKeyB64,
-		roomLabel: "bramble/enroll",
+		roomLabel: "vautix/enroll",
 		wasm: opts.wasm,
 		report: opts.report,
 		onPeer: handlePeer,
@@ -375,9 +375,9 @@ async function recvJoinerHello(
 				sess.sessionId,
 			)) ?? "";
 	} catch {
-		opts.report("⚠ no response: update Bramble on your other device to pair with this one");
+		opts.report("⚠ no response: update Vautix on your other device to pair with this one");
 		opts.onEnrollFailed?.(
-			"That device didn't respond. It's probably running an older version of Bramble: update it there, then generate a new code.",
+			"That device didn't respond. It's probably running an older version of Vautix: update it there, then generate a new code.",
 		);
 		return null;
 	}

@@ -11,7 +11,7 @@ test("attaches to the app's WebView on the device", async ({ page }) => {
 	expect(page.url()).toMatch(/^https:\/\/localhost\//);
 	await expect(page.locator("#root")).not.toBeEmpty();
 	// The shipped app, not a dev server or a stale tab.
-	expect(await page.title()).toBe("Bramble");
+	expect(await page.title()).toBe("Vautix");
 });
 
 test("shows a locked vault and can reach the vault picker", async ({ page }) => {

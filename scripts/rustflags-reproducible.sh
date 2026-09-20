@@ -21,5 +21,5 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cargo_home="${CARGO_HOME:-$HOME/.cargo}"
 rust_src="$(rustc --print sysroot)/lib/rustlib/src/rust"
 commit="$(rustc --version --verbose | sed -n 's/^commit-hash: //p')"
-printf -- '--remap-path-prefix=%s=/bramble --remap-path-prefix=%s=/cargo --remap-path-prefix=%s=/rustc/%s' \
+printf -- '--remap-path-prefix=%s=/vautix --remap-path-prefix=%s=/cargo --remap-path-prefix=%s=/rustc/%s' \
 	"$root" "$cargo_home" "$rust_src" "$commit"

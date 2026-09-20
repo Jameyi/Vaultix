@@ -24,7 +24,7 @@ import {
  */
 
 const PORT = Number(process.env.ANDROID_CDP_PORT ?? 9222);
-export const APP_ID = process.env.ANDROID_APP_ID ?? "app.bramble.mobile";
+export const APP_ID = process.env.ANDROID_APP_ID ?? "app.vautix.mobile";
 
 function adbPath(): string {
 	const candidates = [

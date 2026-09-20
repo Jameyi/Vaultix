@@ -164,7 +164,7 @@ fn derive_kek(password: &str, salt: &[u8]) -> Result<Zeroizing<[u8; KEY_LEN]>, C
     Ok(out)
 }
 
-// Names the product Bramble was called before it was renamed. DO NOT "fix" it: this is an HKDF
+// Names the product Vautix was called before it was renamed. DO NOT "fix" it: this is an HKDF
 // domain separator, not a label. It is never displayed, logged or exported, and its only
 // requirements are uniqueness and permanence. Every security-key slot ever written wrapped its
 // VEK under a KEK derived with these exact bytes, so changing them changes the KEK, the verifier
@@ -720,7 +720,7 @@ mod wasm_exports {
         serde_wasm_bindgen::to_value(&reg).map_err(|e| err(format!("serialize: {e}")))
     }
 
-    /// Convert a base64 PKCS#8 key into Bramble's stored secret, COSE public key, and alg.
+    /// Convert a base64 PKCS#8 key into Vautix's stored secret, COSE public key, and alg.
     #[wasm_bindgen]
     pub fn passkey_import_pkcs8(pkcs8_b64: String) -> Result<JsValue, CryptoError> {
         let imported = crate::passkey::passkey_import_pkcs8_core(&pkcs8_b64)?;

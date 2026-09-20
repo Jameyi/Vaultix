@@ -76,7 +76,7 @@ async function mesh() {
 	const m = await joinMesh({
 		relayUrl: "wss://relay.invalid",
 		groupKey: GROUP_KEY,
-		roomLabel: "bramble/sync",
+		roomLabel: "vautix/sync",
 		// Lower than REMOTE, so this side is the one that offers — and so the one whose setup runs.
 		signer: {
 			pubkeyHex: "ab".repeat(32),

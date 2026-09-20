@@ -48,7 +48,7 @@ export const PREF_LOCK_ON_SCREEN_LOCK = "pref.lockOnScreenLock";
 // Home screen: whether the Total / At Risk / Strong stats row is collapsed.
 // Persisted so the user's choice sticks across opens.
 const PREF_STATS_COLLAPSED = "pref.statsCollapsed";
-// Desktop only: the user waved away the suggestion to start Bramble at login after setting up
+// Desktop only: the user waved away the suggestion to start Vautix at login after setting up
 // a backup. Someone who leaves the machine on has a perfectly good reason to decline, and a
 // suggestion that cannot be silenced is a nag. See BackupSection.
 const PREF_AUTOSTART_PROMPT_DISMISSED = "pref.autostartPromptDismissed";

@@ -13,7 +13,7 @@ use std::{env, fs, path::PathBuf};
 /// the proxy is exactly the step that has to run before its own sidecar can exist.
 fn ensure_proxy_placeholder() {
     let triple = env::var("TARGET").unwrap_or_else(|_| "aarch64-apple-darwin".into());
-    let path = PathBuf::from(format!("binaries/bramble-proxy-{triple}"));
+    let path = PathBuf::from(format!("binaries/vautix-proxy-{triple}"));
     if path.exists() {
         return;
     }

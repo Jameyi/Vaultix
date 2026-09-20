@@ -6,7 +6,7 @@
 import type { IndexEntry } from "../adapters/autofill";
 import type { CardEntry, CustomField, Entry, LoginEntry } from "../hooks/useVault";
 
-// Schemes that identify a mobile app, not a website. Bramble never writes these,
+// Schemes that identify a mobile app, not a website. Vautix never writes these,
 // but importers carry them straight through: `androidapp://` is Bitwarden's
 // convention and `android://<cert-hash>@<package>` is Google Password Manager's.
 // Their "hostname" is a reverse-DNS package name, so treating one as a web host

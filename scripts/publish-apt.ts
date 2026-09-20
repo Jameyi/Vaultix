@@ -26,10 +26,10 @@ import { notifyYubiKeyTouch } from "./yubikey-notify.ts";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEBS = join(ROOT, "dist-linux/deb");
 /** aptly's own name for the repository; not user-visible. */
-const REPO = "bramble";
-/** The suite in `bramble.sources`. Changing it orphans every installed client. */
+const REPO = "vautix";
+/** The suite in `vautix.sources`. Changing it orphans every installed client. */
 const SUITE = "stable";
-const BUCKET = "bramble-apt";
+const BUCKET = "vautix-apt";
 
 const dryRun = process.argv.slice(2).includes("--dry-run");
 
@@ -62,10 +62,10 @@ for (const bin of ["aptly", "gpg", "rclone"]) {
 	if (!has(bin)) fail(`${bin} not found; see docs/release-signing.md`);
 }
 
-const gpgKey = process.env.BRAMBLE_APT_GPG_KEY;
+const gpgKey = process.env.VAUTIX_APT_GPG_KEY;
 if (!gpgKey) {
 	fail(
-		"BRAMBLE_APT_GPG_KEY is not set: the fingerprint or uid of the repository signing key.\n" +
+		"VAUTIX_APT_GPG_KEY is not set: the fingerprint or uid of the repository signing key.\n" +
 			"Put it in .env.local. See docs/release-signing.md.",
 	);
 }
@@ -106,7 +106,7 @@ notifyYubiKeyTouch("sign the APT repository index");
 const published = aptly(["publish", "list", "-raw"], { quiet: true });
 const already = published.split("\n").some((line) => line.trim().startsWith(`. ${SUITE}`));
 // Flags BEFORE the positional arguments: aptly's parser stops looking for flags at the first
-// non-flag word, so `publish repo bramble -gpg-key=...` reads the key as the PREFIX argument and
+// non-flag word, so `publish repo vautix -gpg-key=...` reads the key as the PREFIX argument and
 // publishes the whole tree into a directory named `-gpg-key=<fingerprint>`. It succeeds, too,
 // which is the annoying part: the only symptom is that dists/ is not where anything expects it.
 //
@@ -160,8 +160,8 @@ writeFileSync(
 	execFileSync("gpg", ["--armor", "--export", gpgKey], { encoding: "utf8" }),
 );
 copyFileSync(
-	join(ROOT, "packages/platform-desktop/apt/bramble.sources"),
-	join(publishedDir, "bramble.sources"),
+	join(ROOT, "packages/platform-desktop/apt/vautix.sources"),
+	join(publishedDir, "vautix.sources"),
 );
 
 console.log(`\npublished tree: ${publishedDir}`);
@@ -217,7 +217,7 @@ execFileSync("rclone", ["sync", join(publishedDir, "dists"), `r2:${BUCKET}/dists
 	stdio: "inherit",
 });
 // The key and the sources snippet, which are what a new user fetches before anything else.
-for (const file of ["keys.asc", "bramble.sources"]) {
+for (const file of ["keys.asc", "vautix.sources"]) {
 	execFileSync("rclone", ["copyto", join(publishedDir, file), `r2:${BUCKET}/${file}`, ...RCLONE], {
 		stdio: "inherit",
 	});
@@ -260,7 +260,7 @@ async function purgeEdge(files: string[]): Promise<void> {
 	console.log(`purged ${files.length} edge object(s)`);
 }
 
-await purgeEdge(packages.map((deb) => `https://apt.bramble.sh/pool/main/b/bramble/${deb}`));
+await purgeEdge(packages.map((deb) => `https://apt.vautix.sh/pool/main/b/vautix/${deb}`));
 
 console.log("\ndone. Verify with:");
-console.log("  curl -fsSL https://apt.bramble.sh/dists/stable/InRelease | gpg --verify -");
+console.log("  curl -fsSL https://apt.vautix.sh/dists/stable/InRelease | gpg --verify -");

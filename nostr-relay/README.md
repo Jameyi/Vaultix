@@ -33,7 +33,7 @@ plan.
 ```sh
 cd nostr-relay/cf-worker
 pnpm exec wrangler login   # one-time
-pnpm run deploy            # -> wss://bramble-relay.<subdomain>.workers.dev
+pnpm run deploy            # -> wss://vautix-relay.<subdomain>.workers.dev
 pnpm run dev               # local miniflare at ws://localhost:8787
 ```
 

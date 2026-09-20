@@ -1,20 +1,20 @@
-# APT releases (`apt.bramble.sh`)
+# APT releases (`apt.vautix.sh`)
 
-How a Debian or Ubuntu user installs Bramble and keeps it current, and how a release gets there.
+How a Debian or Ubuntu user installs Vautix and keeps it current, and how a release gets there.
 The signing keys themselves are described in [release-signing.md](release-signing.md); this is the
 end-to-end flow, written as a runbook, with the failures that actually happened while building it.
 
 ## What a user runs
 
 ```bash
-curl -fsSL https://apt.bramble.sh/keys.asc | sudo tee /usr/share/keyrings/bramble-keyring.asc > /dev/null
-curl -fsSL https://apt.bramble.sh/bramble.sources | sudo tee /etc/apt/sources.list.d/bramble.sources > /dev/null
-sudo apt update && sudo apt install bramble
+curl -fsSL https://apt.vautix.sh/keys.asc | sudo tee /usr/share/keyrings/vautix-keyring.asc > /dev/null
+curl -fsSL https://apt.vautix.sh/vautix.sources | sudo tee /etc/apt/sources.list.d/vautix.sources > /dev/null
+sudo apt update && sudo apt install vautix
 ```
 
 Three steps because they are three separate trust decisions: fetch the key, scope it to one
-repository, then install. `bramble.sources` is deb822 and its `Signed-By:` line is the scoping —
-without it, a key installed for Bramble could authenticate a package from anywhere else on the
+repository, then install. `vautix.sources` is deb822 and its `Signed-By:` line is the scoping —
+without it, a key installed for Vautix could authenticate a package from anywhere else on the
 system.
 
 Those same three commands are what the download box on the front page hands a Linux visitor, from
@@ -22,7 +22,7 @@ Those same three commands are what the download box on the front page hands a Li
 
 ## Why a repository rather than a `.deb` on the release page
 
-A downloaded `.deb` installs once and then rots. Bramble is distributed outside any store, so
+A downloaded `.deb` installs once and then rots. Vautix is distributed outside any store, so
 without a channel that updates, a security fix reaches only the people who think to check the
 repository. The desktop app self-updates (see [desktop-port.md](desktop-port.md)), but **a
 dpkg-managed install cannot**: the updater would have to replace files a package manager owns. So
@@ -51,7 +51,7 @@ builds a Debian index without dpkg, so nothing in the publishing half needs Linu
 
 ## Hosting
 
-Cloudflare R2 (`bramble-apt`) behind the custom domain `apt.bramble.sh`. Not the website's
+Cloudflare R2 (`vautix-apt`) behind the custom domain `apt.vautix.sh`. Not the website's
 Cloudflare Pages deployment and not `website/public/`: every release adds a ~10 MB `.deb`, which
 in git is permanent, and Pages caps a file at 25 MiB anyway.
 
@@ -70,20 +70,20 @@ otherwise cacheable, and these extensionless files were never cacheable by defau
 
 ### Cloudflare
 
-1. R2 → create bucket `bramble-apt`.
-2. Bucket → Settings → Public access → Custom Domains → connect `apt.bramble.sh`. Leave the
+1. R2 → create bucket `vautix-apt`.
+2. Bucket → Settings → Public access → Custom Domains → connect `apt.vautix.sh`. Leave the
    `r2.dev` URL off; it is rate-limited and not something to put in install instructions.
 3. The two cache rules above.
 4. R2 → API → create a token with **Object Read & Write**, scoped to that bucket.
 
 A token scoped to one bucket cannot list buckets, so `rclone lsd r2:` returns 403 while
-`rclone ls r2:bramble-apt` works. That 403 is not a credential problem.
+`rclone ls r2:vautix-apt` works. That 403 is not a credential problem.
 
 ### The signing key
 
 On the YubiKey's OpenPGP applet, which is a different applet from the PIV one `age-plugin-yubikey`
 uses; the same token carries both. Full rationale and the generation steps are in
-[release-signing.md](release-signing.md#linux-apt-repository-aptbramblesh). In short: Ed25519,
+[release-signing.md](release-signing.md#linux-apt-repository-aptvautixsh). In short: Ed25519,
 generated on-card with no off-card backup, `ykman openpgp keys set-touch sig on`.
 
 ### Tools
@@ -105,7 +105,7 @@ the container build rsyncs the tree into its workspace.
 ### `.env.local`
 
 ```
-BRAMBLE_APT_GPG_KEY=<fingerprint of the repository signing key>
+VAUTIX_APT_GPG_KEY=<fingerprint of the repository signing key>
 R2_ACCOUNT_ID=...
 R2_ACCESS_KEY_ID=...
 R2_SECRET_ACCESS_KEY=...
@@ -120,7 +120,7 @@ The private half is on the card, but gpg will not create the card stub until it 
 key. Export it from a machine that has it, then on the new one, with the YubiKey plugged in:
 
 ```bash
-gpg --import bramble-apt.asc
+gpg --import vautix-apt.asc
 gpg --card-status                              # creates the sec> stub
 gpg --list-secret-keys --keyid-format=long     # expect  sec>  ed25519/...
 ```
@@ -154,13 +154,13 @@ What publish does, in order:
 
 ```
 keys.asc
-bramble.sources
+vautix.sources
 dists/stable/{InRelease,Release,Release.gpg}
 dists/stable/main/binary-amd64/{Packages,Packages.gz,Packages.bz2,Release}
-pool/main/b/bramble/bramble_<version>_amd64.deb
+pool/main/b/vautix/vautix_<version>_amd64.deb
 ```
 
-`stable` is the suite named in `bramble.sources`. Changing it orphans every installed client.
+`stable` is the suite named in `vautix.sources`. Changing it orphans every installed client.
 
 ## Verifying
 
@@ -169,11 +169,11 @@ checksum in `Packages`, which is covered by `Release`, which is signed. The whol
 cold fetch:
 
 ```bash
-curl -fsSL https://apt.bramble.sh/keys.asc | gpg --dearmor > /tmp/k.gpg
-curl -fsSL https://apt.bramble.sh/dists/stable/InRelease -o /tmp/InRelease
-gpgv --keyring /tmp/k.gpg /tmp/InRelease          # Good signature from "Bramble <...>"
+curl -fsSL https://apt.vautix.sh/keys.asc | gpg --dearmor > /tmp/k.gpg
+curl -fsSL https://apt.vautix.sh/dists/stable/InRelease -o /tmp/InRelease
+gpgv --keyring /tmp/k.gpg /tmp/InRelease          # Good signature from "Vautix <...>"
 
-curl -fsSL https://apt.bramble.sh/dists/stable/main/binary-amd64/Packages -o /tmp/Packages
+curl -fsSL https://apt.vautix.sh/dists/stable/main/binary-amd64/Packages -o /tmp/Packages
 sha256sum /tmp/Packages                            # matches the SHA256 line in InRelease
 grep -E "^(Filename|SHA256):" /tmp/Packages        # matches sha256sum of the downloaded .deb
 ```
@@ -207,7 +207,7 @@ in force. `ykman openpgp access set-retries 5 5 5` is worth doing at the same ti
 problem. Remember `publish update` needs two.
 
 **Everything published into a directory called `-gpg-key=...`** — aptly's flag parser stops at the
-first positional, so `publish repo bramble -gpg-key=FPR` reads the flag as the *prefix* argument.
+first positional, so `publish repo vautix -gpg-key=FPR` reads the flag as the *prefix* argument.
 Flags go before positionals. It exits 0 and signs correctly, so the only symptom is that `dists/`
 is not where anything looks for it. Recover with
 `aptly publish drop stable '-gpg-key=<fpr>'` and delete the stray directory.

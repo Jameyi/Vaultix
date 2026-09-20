@@ -1,4 +1,4 @@
-// The age identity stub for the YubiKey slot that holds Bramble's release keys.
+// The age identity stub for the YubiKey slot that holds Vautix's release keys.
 //
 // Split out because a bare `age-plugin-yubikey --identity` prints NOTHING on 0.5.1: the slot has
 // to be named with --serial/--slot. It exits 0 while doing it, so the empty file lands on disk and

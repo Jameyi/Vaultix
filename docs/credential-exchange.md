@@ -1,7 +1,7 @@
 # Credential Exchange plan: CXF/CXP on iOS
 
 Plan for supporting the FIDO Alliance credential exchange specs on the mobile app, so a user can
-move passwords, TOTP seeds and passkeys between Bramble and Apple Passwords / 1Password / Bitwarden
+move passwords, TOTP seeds and passkeys between Vautix and Apple Passwords / 1Password / Bitwarden
 / Chrome without an intermediate plaintext file.
 
 Platform facts (OS API surfaces, spec status, library availability) are dated **July 2026** and
@@ -83,7 +83,7 @@ via `simctl spawn`) and encoding it:
           "digits": 6, "algorithm": "sha1", "issuer": "GitHub" },
         { "type": "passkey", "credentialId": "AQIDBA", "rpId": "github.com",
           "userHandle": "qrs", "key": "MIGHAgEA" } ] } ] } ],
-  "exporterRpId": "app.bramble.mobile", "version": { "major": 1, "minor": 0 } }
+  "exporterRpId": "app.vautix.mobile", "version": { "major": 1, "minor": 0 } }
 ```
 
 Round-trip decode returns an identical value. What this pins down:
@@ -138,7 +138,7 @@ Two decisions worth knowing before Phase 3 wires the UI:
 
 ### Mapping
 
-| Bramble | CXF | Notes |
+| Vautix | CXF | Notes |
 |---|---|---|
 | `login.username` / `.password` | `BasicAuth{username, password}` | Values wrap in `EditableField`, not bare strings. |
 | `login.urls` | `Item.scope.urls` | Absolute URLs only (the decoder drops what `Foundation.URL` rejects), so a bare host is promoted to https. |
@@ -266,7 +266,7 @@ picker and it applies verbatim here.
 
 **Remaining: phase 4 (device + interop testing, 1-2d), and optionally phase 5.**
 
-**Export is done.** Bramble -> Apple Passwords on an iPhone SE (iOS 26.5.2) carried a login and a
+**Export is done.** Vautix -> Apple Passwords on an iPhone SE (iOS 26.5.2) carried a login and a
 passkey, and the transferred passkey then signed in on webauthn.io from Passwords. That is the
 strongest available check: an importer will accept a structurally valid key it can never use, so
 only a successful assertion proves the key material survived.
@@ -296,10 +296,10 @@ Verified 2026-07-29 on iPhone 17 Pro / iOS 26.4:
   xcrun simctl spawn booted /tmp/cxf-probe
   ```
 - **The credential provider extension registers.** `pluginkit -m -v -p
-  com.apple.authentication-services-credential-provider-ui` lists `app.bramble.mobile.AutoFillProbe`
+  com.apple.authentication-services-credential-provider-ui` lists `app.vautix.mobile.AutoFillProbe`
   after `simctl install`.
 - **It can be enabled without the Settings UI.** `xcrun simctl spawn <sim> pluginkit -e use -i
-  app.bramble.mobile.AutoFillProbe` flips the status flag from blank to `+`. This is a workaround for
+  app.vautix.mobile.AutoFillProbe` flips the status flag from blank to `+`. This is a workaround for
   the sim limitation recorded in `mobile-port.md:804`. Whether AuthenticationServices honours it for
   the live fill UI is **not** verified; the flag flip is all that was tested.
 - **The exchange machinery ships in the sim runtime.** `AuthenticationServicesUI.app` contains

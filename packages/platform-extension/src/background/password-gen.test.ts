@@ -23,7 +23,7 @@ async function load(local: Record<string, unknown> = {}) {
 		// extension origin from getURL.
 		runtime: {
 			onMessage: { addListener: () => {} },
-			getURL: (path: string) => `chrome-extension://bramble/${path}`,
+			getURL: (path: string) => `chrome-extension://vautix/${path}`,
 		},
 	});
 	return import("./password-gen");

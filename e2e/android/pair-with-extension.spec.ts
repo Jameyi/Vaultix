@@ -87,11 +87,11 @@ test("the extension pairs with the app on the device and its data lands there", 
 		await inviter.page.getByRole("button", { name: /Continue/i }).click();
 
 		const code = await inviter.page.locator("input[readonly]").inputValue();
-		expect(code).toMatch(/^bramble-pair-1\./);
+		expect(code).toMatch(/^vautix-pair-1\./);
 		// The device resolves this URL literally, via adb reverse, so it has to be OUR relay —
 		// otherwise the test would quietly pair through production infrastructure.
 		const decoded = JSON.parse(
-			Buffer.from(code.replace("bramble-pair-1.", ""), "base64").toString("utf8"),
+			Buffer.from(code.replace("vautix-pair-1.", ""), "base64").toString("utf8"),
 		) as { relay: string };
 		expect(decoded.relay).toBe(RELAY);
 
@@ -144,7 +144,7 @@ test("the extension pairs with the app on the device and its data lands there", 
 					.getByRole("button", { name: /Delete this vault/i })
 					.last()
 					.click();
-				await expect(device.getByText(/Choose a vault|Welcome to Bramble/i).first()).toBeVisible();
+				await expect(device.getByText(/Choose a vault|Welcome to Vautix/i).first()).toBeVisible();
 			} catch {
 				// Leave it rather than flailing: a stray e2e-* vault is obvious and harmless.
 			}

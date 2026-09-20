@@ -258,7 +258,7 @@ driven by a plain callback prop (`onCreate` / `onRestore` / `onJoin`); none swap
   decrypted the on-device blob (`unlock`), but it only ever appeared with 0 vaults - with 1+ the
   shell is already the add-a-vault view, which never had that tab - and with 0 vaults there is
   nothing on-device to unlock (`readDecodedBlob` just fails). The real "bring an existing vault"
-  path is the `.bramble` restore. `VaultSetupMode` is now `"create" | "restore" | "join"` (no
+  path is the `.vautix` restore. `VaultSetupMode` is now `"create" | "restore" | "join"` (no
   `"open"`); the dead `onUnlock` plumbing and `PasswordCard`'s unlock branches were removed. The
   "Point at your existing vault file" copy was misleading - `unlock` never picked a file. (a7f0a2b5)
 - **"Restore from backup" is a real tab, not a page swap.** Its panel is an embedded `RestoreShell`
@@ -267,7 +267,7 @@ driven by a plain callback prop (`onCreate` / `onRestore` / `onJoin`); none swap
   bubbles `onRestored({ addedNew })` so the setup flow owns the terminal (a new "Vault added"
   screen for a restored-into-new locked vault, else "Vault unlocked"), consistent with
   create -> recovery-code and join -> connecting. `RestoreShell` is imported directly (not `lazy`):
-  it only decodes a `.bramble` blob with deps already in this bundle, so a lazy fetch would just lag
+  it only decodes a `.vautix` blob with deps already in this bundle, so a lazy fetch would just lag
   the primary tab; only the genuinely-heavy `ImportShell` (kdbx/csv parsers) stays lazy. The
   standalone `?screen=restore` path (Settings -> Data -> Restore) is unchanged - still full-screen
   with its own done screen. (e94c8827) The always-true `restore` capability that gated the setup
@@ -470,7 +470,7 @@ vault). What shipped:
   second vault silently overwrote the first's cached VEK. Now keyed by vault id end to end: the core
   `BiometricUnlock` interface takes a `vaultId` on every op; iOS stores each VEK under Keychain
   account `vek:<vaultId>` (`BiometricVault.swift`); Android under Keystore alias
-  `bramble.biometric.vek:<vaultId>` + prefs `vek_ct:<vaultId>`/`vek_iv:<vaultId>`
+  `vautix.biometric.vek:<vaultId>` + prefs `vek_ct:<vaultId>`/`vek_iv:<vaultId>`
   (`BiometricVaultPlugin.java`).
 - **Migration blocker fixed (Android).** The namespacing migration (below) copies the flat
   `vault.vlt1` to `vault-<id>.vlt1` and **deletes the flat file** - but the AOSP autofill service read
@@ -542,7 +542,7 @@ for someone who arms or disarms a gate again.
 
 The original v1 plan is kept below for context (superseded: active-vault, not primary-vault). Autofill
 reads out of process from a fixed location (iOS App Group keys `autofill.bundle` / `autofill.slot` in
-`BrambleConstants.swift`; Android `filesDir/vault.vlt1` via `VaultReader.kt`), and biometric cached
+`VautixConstants.swift`; Android `filesDir/vault.vlt1` via `VaultReader.kt`), and biometric cached
 exactly one VEK globally. Nothing in the fill request carries a vault id, so a provider cannot know
 which of several vaults to search.
 
@@ -629,7 +629,7 @@ file move ties to the autofill work (Phase 3) rather than a hardcoded filename.
 Considered and rejected for v1. Putting the UUID inside the blob costs two things a
 local registry id avoids entirely.
 
-- **Compat / rollout.** The blob is exported as `.bramble` and rebuilt verbatim
+- **Compat / rollout.** The blob is exported as `.vautix` and rebuilt verbatim
   during sync enrollment, and `decodeVaultBlob` throws on any version it does not
   recognize (`vault-format.ts`), with no forward tolerance. Bumping v2 -> v3 means a
   v3 vault that syncs or restores onto a not-yet-updated device hard-fails. Because
@@ -700,7 +700,7 @@ Each phase is independently shippable.
   Phase 4 first shipped with backup *targets* still device-global (one config backing up
   every vault), which turned out to be wrong in use: configuring Nextcloud in a personal
   vault silently configured a work vault with the same server, credentials and folder
-  ([issue #49](https://github.com/flythenimbus/bramble/issues/49)). Targets are now per
+  ([issue #49](https://github.com/flythenimbus/vautix/issues/49)). Targets are now per
   vault (`backup.targets:<id>`), as this document's key table always said. Consequences:
   - a target created in a vault writes to **exactly** the folder the user typed;
   - targets adopted from the old shared list are marked `sharedFolder` and keep the
@@ -950,7 +950,7 @@ ambient `vcrypto`, because unlock screens only render for the selected vault.
 Per-vault VEK shipped on the extension only; mobile's Rust core stays a process-global
 singleton, so `withVault` is undefined there and the binding at `useVault.createVault` is a
 silent no-op. That left mobile with the original hazard, and it reached a user:
-[#27](https://github.com/flythenimbus/bramble/issues/27) — a synced vault that no longer
+[#27](https://github.com/flythenimbus/vautix/issues/27) — a synced vault that no longer
 opens under **either** the master password or the recovery code, failing with
 `aes decrypt: aead::Error`.
 

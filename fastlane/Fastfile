@@ -1,4 +1,4 @@
-# Fastlane lanes for the Bramble iOS app (Capacitor):
+# Fastlane lanes for the Vautix iOS app (Capacitor):
 #   fastlane ipa      -> distribution IPA to ~/Desktop, no upload (no API key needed)
 #   fastlane beta     -> build + upload to TestFlight, auto-bumping the build number
 #   fastlane metadata -> upload App Store text metadata (en-US); no binary, no screenshots
@@ -11,7 +11,7 @@
 default_platform(:ios)
 
 REPO = `git rev-parse --show-toplevel`.strip
-BUNDLE_ID = "app.bramble.mobile"
+BUNDLE_ID = "app.vautix.mobile"
 # This folder is the REPO ROOT fastlane, not the iOS project's: fastlane's supply layout puts the
 # Android listing at `<root>/fastlane/metadata/android/`, so it lives here and the iOS one keeps it
 # company rather than sitting two directories deeper. Everything below is therefore addressed from
@@ -80,11 +80,11 @@ platform :ios do
       export_method: "app-store",
       derived_data_path: DERIVED,
       output_directory: File.expand_path("~/Desktop"),
-      output_name: "Bramble-TestFlight.ipa",
+      output_name: "Vautix-TestFlight.ipa",
       xcargs: "-allowProvisioningUpdates",
       export_options: stable_export_options,
     )
-    UI.success("IPA at ~/Desktop/Bramble-TestFlight.ipa")
+    UI.success("IPA at ~/Desktop/Vautix-TestFlight.ipa")
   end
 
   desc "Build + upload to TestFlight (monotonic timestamp build number)"
@@ -94,10 +94,10 @@ platform :ios do
     # Build number = seconds since 2020. Strictly increasing and never collides, unlike
     # `latest_testflight_build_number + 1`, which queries App Store Connect and lags while
     # builds process -> it kept recomputing already-used numbers ("Redundant Binary Upload").
-    # `pnpm run release ios` precomputes the same value and passes it via BRAMBLE_IOS_BUILD so the
+    # `pnpm run release ios` precomputes the same value and passes it via VAUTIX_IOS_BUILD so the
     # release commit it makes names the build that actually lands on TestFlight (iOS cuts no tag);
     # a bare `fastlane beta` computes its own.
-    next_build = (ENV["BRAMBLE_IOS_BUILD"] || (Time.now.to_i - 1_577_836_800)).to_i
+    next_build = (ENV["VAUTIX_IOS_BUILD"] || (Time.now.to_i - 1_577_836_800)).to_i
     # Pin CURRENT_PROJECT_VERSION at build time (both the app + extension consume it). `pnpm run
     # release ios` commits this same number to the pbxproj (mirroring the Android versionCode), so
     # the xcarg just guarantees the built binary matches what was passed in, and keeps a bare

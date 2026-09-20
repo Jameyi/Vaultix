@@ -29,7 +29,7 @@ interface TotpSetupProps {
 
 /**
  * Where should a handed-over authenticator key go? Shown when another app or a website
- * sends Bramble an `otpauth://` URI (iOS "Set Up Codes In", an Android `otpauth://`
+ * sends Vautix an `otpauth://` URI (iOS "Set Up Codes In", an Android `otpauth://`
  * intent). It never saves anything itself: both legs land on a form the user submits,
  * which is what keeps an entry point any app on the device can fire from writing to the
  * vault. See docs/totp-uri-handler.md.
@@ -151,7 +151,7 @@ export function TotpSetupFailure({
 			case "migration":
 				return t`That link is an authenticator export holding several accounts, not a setup code. Add each account from its own site instead.`;
 			case "not-totp":
-				return t`That link isn't an authenticator setup code Bramble can use. Counter-based (HOTP) codes aren't supported.`;
+				return t`That link isn't an authenticator setup code Vautix can use. Counter-based (HOTP) codes aren't supported.`;
 			default:
 				return t`Nothing usable was handed over. Open the site's 2FA page and add the code from the login instead.`;
 		}

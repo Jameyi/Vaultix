@@ -31,7 +31,7 @@ per-file permission exists to lapse.
 
 The "I want a real file" use case is served two other ways instead: **P2P sync**
 (the vault is replicated across the user's own devices) and an **export** to a
-`.bramble` file on demand, rather than a file that must stay attached and
+`.vautix` file on demand, rather than a file that must stay attached and
 re-permissioned forever.
 
 ## Crash recovery via a backup key
@@ -97,5 +97,5 @@ browser:
 
 `persist()` only prevents *silent* eviction; it never blocks a user who deliberately
 clears data (the browser asks first). The real backstops against loss are **P2P sync**
-(other devices hold a copy) and **export** (a `.bramble` backup the user saves): the
+(other devices hold a copy) and **export** (a `.vautix` backup the user saves): the
 vault is not pinned to one browser profile.

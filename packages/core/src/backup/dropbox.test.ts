@@ -35,12 +35,12 @@ describe("createDropboxTarget", () => {
 	it("uploads to the content endpoint with the app-folder path and bearer auth", async () => {
 		const calls = route(() => ok());
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "AT" });
-		await t.put("bramble/bramble-x.bramble", new Uint8Array([1, 2, 3]));
+		await t.put("vautix/vautix-x.vautix", new Uint8Array([1, 2, 3]));
 
 		expect(calls).toHaveLength(1);
 		expect(calls[0]!.url).toBe(UPLOAD);
 		expect(authOf(calls[0]!.init)).toBe("Bearer AT");
-		expect(argOf(calls[0]!.init).path).toBe("/bramble/bramble-x.bramble");
+		expect(argOf(calls[0]!.init).path).toBe("/vautix/vautix-x.vautix");
 	});
 
 	it("nests uploads under a configured subfolder", async () => {
@@ -51,14 +51,14 @@ describe("createDropboxTarget", () => {
 			accessToken: "AT",
 			path: "/Backups",
 		});
-		await t.put("bramble/bramble-x.bramble", new Uint8Array([1]));
-		expect(argOf(calls[0]!.init).path).toBe("/Backups/bramble/bramble-x.bramble");
+		await t.put("vautix/vautix-x.vautix", new Uint8Array([1]));
+		expect(argOf(calls[0]!.init).path).toBe("/Backups/vautix/vautix-x.vautix");
 	});
 
 	it("mints an access token from the refresh token before the first call", async () => {
 		const calls = route((url) => (url === TOKEN ? ok({ access_token: "MINTED" }) : ok()));
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT" });
-		await t.put("bramble/x.bramble", new Uint8Array([9]));
+		await t.put("vautix/x.vautix", new Uint8Array([9]));
 
 		expect(calls[0]!.url).toBe(TOKEN);
 		expect(calls[1]!.url).toBe(UPLOAD);
@@ -76,7 +76,7 @@ describe("createDropboxTarget", () => {
 			return ok();
 		});
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "STALE" });
-		await t.put("bramble/x.bramble", new Uint8Array([1]));
+		await t.put("vautix/x.vautix", new Uint8Array([1]));
 
 		expect(uploads).toBe(2);
 		const last = calls[calls.length - 1]!;
@@ -91,7 +91,7 @@ describe("createDropboxTarget", () => {
 						entries: [
 							{
 								".tag": "file",
-								name: "bramble-1.bramble",
+								name: "vautix-1.vautix",
 								size: 10,
 								server_modified: "2026-01-01T00:00:00Z",
 							},
@@ -101,29 +101,29 @@ describe("createDropboxTarget", () => {
 				: ok(),
 		);
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "AT" });
-		const items = await t.list("bramble/");
+		const items = await t.list("vautix/");
 
-		expect(JSON.parse(calls[0]!.init.body as string).path).toBe("/bramble");
+		expect(JSON.parse(calls[0]!.init.body as string).path).toBe("/vautix");
 		expect(items).toEqual([
-			{ key: "bramble/bramble-1.bramble", size: 10, lastModified: "2026-01-01T00:00:00Z" },
+			{ key: "vautix/vautix-1.vautix", size: 10, lastModified: "2026-01-01T00:00:00Z" },
 		]);
 	});
 
 	it("returns an empty list when the folder doesn't exist yet (409)", async () => {
 		route((url) => (url === LIST ? status(409, { error_summary: "path/not_found/" }) : ok()));
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "AT" });
-		expect(await t.list("bramble/")).toEqual([]);
+		expect(await t.list("vautix/")).toEqual([]);
 	});
 
 	it("treats a 409 on delete as success (already gone)", async () => {
 		route((url) => (url === DELETE ? status(409) : ok()));
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "AT" });
-		await expect(t.remove("bramble/x.bramble")).resolves.toBeUndefined();
+		await expect(t.remove("vautix/x.vautix")).resolves.toBeUndefined();
 	});
 
 	it("throws on a non-409 delete failure", async () => {
 		route((url) => (url === DELETE ? status(500) : ok()));
 		const t = createDropboxTarget({ kind: "dropbox", refreshToken: "RT", accessToken: "AT" });
-		await expect(t.remove("bramble/x.bramble")).rejects.toThrow(/500/);
+		await expect(t.remove("vautix/x.vautix")).rejects.toThrow(/500/);
 	});
 });

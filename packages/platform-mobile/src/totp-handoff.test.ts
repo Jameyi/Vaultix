@@ -82,7 +82,7 @@ describe("onTotpHandoff", () => {
 		const cb = vi.fn();
 		onTotpHandoff(cb);
 		await vi.waitFor(() => expect(handlers.appUrlOpen).toBeDefined());
-		handlers.appUrlOpen?.({ url: "https://bramble.app/" });
+		handlers.appUrlOpen?.({ url: "https://vautix.app/" });
 		expect(cb).not.toHaveBeenCalled();
 	});
 

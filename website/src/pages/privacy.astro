@@ -5,25 +5,25 @@ import { SITE } from "@/consts";
 
 <LegalLayout
 	title="Privacy Policy"
-	description="Bramble is a local-first password manager. It stores everything encrypted on your device. Its network use is limited to optional, off-by-default features you control: a password breach check, peer-to-peer sync between your own devices, encrypted backups to a storage provider you choose, and email aliases from a provider you already use."
+	description="Vautix is a local-first password manager. It stores everything encrypted on your device. Its network use is limited to optional, off-by-default features you control: a password breach check, peer-to-peer sync between your own devices, encrypted backups to a storage provider you choose, and email aliases from a provider you already use."
 	path="/privacy"
 	meta="Effective date: 7 September 2026"
 >
 	<p class="lead">
-		<strong>The short version:</strong> Bramble is a local-first password manager, available as a
+		<strong>The short version:</strong> Vautix is a local-first password manager, available as a
 		browser extension and as mobile apps. It does not collect, sell, or share any of your data.
-		There is no account and no Bramble server that holds your vault. Everything stays on your
-		device, encrypted. Bramble makes network connections only for a few optional features that are
+		There is no account and no Vautix server that holds your vault. Everything stays on your
+		device, encrypted. Vautix makes network connections only for a few optional features that are
 		off by default and that you turn on yourself: a password breach check, peer-to-peer sync between
 		your own devices, encrypted backups to a storage provider you choose, and email aliases from a
 		provider you already use. None of them ever
-		exposes your passwords or your vault in a form that Bramble, a provider, or anyone else could
+		exposes your passwords or your vault in a form that Vautix, a provider, or anyone else could
 		read. Details below.
 	</p>
 
-	<h2>What data Bramble handles</h2>
+	<h2>What data Vautix handles</h2>
 	<p>
-		Bramble stores the data you choose to save in it, such as login usernames and passwords,
+		Vautix stores the data you choose to save in it, such as login usernames and passwords,
 		passkeys, payment cards, secure notes, SSH keys, and two-factor (TOTP) seeds, together with
 		your own app preferences. This data is created and used only to provide the password-manager
 		features you
@@ -35,7 +35,7 @@ import { SITE } from "@/consts";
 		Your vault is stored only on your devices. In the browser extension that means your browser's
 		local extension storage and/or a vault file you pick on your own computer. In the mobile apps
 		it means the app's private on-device storage, with a small number of secrets (the key that
-		protects your vault) held in the OS keystore. Bramble has no vault server, so your data is not
+		protects your vault) held in the OS keystore. Vautix has no vault server, so your data is not
 		stored off your devices unless you turn on cloud backups (below), which keep an encrypted copy
 		with a storage provider you choose.
 	</p>
@@ -48,12 +48,12 @@ import { SITE } from "@/consts";
 		stored in plaintext and never leave your device.
 	</p>
 
-	<h2>What Bramble does not do</h2>
+	<h2>What Vautix does not do</h2>
 	<ul>
 		<li>No data collection, tracking, analytics, telemetry, or advertising.</li>
 		<li>No accounts, sign-up, or login to any service.</li>
 		<li>
-			No Bramble vault server or cloud. Bramble runs no server that stores your vault. If you turn
+			No Vautix vault server or cloud. Vautix runs no server that stores your vault. If you turn
 			on backups, only an encrypted copy goes to a storage provider you choose and control (see
 			"Cloud backups" below); the ciphertext is all that ever leaves your device.
 		</li>
@@ -63,24 +63,24 @@ import { SITE } from "@/consts";
 
 	<h2>Network connections, in full</h2>
 	<p>
-		Bramble works entirely offline by default. There are four features that make network
+		Vautix works entirely offline by default. There are four features that make network
 		connections, all optional and all off until you turn them on: the password breach check, device
-		sync, cloud backups, and email aliases. They are described next. Bramble makes no other network
+		sync, cloud backups, and email aliases. They are described next. Vautix makes no other network
 		requests.
 	</p>
 
 	<h2>Password breach check (optional)</h2>
 	<p>
-		Bramble can tell you whether one of your saved passwords has appeared in a known data breach.
+		Vautix can tell you whether one of your saved passwords has appeared in a known data breach.
 		This feature is off by default; you turn it on in Settings.
 	</p>
 	<p>
-		When it is on, Bramble checks a password using the Have I Been Pwned "Pwned Passwords" service
+		When it is on, Vautix checks a password using the Have I Been Pwned "Pwned Passwords" service
 		with a privacy-preserving method called k-anonymity: it computes a SHA-1 hash of the password
 		and sends only the first five characters of that hash to its API (api.pwnedpasswords.com). The
-		service returns a list of possible matches and Bramble compares them on your device. Your
+		service returns a list of possible matches and Vautix compares them on your device. Your
 		password, and even its full hash, never leave your device, and Have I Been Pwned cannot tell
-		which password you checked. Bramble also asks the service to pad its response so the amount of
+		which password you checked. Vautix also asks the service to pad its response so the amount of
 		data returned reveals nothing about your query.
 	</p>
 	<p>
@@ -90,10 +90,10 @@ import { SITE } from "@/consts";
 
 	<h2>Syncing across your own devices (optional)</h2>
 	<p>
-		Bramble can sync one vault across your own devices (for example between two browsers, or between
+		Vautix can sync one vault across your own devices (for example between two browsers, or between
 		a browser and a phone). This is optional and off until you set it up by linking a device, and
 		it is strictly personal: only your own devices, only your own vault. There is no shared network,
-		and there is no Bramble server that stores or relays your vault.
+		and there is no Vautix server that stores or relays your vault.
 	</p>
 	<p>How it works, and what each part can see:</p>
 	<ul>
@@ -105,7 +105,7 @@ import { SITE } from "@/consts";
 		<li>
 			<strong>A signaling relay only helps your devices find each other.</strong> To set up the
 			direct connection, your devices exchange brief connection details through a relay (a WebSocket
-			server). By default this is a relay we run, but you can point Bramble at your own relay or at
+			server). By default this is a relay we run, but you can point Vautix at your own relay or at
 			any public relay that speaks the same protocol. The relay never receives your vault, your
 			passwords, your master password, or any key that could decrypt them.
 		</li>
@@ -122,7 +122,7 @@ import { SITE } from "@/consts";
 
 	<h2>Cloud backups (optional)</h2>
 	<p>
-		Bramble can keep an encrypted backup of your vault with a storage provider you choose. This is
+		Vautix can keep an encrypted backup of your vault with a storage provider you choose. This is
 		optional and off until you set it up, and you can turn it off or remove your backups at any
 		time.
 	</p>
@@ -135,9 +135,9 @@ import { SITE } from "@/consts";
 			data and never sees your passwords, your vault, or any key that could decrypt them.
 		</li>
 		<li>
-			<strong>You pick the destination, and Bramble has no server in the middle.</strong> Bramble
+			<strong>You pick the destination, and Vautix has no server in the middle.</strong> Vautix
 			uploads directly to the storage you configure: Dropbox (which you connect with a normal
-			sign-in), or any S3-compatible or WebDAV storage, including services you self-host. Bramble
+			sign-in), or any S3-compatible or WebDAV storage, including services you self-host. Vautix
 			runs no backup server of its own and keeps no copy.
 		</li>
 		<li>
@@ -150,9 +150,9 @@ import { SITE } from "@/consts";
 
 	<h2>Email aliases (optional)</h2>
 	<p>
-		Bramble can create a different email address for each site you sign up to, using an alias
+		Vautix can create a different email address for each site you sign up to, using an alias
 		provider you already have an account with. This is optional and off until you set it up, and
-		setting it up is what turns it on: until you enter an API key in Settings, Bramble never
+		setting it up is what turns it on: until you enter an API key in Settings, Vautix never
 		contacts any alias provider and the feature does not appear anywhere in the app.
 	</p>
 	<p>What this does and does not expose:</p>
@@ -160,19 +160,19 @@ import { SITE } from "@/consts";
 		<li>
 			<strong>Nothing happens without a deliberate click.</strong> An address is only ever created
 			when you ask for one, by pressing the alias button in an entry, or the alias row that appears
-			on a sign-up form. Bramble never creates one in the background, never on page load, and never
+			on a sign-up form. Vautix never creates one in the background, never on page load, and never
 			to see whether it could.
 		</li>
 		<li>
-			<strong>Bramble is not the alias service and never sees your mail.</strong> Your provider is
-			the one that creates the address and forwards the mail; Bramble asks it for an address on your
-			behalf and puts the answer in the field. Mail never passes through Bramble, and Bramble runs
+			<strong>Vautix is not the alias service and never sees your mail.</strong> Your provider is
+			the one that creates the address and forwards the mail; Vautix asks it for an address on your
+			behalf and puts the answer in the field. Mail never passes through Vautix, and Vautix runs
 			no alias service of its own.
 		</li>
 		<li>
 			<strong>What is sent, and to whom.</strong> The request goes to your provider and nowhere
 			else: to Addy.io, to SimpleLogin, or to your own server if you self-host either of them. It
-			carries your API key, the site the address is for, and a short note naming Bramble, so the
+			carries your API key, the site the address is for, and a short note naming Vautix, so the
 			alias is recognisable in your provider's own dashboard. Nothing from your vault is included.
 		</li>
 		<li>
@@ -191,35 +191,35 @@ import { SITE } from "@/consts";
 
 	<h2>Autofill</h2>
 	<p>
-		In the browser extension, Bramble's content script runs on web pages and looks at the structure
+		In the browser extension, Vautix's content script runs on web pages and looks at the structure
 		of forms on the page (for example, whether a field is a username, password, or one-time-code
-		field) so it can offer to fill saved credentials. This happens entirely on your device. Bramble
+		field) so it can offer to fill saved credentials. This happens entirely on your device. Vautix
 		does not read, collect, or transmit the content of the pages you visit, and it only fills a
 		credential when you explicitly choose one.
 	</p>
 	<p>
-		On mobile, autofill uses the operating system's own AutoFill framework. When you pick Bramble to
-		fill a login, the system hands Bramble the app or website you are filling so it can find a
-		matching entry. Bramble's autofill runs in a separate, locked component that reads your vault
+		On mobile, autofill uses the operating system's own AutoFill framework. When you pick Vautix to
+		fill a login, the system hands Vautix the app or website you are filling so it can find a
+		matching entry. Vautix's autofill runs in a separate, locked component that reads your vault
 		only after you authenticate (with biometrics, your device passcode, or your master password) and
 		then decrypt it; nothing in your vault is readable before that.
 	</p>
 
 	<h2>Passkeys and security keys</h2>
 	<p>
-		Bramble can act as a passkey provider (and, in the browser extension, a security-key provider)
+		Vautix can act as a passkey provider (and, in the browser extension, a security-key provider)
 		for the sites and apps you sign in to. When a site asks you to create or use a passkey, your
-		browser or device can offer Bramble: the passkey's private key is generated and kept in your
-		encrypted vault, stored as an ordinary vault entry, and never leaves it. Bramble only signs the
+		browser or device can offer Vautix: the passkey's private key is generated and kept in your
+		encrypted vault, stored as an ordinary vault entry, and never leaves it. Vautix only signs the
 		challenge the site sends, and only after you approve. In Chromium browsers this uses the
 		browser's Web Authentication proxy; on mobile it uses the operating system's passkey framework.
-		No passkey material is ever sent to Bramble.
+		No passkey material is ever sent to Vautix.
 	</p>
 
 	<h2>On mobile: unlocking, key storage, and keyboard suggestions</h2>
 	<ul>
 		<li>
-			<strong>Biometric unlock.</strong> If you turn it on, Bramble caches your vault key behind a
+			<strong>Biometric unlock.</strong> If you turn it on, Vautix caches your vault key behind a
 			hardware-backed biometric gate provided by the operating system (the iOS Keychain and Secure
 			Enclave, or the Android Keystore). The key is released only after a successful biometric or
 			device-passcode check, and the system invalidates it if your enrolled biometrics change. This
@@ -233,14 +233,14 @@ import { SITE } from "@/consts";
 		</li>
 		<li>
 			<strong>Keyboard suggestions (iOS, off by default).</strong> On iOS you can optionally let
-			Bramble show matching logins as suggestions above the keyboard. Turning this on provides your
+			Vautix show matching logins as suggestions above the keyboard. Turning this on provides your
 			saved usernames and the websites they belong to (but never your passwords) to iOS, so the
-			system can show those suggestions even before you unlock Bramble. It is off by default
+			system can show those suggestions even before you unlock Vautix. It is off by default
 			precisely because it makes those usernames visible to the operating system before
 			authentication; you can turn it off at any time.
 		</li>
 		<li>
-			<strong>Camera.</strong> Bramble can scan QR codes (to link a device for sync, or to add a
+			<strong>Camera.</strong> Vautix can scan QR codes (to link a device for sync, or to add a
 			TOTP secret) using your camera. The scanning happens on your device and the camera images are
 			not stored or transmitted.
 		</li>
@@ -256,7 +256,7 @@ import { SITE } from "@/consts";
 		</li>
 		<li>Offscreen: to run the encryption module.</li>
 		<li>
-			Web authentication: to let you use Bramble as a passkey or security-key provider for websites
+			Web authentication: to let you use Vautix as a passkey or security-key provider for websites
 			(Chromium browsers).
 		</li>
 		<li>
@@ -267,21 +267,21 @@ import { SITE } from "@/consts";
 
 	<h2>Clipboard</h2>
 	<p>
-		When you copy a password, Bramble writes it to your clipboard and, after a short timeout, clears
+		When you copy a password, Vautix writes it to your clipboard and, after a short timeout, clears
 		the clipboard to reduce the chance of a secret lingering there. This is done locally and the
 		copied value is never sent anywhere.
 	</p>
 
 	<h2>Importing other password files</h2>
 	<p>
-		If you import a vault from another manager (for example a KeePass .kdbx file), Bramble reads that
+		If you import a vault from another manager (for example a KeePass .kdbx file), Vautix reads that
 		file locally to add its entries to your vault. The file and its contents are processed only on
 		your device and are not transmitted anywhere.
 	</p>
 
 	<h2>Recovery and lost access</h2>
 	<p>
-		Bramble has no copy of your master password or the keys derived from it, so it cannot recover
+		Vautix has no copy of your master password or the keys derived from it, so it cannot recover
 		your vault or reset your password for you. If you set up a recovery code or a security key, you
 		can use those to regain access. If you lose your master password and every recovery method you
 		set up, your vault cannot be decrypted by you, by us, or by anyone. That is the trade-off for
@@ -292,14 +292,14 @@ import { SITE } from "@/consts";
 	<p>
 		Because your data lives only on your devices, you are in control of it. Removing the extension
 		or the app, deleting your vault file, and clearing the app's or extension's storage removes your
-		data. Bramble retains nothing on your behalf because it holds nothing about you anywhere else. If
+		data. Vautix retains nothing on your behalf because it holds nothing about you anywhere else. If
 		you turned on cloud backups, delete the encrypted backup files from your storage provider too,
-		since those live in your account there, not with Bramble.
+		since those live in your account there, not with Vautix.
 	</p>
 
 	<h2>Children</h2>
 	<p>
-		Bramble is a general-purpose tool, not directed at children, and collects no information from
+		Vautix is a general-purpose tool, not directed at children, and collects no information from
 		anyone.
 	</p>
 

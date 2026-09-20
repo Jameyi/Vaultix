@@ -21,7 +21,7 @@ const SIGNUP = `<!doctype html><html><head><title>Sign up</title></head><body>
 	</form>
 </body></html>`;
 
-const HOST = "#bramble-autofill-dropdown";
+const HOST = "#vautix-autofill-dropdown";
 // Five EFF words joined by hyphens. Four of the list's words are themselves hyphenated, so the
 // count is a floor rather than an exact 4. Nothing the character generator produces can pass
 // this: its charset would have to come up all-lowercase with hyphens in every gap.

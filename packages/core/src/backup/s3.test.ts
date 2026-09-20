@@ -26,7 +26,7 @@ function recorder(body = "", status = 200) {
 }
 
 const LISTING = `<?xml version="1.0" encoding="UTF-8"?>
-<ListBucketResult><Contents><Key>bramble/bramble-20260814T101112Z-abcd1234.bramble</Key><Size>42</Size></Contents></ListBucketResult>`;
+<ListBucketResult><Contents><Key>vautix/vautix-20260814T101112Z-abcd1234.vautix</Key><Size>42</Size></Contents></ListBucketResult>`;
 
 describe("createS3Target with an injected transport", () => {
 	// The desktop's transport authenticates in the Rust shell, where the credential lives. If any
@@ -38,9 +38,9 @@ describe("createS3Target with an injected transport", () => {
 		const { transport, sent } = recorder(LISTING);
 		const target = createS3Target(CFG, transport);
 
-		await target.put("bramble/x.bramble", new Uint8Array([1, 2, 3]), "application/octet-stream");
-		await target.list("bramble/");
-		await target.remove("bramble/x.bramble");
+		await target.put("vautix/x.vautix", new Uint8Array([1, 2, 3]), "application/octet-stream");
+		await target.list("vautix/");
+		await target.remove("vautix/x.vautix");
 
 		expect(fetchSpy).not.toHaveBeenCalled();
 		expect(sent.map((r) => r.method)).toEqual(["PUT", "GET", "DELETE"]);
@@ -53,13 +53,13 @@ describe("createS3Target with an injected transport", () => {
 
 	it("still builds the object URLs and parses the listing", async () => {
 		const { transport, sent } = recorder(LISTING);
-		const objects = await createS3Target(CFG, transport).list("bramble/");
+		const objects = await createS3Target(CFG, transport).list("vautix/");
 		expect(sent[0]?.url).toBe(
-			"https://s3.us-west-002.backblazeb2.com/mybucket?list-type=2&prefix=bramble%2F",
+			"https://s3.us-west-002.backblazeb2.com/mybucket?list-type=2&prefix=vautix%2F",
 		);
 		expect(objects).toEqual([
 			{
-				key: "bramble/bramble-20260814T101112Z-abcd1234.bramble",
+				key: "vautix/vautix-20260814T101112Z-abcd1234.vautix",
 				size: 42,
 				lastModified: undefined,
 			},
@@ -68,7 +68,7 @@ describe("createS3Target with an injected transport", () => {
 
 	it("surfaces a failed status as an error", async () => {
 		const { transport } = recorder("denied", 403);
-		await expect(createS3Target(CFG, transport).get("bramble/x")).rejects.toThrow(/403/);
+		await expect(createS3Target(CFG, transport).get("vautix/x")).rejects.toThrow(/403/);
 	});
 
 	// Without a transport nothing changes for the extension and mobile: sign here, then fetch.
@@ -81,7 +81,7 @@ describe("createS3Target with an injected transport", () => {
 				return new Response(new Uint8Array(), { status: 200 });
 			}),
 		);
-		await createS3Target(CFG).remove("bramble/x.bramble");
+		await createS3Target(CFG).remove("vautix/x.vautix");
 		const headers = calls[0]?.init.headers as Record<string, string>;
 		expect(headers.Authorization).toMatch(/^AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE\//);
 		expect(calls[0]?.init.credentials).toBe("omit");

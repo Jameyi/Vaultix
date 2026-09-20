@@ -1,6 +1,6 @@
 # Passkey provider plan: becoming an authenticator
 
-Plan for expanding Bramble (extension + iOS + Android) from a password manager into a **passkey
+Plan for expanding Vautix (extension + iOS + Android) from a password manager into a **passkey
 provider**: a WebAuthn authenticator that creates, stores, and signs passkeys for other websites and
 apps. This is the credential-provider passkey role that `mobile-port.md` deferred out of v1; this
 document picks it up.
@@ -10,13 +10,13 @@ Fast-moving platform facts (OS API surfaces, store rules, library availability) 
 
 ## Two WebAuthn roles, do not conflate them
 
-Bramble already uses WebAuthn, but in the opposite direction from what this plan adds.
+Vautix already uses WebAuthn, but in the opposite direction from what this plan adds.
 
 - **Consumer / relying-party (exists today).** Your security key's PRF unlocks the vault.
   `packages/core/src/vault/webauthn-ceremony.ts` calls `navigator.credentials.get()` to derive a
-  KEK. Bramble *uses* an authenticator. See `docs/security-keys.md`.
-- **Provider / authenticator (this plan).** Bramble *becomes* the authenticator. Other sites call
-  `navigator.credentials.create()/.get()` and Bramble mints, stores, and signs with the passkey.
+  KEK. Vautix *uses* an authenticator. See `docs/security-keys.md`.
+- **Provider / authenticator (this plan).** Vautix *becomes* the authenticator. Other sites call
+  `navigator.credentials.create()/.get()` and Vautix mints, stores, and signs with the passkey.
 
 None of the existing WebAuthn code is reusable for the provider role. They share a name and nothing
 else.
@@ -45,7 +45,7 @@ else.
 | Shared Rust crypto core (wasm + uniffi ffi) | `packages/core-rust/` | Needs new functions (see Core work). |
 | iOS credential-provider extension | `ios/App/AutoFillProbe/CredentialProviderViewController.swift` | Reads vault via App Group + native crypto. Add passkey methods to same class. |
 | iOS credential identity registration | `ios/App/App/AutofillBridge.swift` | Add `ASPasskeyCredentialIdentity` alongside passwords. |
-| Android `AutofillService` (`:autofill` process) | `android/.../BrambleAutofillService.kt` | Pattern reused; passkeys need a sibling `CredentialProviderService`. |
+| Android `AutofillService` (`:autofill` process) | `android/.../VautixAutofillService.kt` | Pattern reused; passkeys need a sibling `CredentialProviderService`. |
 | Vault read + host matching (mobile) | `VaultReader.kt`, `AutofillUnlockActivity.kt` | `rpId` matches like a hostname; auth/selection activity pattern reused. |
 | Biometric / keep-unlocked session unlock | iOS Keychain, Android Keystore | Becomes passkey user-verification. |
 | P2P E2E entry sync | existing WebRTC mesh | Passkeys sync automatically. |
@@ -102,7 +102,7 @@ Passkeys are managed, not edited: the user never types key material, only remove
 
 - **Item edit form (login):** render each passkey **below the TOTP field**, one row per credential
   showing its identity (rpId / userName, created date) and a **Remove** button. No fields are
-  editable; Remove drops it from `passkeys[]` on save. Bramble does not add passkeys from the edit
+  editable; Remove drops it from `passkeys[]` on save. Vautix does not add passkeys from the edit
   form (they are minted by the provider ceremony), so there is no "add passkey" control here.
 - **Item view (read-only):** show only an indicator that the item **contains a passkey** (a small
   "Passkey" badge/row), never the credential id, public key, or any key material.
@@ -157,7 +157,7 @@ The extension already decrypts the vault natively via App Group + uniffi. What w
 
 **To build + verify on device:** `pnpm run ffi:build:ios` (regenerates the uniffi Swift bindings —
 which now include `passkeyMakeCredential` / `passkeyGetAssertion` — and the XCFramework), then an
-Xcode build. Enable Bramble under iOS Settings > Passwords > AutoFill. A passkey created in the
+Xcode build. Enable Vautix under iOS Settings > Passwords > AutoFill. A passkey created in the
 Chromium extension syncs to the iOS vault, so assertion is testable independently of registration.
 
 **Confirm in Xcode (couldn't be checked here, no compiler):** the init labels of
@@ -172,16 +172,16 @@ Apple: developer generates the passkey; the request object carries the options.
 
 ### Android (BUILT, compile-verified; pending device verification)
 
-What landed (`BrambleCredentialService` + `CredentialFulfillActivity`, both `:autofill` process,
+What landed (`VautixCredentialService` + `CredentialFulfillActivity`, both `:autofill` process,
 all gated API 34+): the provider registers via the manifest + capabilities XML
 (`TYPE_PUBLIC_KEY_CREDENTIAL`); `onBeginGetCredentialRequest` offers an unlock `AuthenticationAction`
 (the vault is encrypted, so passkeys can't be enumerated while locked); after unlock the activity
 lists matching passkeys as `PublicKeyCredentialEntry` items (system renders the picker) and on pick
 signs (`passkeyGetAssertion` -> `WebauthnJson.authenticationResponseJson`);
-`onBeginCreateCredentialRequest` offers a "Save passkey in Bramble" `CreateEntry` whose fulfill
+`onBeginCreateCredentialRequest` offers a "Save passkey in Vautix" `CreateEntry` whose fulfill
 mints ES256 (`passkeyMakeCredential` -> `registrationResponseJson`) and stashes the credential
 VEK-encrypted via `PendingPasskey` for the app to persist (the core `usePendingPasskeys` drain reads
-the Android file too now). The auth-first unlock is the shared `BrambleUnlockActivity` (extracted
+the Android file too now). The auth-first unlock is the shared `VautixUnlockActivity` (extracted
 from `AutofillUnlockActivity`, which is unchanged behaviourally). `VaultReader.readPasskeys` reads
 the real vault directly (same app -> no iOS-style bundle). Verified with
 `./gradlew :app:compileDebugKotlin` + `:app:testDebugUnitTest`. Remaining: `pnpm ffi:build:android`
@@ -200,18 +200,18 @@ not the first.
 
 **Stage 1: does the request reach us at all?** A Chromium browser that has not adopted Android
 Credential Manager sends `navigator.credentials.create()` to Google FIDO2 instead, and no
-third-party provider - Bramble, Bitwarden, any of them - is ever consulted. There is no prompt, and
+third-party provider - Vautix, Bitwarden, any of them - is ever consulted. There is no prompt, and
 the RP reports `NotSupportedError`, which webauthn.io renders as "No available authenticator
 supported any of the specified pubKeyCredParams algorithms". That sentence is Chromium's, and it is
-also what a Bramble-side ES256 decline produces, which is exactly why that decline logs. Logcat
+also what a Vautix-side ES256 decline produces, which is exactly why that decline logs. Logcat
 separates them: a request that reached us leaves `CredentialManager: Provider session created` and
-starts the `app.bramble.mobile:autofill` process. Silence means stage 1, and nothing in Bramble can
-fix it. Note `BrambleCredentialService` itself logs nothing, so absence of `BrambleCredential` lines
+starts the `app.vautix.mobile:autofill` process. Silence means stage 1, and nothing in Vautix can
+fix it. Note `VautixCredentialService` itself logs nothing, so absence of `VautixCredential` lines
 proves only that the *fulfill activity* didn't run; check for the process, not the tag.
 
 Reproduced on GrapheneOS (Pixel 8, Android 17), same site and build within one minute: **Vanadium
 prompts, unlocks and registers; Vivaldi and Brave produce no provider session at all**, with
-Bitwarden swapped in as the sole provider to rule out anything Bramble-specific.
+Bitwarden swapped in as the sole provider to rule out anything Vautix-specific.
 
 **Why Vanadium and not the others, precisely.** Chromium picks a WebAuthn backend at runtime
 (`components/webauthn/android`, `Barrier.Mode`): `ONLY_FIDO_2_API` (GMS Core), `ONLY_CRED_MAN`
@@ -227,7 +227,7 @@ it is a known upstream bug with a named mechanism and a fork that fixed it.
 The one datum that does not fit: the #42 reporter says Bitwarden works in Vivaldi on their Pixel 10
 Pro. Under this model that requires their Vivaldi to be reaching CredMan, which on GrapheneOS is
 per-profile (Play Services can be enabled in one profile and not another). Until that is confirmed
-with a logcat from their device, treat it as unverified rather than as evidence that Bramble is
+with a logcat from their device, treat it as unverified rather than as evidence that Vautix is
 being singled out. The check is one line: a request that reached *any* provider logs
 `CredentialManager: starting executeCreateCredential with callingPackage: com.vivaldi.browser`.
 
@@ -374,7 +374,7 @@ Three consequences, in severity order.
 **The proxy intercepts our own extension origin.** Measured: with the proxy attached, both
 `get()` and `create()` issued from `chrome-extension://<id>/popup.html` are delivered to our
 listener. So the PAUSE/RESUME machinery is load-bearing and cannot be deleted; without it
-Bramble's security-key PRF unlock would be hijacked by Bramble's own proxy. (Firefox differs: its
+Vautix's security-key PRF unlock would be hijacked by Vautix's own proxy. (Firefox differs: its
 MAIN-world override deliberately skips the extension's own `moz-extension` origin.)
 
 ### The pause window is a hole in the provider, and it is structural
@@ -384,13 +384,13 @@ vault opens our unlock popup; the user unlocks with a **security key**; the paus
 page's in-flight request dies with `AbortError`, and every WebAuthn call for the rest of that
 window (PIN entry can take 30 seconds) goes to the platform authenticator instead. The observed
 result was **Chromium's own WebAuthn sheet** taking the request over, listing the OS-level
-providers it knows about (iCloud Keychain, phone or tablet) and not Bramble, while Bramble sat in
+providers it knows about (iCloud Keychain, phone or tablet) and not Vautix, while Vautix sat in
 its popup asking for a security-key PIN.
 
 The three requirements genuinely conflict:
 
 1. Serving a page's passkey request needs the proxy **attached**.
-2. Bramble's own security-key unlock needs the proxy **detached** (see above: our origin is not
+2. Vautix's own security-key unlock needs the proxy **detached** (see above: our origin is not
    exempt).
 3. Serving a request from a locked vault **requires an unlock**, which may be a security-key unlock.
 
@@ -400,7 +400,7 @@ options are to avoid the combination (steer the ceremony's unlock away from the 
 another method exists), or to fail the page's request cleanly and early so the site shows a real
 error instead of the user watching it silently reroute. Both, ideally.
 
-Note this hole is not unique to Bramble: any provider on this API that authenticates its own unlock
+Note this hole is not unique to Vautix: any provider on this API that authenticates its own unlock
 with WebAuthn has it. It is the price of all-or-nothing interception.
 
 **Not covered, still manual:** whether Chrome destroys the toolbar popup when its own WebAuthn
@@ -414,22 +414,22 @@ driving a rewrite.
 - **`signCount` = 0, always.** The spec permits it and synced passkeys require it: a real counter
   regresses when the same passkey is used on two synced devices, which some RPs flag as a cloned
   authenticator. Our sync makes 0 mandatory.
-- **Attestation = `"none"`.** Standard for password managers. We ship one fixed Bramble AAGUID
+- **Attestation = `"none"`.** Standard for password managers. We ship one fixed Vautix AAGUID
   (**`4249c72f-2967-4a74-8ec5-e610036d7be1`**, in `passkey.rs`) so RPs / other managers can show the
-  Bramble icon. NOTE: the strict spec reading zeroes the AAGUID for `none` attestation, and a minority
+  Vautix icon. NOTE: the strict spec reading zeroes the AAGUID for `none` attestation, and a minority
   of RPs (e.g. Quarkus-webauthn) reject a non-zero one; clients also commonly zero it for `none`
   anyway. We keep a non-zero AAGUID regardless, matching 1Password / Apple / the major RPs (which
   accept it and use it for attribution). See **AAGUID registration** below.
 
 ### AAGUID registration (TODO before public launch)
 
-The value is finalized (`4249c72f-2967-4a74-8ec5-e610036d7be1`, `BRAMBLE_AAGUID` in
+The value is finalized (`4249c72f-2967-4a74-8ec5-e610036d7be1`, `VAUTIX_AAGUID` in
 `packages/core-rust/src/passkey.rs`) and must **never change** — it's baked into every passkey we
 create (assertions don't carry it, so existing passkeys keep working regardless). Remaining:
 
 - [ ] **Register it in the community list.** Open a PR to
   [`passkeydeveloper/passkey-authenticator-aaguids`](https://github.com/passkeydeveloper/passkey-authenticator-aaguids)
-  adding `4249c72f-2967-4a74-8ec5-e610036d7be1` → `{ name: "Bramble", icon_light, icon_dark }`. This
+  adding `4249c72f-2967-4a74-8ec5-e610036d7be1` → `{ name: "Vautix", icon_light, icon_dark }`. This
   is the list OS UIs / managers read to map AAGUID → name + icon. It is **not** FIDO MDS / FIDO
   certification (those are for certified hardware, cost money, and don't apply to a software provider).
 - [ ] **Produce the two icons** the PR needs: light- and dark-background SVGs, embedded as base64
@@ -439,7 +439,7 @@ create (assertions don't carry it, so existing passkeys keep working regardless)
 Visibility caveat: for the default `attestation: "none"` flow the client usually zeroes the AAGUID
 before the RP sees it, so the registry entry mostly surfaces when an RP requests attestation or in
 local "which provider made this passkey" UIs. Worth doing for attribution, not load-bearing.
-- **Backup flags BE + BS = 1.** Bramble syncs passkeys across devices, so authenticatorData sets
+- **Backup flags BE + BS = 1.** Vautix syncs passkeys across devices, so authenticatorData sets
   backup-eligible + backed-up (`0x18`); without them RPs treat the credential as single-device and
   may nag the user to add another. (Set in `passkey.rs`.)
 - **User verification.** Honor `userVerification: "required"` with a real biometric tap *even inside
@@ -491,8 +491,8 @@ local "which provider made this passkey" UIs. Worth doing for attribution, not l
    `handleCreate`/`handleGet` orchestration (unit-tested), ambient chrome types, the
    `webAuthenticationProxy` permission, the save-passkey **corner card** (same placement as
    save-password) for create + get, the create-time vault write (`savePlacement`), the
-   **Settings → General toggle** ("Use Bramble for passkeys", gated on `shell.supportsPasskeyProvider`,
-   applies live + persists), and **pause-during-own-unlock** (the proxy detaches around Bramble's own
+   **Settings → General toggle** ("Use Vautix for passkeys", gated on `shell.supportsPasskeyProvider`,
+   applies live + persists), and **pause-during-own-unlock** (the proxy detaches around Vautix's own
    security-key PRF ceremony, reentrant, via PASSKEY_PROXY_PAUSE/RESUME). **Origin resolved:**
    `requestDetailsJson` carries no origin (W3C options shape) and the events carry no tab, so the
    origin comes from the **active tab** (`chrome.tabs.query({active, lastFocusedWindow})`), which is
@@ -517,9 +517,9 @@ local "which provider made this passkey" UIs. Worth doing for attribution, not l
    verification: a lingui macro in a `.ts` file (`usePendingPasskeys`) shipped untransformed and
    hung the mobile splash — macro-using files must be `.tsx` (commit 2fb0fbf0).
 4. **Android provider (BUILT, compile-verified; pending device verification).**
-   `BrambleCredentialService` (`onBeginGet` unlock-action + `onBeginCreate` save-entry) +
+   `VautixCredentialService` (`onBeginGet` unlock-action + `onBeginCreate` save-entry) +
    `CredentialFulfillActivity` (MODE_GET list / MODE_ASSERT sign / MODE_CREATE mint), the shared
-   `BrambleUnlockActivity`, `VaultReader.readPasskeys`, `WebauthnJson` (auth + registration JSON),
+   `VautixUnlockActivity`, `VaultReader.readPasskeys`, `WebauthnJson` (auth + registration JSON),
    and the `PendingPasskey` create handoff (drained by the existing core `usePendingPasskeys`). Pure
    AOSP, API 34+. `compileDebugKotlin` + `testDebugUnitTest` pass. Needs `ffi:build:android` (NDK) +
    an API 34+ device; the browser **origin allowlist** (res/raw/privileged_browsers.json) is the

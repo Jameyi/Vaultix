@@ -1,6 +1,6 @@
 # macOS credential provider: system AutoFill for the desktop app
 
-Plan for shipping an `ASCredentialProviderExtension` inside the macOS desktop app, so Bramble
+Plan for shipping an `ASCredentialProviderExtension` inside the macOS desktop app, so Vautix
 appears in **System Settings > General > AutoFill & Passwords > AutoFill from** and fills passwords,
 passkeys and one-time codes into Safari and native Mac apps.
 
@@ -118,7 +118,7 @@ the work:
 
 1. Build the `.appex` with `xcodebuild` from a small Xcode project, universal (`arm64` + `x86_64`),
    since the release `.dmg` is universal.
-2. Copy it into `Bramble.app/Contents/PlugIns/`.
+2. Copy it into `Vautix.app/Contents/PlugIns/`.
 3. Sign inside-out: the appex with its own entitlements, then the outer app.
 4. Notarize the result as usual.
 
@@ -140,14 +140,14 @@ Two follow-on unknowns, both `[unverified]`:
 ### Handing a sandboxed extension the vault
 
 `[unverified, and the main design question]` App extensions are always sandboxed. The Tauri app is
-not, and its vault lives in `~/Library/Application Support/app.bramble.desktop` via Tauri's
+not, and its vault lives in `~/Library/Application Support/app.vautix.desktop` via Tauri's
 `app_data_dir()` (`src-tauri/src/storage.rs`), which the extension cannot read.
 
 The iOS answer is an App Group container plus a shared keychain, and it should port, with two
 differences to verify on a real machine before designing around either:
 
 - macOS App Group identifiers for Developer ID apps take a team-ID prefix
-  (`BHGR3PP64J.group....`), unlike iOS's bare `group.app.bramble.mobile`. The hardcoded shared
+  (`BHGR3PP64J.group....`), unlike iOS's bare `group.app.vautix.mobile`. The hardcoded shared
   keychain group has already been a long debugging loop once on iOS; do not guess the macOS form,
   read it back with `codesign -d --entitlements`.
 - A *non-sandboxed* app writing into `~/Library/Group Containers/<id>/` is a different case from the

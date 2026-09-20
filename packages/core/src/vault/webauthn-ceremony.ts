@@ -304,7 +304,7 @@ export async function createPrfCredential(
 		// message cannot name just one of them.
 		if (rpId && (e as { name?: string })?.name === "SecurityError") {
 			throw new Error(
-				"This browser is too old to register a key for Bramble. Chrome 122 or Firefox 150 and newer are supported.",
+				"This browser is too old to register a key for Vautix. Chrome 122 or Firefox 150 and newer are supported.",
 			);
 		}
 		if ((e as { name?: string })?.name === "NotAllowedError") {

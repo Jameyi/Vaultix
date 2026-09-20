@@ -42,7 +42,7 @@ async function importLargeVault(page: Page, extensionId: string): Promise<void> 
 	}
 
 	// Scope to the Bitwarden card. Picking the first file input positionally broke the moment a
-	// provider was added above it, and landed on the .bramble password prompt instead.
+	// provider was added above it, and landed on the .vautix password prompt instead.
 	const card = page
 		.locator("label")
 		.filter({ hasText: /Bitwarden/ })
@@ -105,7 +105,7 @@ test("a multi-frame vault survives the transfer and the teardown that follows it
 	await expect(codeField).toBeVisible();
 	const code = await codeField.inputValue();
 	const decoded = JSON.parse(
-		Buffer.from(code.replace("bramble-pair-1.", ""), "base64").toString("utf8"),
+		Buffer.from(code.replace("vautix-pair-1.", ""), "base64").toString("utf8"),
 	) as { relay: string };
 	expect(decoded.relay).toContain(LOCAL_RELAY_HOST);
 
