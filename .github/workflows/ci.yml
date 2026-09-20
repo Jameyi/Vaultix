@@ -144,13 +144,13 @@ jobs:
       # transitive locks, so release a patch-level update here, then audit. Remove this
       # step once the committed lockfiles have caught up.
       - name: Patch transitive deps with RustSec advisories
-        run: cargo update -p rkyv -p rustls
+        run: cargo update -p rkyv && cargo update -p rustls --precise 0.23.45
         working-directory: packages/core-rust
       - name: cargo audit (core-rust)
         run: cargo audit
         working-directory: packages/core-rust
       - name: Patch transitive deps with RustSec advisories (desktop)
-        run: cargo update -p rustls -p h2
+        run: cargo update -p h2 && cargo update -p rustls --precise 0.23.45
         working-directory: packages/platform-desktop/src-tauri
       - name: cargo audit (desktop src-tauri)
         run: cargo audit
