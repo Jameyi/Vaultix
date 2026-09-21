@@ -298,7 +298,11 @@ fn parse_xml_keyfile(bytes: &[u8]) -> Option<[u8; 32]> {
                 _ => {}
             },
             Ok(Event::Text(t)) => {
-                let txt = t.unescape().ok()?.into_owned();
+                let txt = quick_xml::escape::unescape(
+                    std::str::from_utf8(t.as_ref()).map_err(|_| KdbxError::Corrupt("xml utf8"))?,
+                )
+                .ok()?
+                .into_owned();
                 if in_version {
                     version.push_str(txt.trim());
                 } else if in_data {
@@ -564,10 +568,11 @@ fn parse_inner_xml(xml: &[u8], inner_stream_key: &[u8]) -> Res<Vec<OutEntry>> {
                 _ => {}
             },
             Ok(Event::Text(t)) => {
-                let txt = t
-                    .unescape()
-                    .map_err(|_| KdbxError::Corrupt("xml unescape"))?
-                    .into_owned();
+                let txt = quick_xml::escape::unescape(
+                    std::str::from_utf8(t.as_ref()).map_err(|_| KdbxError::Corrupt("xml utf8"))?,
+                )
+                .map_err(|_| KdbxError::Corrupt("xml unescape"))?
+                .into_owned();
                 match mode {
                     Mode::Key => cur_key = txt,
                     Mode::Value | Mode::Tags => cur_val = txt,
