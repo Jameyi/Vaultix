@@ -71,10 +71,7 @@ async function openVautixFile(page: Page, extensionId: string, file: string, pas
 	await page.getByRole("button", { name: /Open database/i }).click();
 }
 
-test("exports a selection as a .vautix the app can read back", async ({
-	context,
-	extensionId,
-}) => {
+test("exports a selection as a .vautix the app can read back", async ({ context, extensionId }) => {
 	const setup = await context.newPage();
 	await createVault(setup, extensionId);
 	await seedEntries(setup, extensionId);

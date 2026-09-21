@@ -13,8 +13,8 @@
 		"macOSPrivateApi": true,
 		"windows": [
 			{
-			"label": "main",
-			"title": "Vautix\nPersonal Encrypted Key Vault",
+				"label": "main",
+				"title": "Vautix\nPersonal Encrypted Key Vault",
 				"width": 660,
 				"height": 580,
 				"minWidth": 420,

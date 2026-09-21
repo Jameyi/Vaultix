@@ -356,8 +356,8 @@ export function DesktopLinkSection() {
 				<div className="space-y-3">
 					<p className="text-sm text-muted-foreground">
 						<Trans>
-							Vautix needs your permission to talk to the desktop app on this computer. Your
-							browser will ask you to confirm.
+							Vautix needs your permission to talk to the desktop app on this computer. Your browser
+							will ask you to confirm.
 						</Trans>
 					</p>
 					<Button variant="primary" fullWidth onClick={() => void requestPermission()}>

@@ -2,9 +2,9 @@ import { Trans } from "@lingui/react/macro";
 import { Plus } from "lucide-react";
 import { usePlatform } from "../../../context/PlatformContext";
 import { useVaultRegistry } from "../../../hooks/useVaultRegistry";
-import { VautixGlyph } from "../../components/VautixGlyph";
 import { Button } from "../../components/ui/button";
 import { VaultChoiceList } from "../../components/VaultChoiceList";
+import { VautixGlyph } from "../../components/VautixGlyph";
 
 /** Launch-time vault chooser, shown when more than one vault exists (see routing guards). */
 export function VaultPicker() {

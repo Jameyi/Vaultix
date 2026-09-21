@@ -1,8 +1,8 @@
 import { i18n } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { VautixGlyph } from "./components/VautixGlyph";
 import { Button } from "./components/ui/button";
+import { VautixGlyph } from "./components/VautixGlyph";
 
 interface Props {
 	children: ReactNode;

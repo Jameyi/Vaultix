@@ -14,11 +14,7 @@ function ExportDialog({ open, onClose, onDone, entries, hiddenCount }: BulkActio
 		const bytes = await sealPortableVaultFile(crypto, entries, password);
 		const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 		if (!shell.exportBytes) throw new Error("Saving a file isn't available here.");
-		await shell.exportBytes(
-			`vautix-selection-${stamp}.vautix`,
-			bytes,
-			"application/octet-stream",
-		);
+		await shell.exportBytes(`vautix-selection-${stamp}.vautix`, bytes, "application/octet-stream");
 		onDone();
 	};
 

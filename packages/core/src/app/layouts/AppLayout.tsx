@@ -5,10 +5,10 @@ import { usePlatform } from "../../context/PlatformContext";
 import { useVault } from "../../hooks/useVault";
 import { useVaultRegistry } from "../../hooks/useVaultRegistry";
 import { displayLabel } from "../../vault/vault-registry";
-import { VautixGlyph } from "../components/VautixGlyph";
 import { PasskeySavedToast } from "../components/PasskeySavedToast";
 import { BackButton } from "../components/ui/back-button";
 import { Button } from "../components/ui/button";
+import { VautixGlyph } from "../components/VautixGlyph";
 import { usePopOut } from "../hooks/usePopOut";
 
 /** App chrome (header with back/lock/theme/settings) wrapping the routed Outlet. */

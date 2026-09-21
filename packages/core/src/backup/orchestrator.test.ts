@@ -40,9 +40,7 @@ describe("backup orchestrator", () => {
 			{ key: "vautix/vautix-20260102T000000Z-bbbbbbbb.vautix", size: 1 },
 			{ key: "vautix/vautix-20260103T000000Z-cccccccc.vautix", size: 1 },
 		];
-		expect(selectForPruning(objs, 2)).toEqual([
-			"vautix/vautix-20260101T000000Z-aaaaaaaa.vautix",
-		]);
+		expect(selectForPruning(objs, 2)).toEqual(["vautix/vautix-20260101T000000Z-aaaaaaaa.vautix"]);
 		expect(selectForPruning(objs, 5)).toEqual([]);
 	});
 
@@ -81,9 +79,7 @@ describe("backup orchestrator", () => {
 			{ key: "vautix/vautix-20260103T000000Z-cccccccc-vdddddddd.vautix", size: 1 },
 		];
 		expect(selectForPruning(objs, 1, "dddddddd-0000-4000")).toEqual([]);
-		expect(selectForPruning(objs, 1)).toEqual([
-			"vautix/vautix-20260101T000000Z-aaaaaaaa.vautix",
-		]);
+		expect(selectForPruning(objs, 1)).toEqual(["vautix/vautix-20260101T000000Z-aaaaaaaa.vautix"]);
 	});
 
 	// Housekeeping must not fail a snapshot that is already safely uploaded: a target whose
