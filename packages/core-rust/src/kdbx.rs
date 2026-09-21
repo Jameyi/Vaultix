@@ -299,7 +299,7 @@ fn parse_xml_keyfile(bytes: &[u8]) -> Option<[u8; 32]> {
             },
             Ok(Event::Text(t)) => {
                 let txt = quick_xml::escape::unescape(
-                    std::str::from_utf8(t.as_ref()).map_err(|_| KdbxError::Corrupt("xml utf8"))?,
+                    std::str::from_utf8(t.as_ref()).ok()?,
                 )
                 .ok()?
                 .into_owned();
