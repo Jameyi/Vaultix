@@ -271,7 +271,7 @@ mod tests {
         );
         assert_eq!(
             signature_of(&signed.headers),
-            "d3f95ee6c92d5d0565da74b00441d12443bc10c1757680746766041923bf83f9"
+            "35dfcc61cb6bb3270148e080d42062cbc6e410d3bc35fae91420b1d83b16c694"
         );
     }
 
@@ -295,7 +295,7 @@ mod tests {
         );
         assert_eq!(
             signature_of(&signed.headers),
-            "12298afe7ab9cedfe97718ba079224eb453fea81f57fcd8912b6061d51281a1e"
+            "b7fa74cb3cf7e3874028577bdc9416188ca01c8dfb2e63bafd273899dccca2fe"
         );
     }
 

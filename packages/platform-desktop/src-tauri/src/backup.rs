@@ -467,7 +467,7 @@ mod tests {
         assert_eq!(url.query(), Some("list-type=2&prefix=vautix%2Fsub%20dir"));
         // Same vector as the TS signer and core-rust's own tests.
         assert!(header(&headers, "Authorization").ends_with(
-            "Signature=12298afe7ab9cedfe97718ba079224eb453fea81f57fcd8912b6061d51281a1e"
+            "Signature=b7fa74cb3cf7e3874028577bdc9416188ca01c8dfb2e63bafd273899dccca2fe"
         ));
         assert_eq!(header(&headers, "x-amz-date"), STAMP);
     }
@@ -544,7 +544,7 @@ mod tests {
         );
         assert_eq!(
             header(&headers, "Authorization"),
-            "Basic YWRtaW46QnJhbWJsZS10ZXN0LTEyMw=="
+            "Basic YWRtaW46VmF1dGl4LXRlc3QtMTIz"
         );
         assert_eq!(header(&headers, "Depth"), "1");
     }
@@ -644,7 +644,7 @@ mod tests {
         .unwrap();
         assert_eq!(
             header(&headers, "Authorization"),
-            "Basic YWRtaW46QnJhbWJsZS10ZXN0LTEyMw=="
+            "Basic YWRtaW46VmF1dGl4LXRlc3QtMTIz"
         );
     }
 
