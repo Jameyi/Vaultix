@@ -567,18 +567,35 @@ fn parse_inner_xml(xml: &[u8], inner_stream_key: &[u8]) -> Res<Vec<OutEntry>> {
                 }
                 _ => {}
             },
-            Ok(Event::Text(t)) => {
-                let txt = quick_xml::escape::unescape(
-                    std::str::from_utf8(t.as_ref()).map_err(|_| KdbxError::Corrupt("xml utf8"))?,
-                )
-                .map_err(|_| KdbxError::Corrupt("xml unescape"))?
-                .into_owned();
+            // quick-xml 0.41 splits escaped entities out of Text into GeneralRef events, so a
+            // value like `a&lt;b` arrives as several fragments; append them in order instead of
+            // overwriting, or only the fragment after the last entity survives.
+            Ok(ev) if matches!(ev, Event::Text(_) | Event::GeneralRef(_)) => {
+                let txt: String = match ev {
+                    Event::Text(t) => quick_xml::escape::unescape(
+                        std::str::from_utf8(t.as_ref()).map_err(|_| KdbxError::Corrupt("xml utf8"))?,
+                    )
+                    .map_err(|_| KdbxError::Corrupt("xml unescape"))?
+                    .into_owned(),
+                    Event::GeneralRef(g) => match g.resolve_char_ref() {
+                        Ok(c) => c.to_string(),
+                        Err(_) => match g.name().as_ref() {
+                            b"amp" => "&".into(),
+                            b"lt" => "<".into(),
+                            b"gt" => ">".into(),
+                            b"quot" => "\"".into(),
+                            b"apos" => "'".into(),
+                            _ => return Err(KdbxError::Corrupt("xml entity")),
+                        },
+                    },
+                    _ => unreachable!(),
+                };
                 match mode {
-                    Mode::Key => cur_key = txt,
-                    Mode::Value | Mode::Tags => cur_val = txt,
+                    Mode::Key => cur_key.push_str(&txt),
+                    Mode::Value | Mode::Tags => cur_val.push_str(&txt),
                     Mode::GroupName => {
                         if let Some(n) = group_names.last_mut() {
-                            *n = txt;
+                            n.push_str(&txt);
                         }
                     }
                     Mode::None => {}
