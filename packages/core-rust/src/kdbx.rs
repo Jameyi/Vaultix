@@ -577,17 +577,28 @@ fn parse_inner_xml(xml: &[u8], inner_stream_key: &[u8]) -> Res<Vec<OutEntry>> {
                     )
                     .map_err(|_| KdbxError::Corrupt("xml unescape"))?
                     .into_owned(),
-                    Event::GeneralRef(g) => match g.resolve_char_ref() {
-                        Ok(c) => c.to_string(),
-                        Err(_) => match g.name().as_ref() {
-                            b"amp" => "&".into(),
-                            b"lt" => "<".into(),
-                            b"gt" => ">".into(),
-                            b"quot" => "\"".into(),
-                            b"apos" => "'".into(),
-                            _ => return Err(KdbxError::Corrupt("xml entity")),
-                        },
-                    },
+                    Event::GeneralRef(g) => {
+                        // Deref gives the content between `&` and `;`: `amp`, `#60`, `#x3C`.
+                        let body = g.as_ref();
+                        if let Some(num) = body.strip_prefix(b"#") {
+                            let code = if let Some(hex) = num.strip_prefix(b"x") {
+                                u32::from_str_radix(std::str::from_utf8(hex).map_err(|_| KdbxError::Corrupt("xml utf8"))?, 16)
+                            } else {
+                                std::str::from_utf8(num).map_err(|_| KdbxError::Corrupt("xml utf8"))?.parse::<u32>()
+                            }
+                            .map_err(|_| KdbxError::Corrupt("xml entity"))?;
+                            char::from_u32(code).ok_or(KdbxError::Corrupt("xml entity"))?.to_string()
+                        } else {
+                            match body {
+                                b"amp" => "&".into(),
+                                b"lt" => "<".into(),
+                                b"gt" => ">".into(),
+                                b"quot" => "\"".into(),
+                                b"apos" => "'".into(),
+                                _ => return Err(KdbxError::Corrupt("xml entity")),
+                            }
+                        }
+                    }
                     _ => unreachable!(),
                 };
                 match mode {
