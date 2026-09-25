@@ -65,7 +65,9 @@ function build(forTriple) {
 	// assuming target/release/ here looked for a binary that was one directory away.
 	const dir = forTriple ?? process.env.CARGO_BUILD_TARGET ?? "";
 	const root = process.env.CARGO_TARGET_DIR ?? join(tauri, "target");
-	return join(root, ...(dir ? [dir] : []), "release", "vautix-proxy");
+	// Windows puts .exe on cargo's output, and the sidecar name keeps it there too.
+	const exeSuffix = process.platform === "win32" || (dir && dir.includes("windows")) ? ".exe" : "";
+	return join(root, ...(dir ? [dir] : []), "release", `vautix-proxy${exeSuffix}`);
 }
 
 // Set by build-macos.ts when it passes --target universal-apple-darwin. Read from our own
@@ -101,6 +103,8 @@ if (process.env.VAUTIX_UNIVERSAL) {
 
 	console.log("stage-proxy: staged vautix-proxy for arm64, x86_64 and universal");
 } else {
-	copyFileSync(build(null), join(staged, `vautix-proxy-${triple}`));
-	console.log(`stage-proxy: staged vautix-proxy-${triple}`);
+	// On a Windows host (or a windows cross-target) the staged sidecar name carries .exe.
+	const exe = triple.includes("windows") ? ".exe" : "";
+	copyFileSync(build(null), join(staged, `vautix-proxy-${triple}${exe}`));
+	console.log(`stage-proxy: staged vautix-proxy-${triple}${exe}`);
 }

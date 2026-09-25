@@ -379,3 +379,131 @@ jobs:
 
       - name: Show what was produced
         run: ls -la packages/platform-desktop/src-tauri/target/release/bundle/*/
+
+  # The Windows shell of the same Tauri app. Mirrors desktop-linux where the platform allows:
+  # same throwaway updater key, same bundler. Calls `tauri build` directly rather than through
+  # build-macos.ts, whose execFileSync("pnpm") cannot resolve pnpm.cmd on Windows and whose
+  # notarization plumbing is Apple-specific. build.rs + stage-proxy.mjs handle the .exe sidecar
+  # naming; "all" bundle targets produce the nsis setup .exe and the .msi here.
+  desktop-windows:
+    name: Desktop (Windows .exe/.msi)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Cache Rust deps
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/platform-desktop/src-tauri
+
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Test the shell
+        run: cd packages/platform-desktop/src-tauri && cargo test
+        shell: bash
+
+      - name: Generate a throwaway signing key
+        shell: bash
+        run: |
+          pnpm --filter @vault/platform-desktop exec tauri signer generate -w /tmp/ci.key -p ""
+          echo "TAURI_SIGNING_PRIVATE_KEY=$(cat /tmp/ci.key)" >> "$GITHUB_ENV"
+          echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD=" >> "$GITHUB_ENV"
+
+      - name: Build the bundles (nsis setup .exe, .msi)
+        shell: bash
+        run: pnpm --filter @vault/platform-desktop exec tauri build
+
+      - name: Show what was produced
+        if: always()
+        shell: bash
+        run: ls -la packages/platform-desktop/src-tauri/target/release/bundle/*/
+
+      - name: Upload the bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-windows
+          path: |
+            packages/platform-desktop/src-tauri/target/release/bundle/nsis/*.exe
+            packages/platform-desktop/src-tauri/target/release/bundle/msi/*.msi
+
+  # The Android app: the Rust crypto cross-compiled to jniLibs via cargo-ndk, the uniffi Kotlin
+  # glue regenerated, the SPA + WASM synced into the Capacitor shell, then gradle assembles a
+  # debug APK (debug-signed, so it installs straight onto a device with no signing setup).
+  android:
+    name: Android (.apk)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+
+      - name: Cache Rust deps
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/core-rust
+
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk@3.5.4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # The runner image ships the Android SDK (ANDROID_HOME) with an NDK; the FFI script
+      # auto-resolves ANDROID_NDK_HOME from it.
+
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the WASM (mobile target)
+        run: pnpm run wasm:build:mobile
+
+      - name: Build the mobile web bundle
+        run: pnpm --filter @vault/platform-mobile run build
+
+      - name: Sync Capacitor (android)
+        run: pnpm --filter @vault/platform-mobile exec cap sync android
+
+      - name: Build the Rust FFI (jniLibs + Kotlin glue)
+        run: pnpm run ffi:build:android
+
+      - name: Assemble the debug APK
+        run: |
+          cd packages/platform-mobile/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: packages/platform-mobile/android/app/build/outputs/apk/debug/*.apk
