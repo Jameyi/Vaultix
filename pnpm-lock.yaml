@@ -33,6 +33,9 @@ importers:
       '@lingui/cli':
         specifier: ^6.6.0
         version: 6.6.0(esbuild@0.28.2)(rolldown@1.2.6)
+      '@lingui/conf':
+        specifier: 6.6.0
+        version: 6.6.0
       '@lingui/format-po':
         specifier: ^6.6.0
         version: 6.6.0

@@ -12,8 +12,19 @@
 // Exit 0 = all locales complete; exit 1 = something is missing (with a report).
 
 import { execSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import {
+	copyFileSync,
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { getConfig } from "@lingui/conf";
 import {
 	ANDROID_FASTLANE_DIR,
 	ANDROID_RES,
@@ -21,6 +32,7 @@ import {
 	FASTLANE_DIR,
 	LOCALES,
 	PO_CATALOG,
+	repo,
 	TAURI_LOCALES_DIR,
 	XCSTRINGS,
 } from "./i18n/locales.mjs";
@@ -35,21 +47,62 @@ if (process.argv.includes("--extract")) {
 
 // --- Lingui .po: any target locale with an empty msgstr is untranslated ---
 const decode = (raw) =>
-	raw ? [...raw.matchAll(/"([^]*?)"/g)].map((m) => m[1]).join("") : "";
+	raw ? [...raw.matchAll(/"((?:\\.|[^"\\])*)"/g)].map((m) => JSON.parse(m[0])).join("") : "";
 for (const { code } of LOCALES) {
 	const path = PO_CATALOG(code);
 	if (!existsSync(path)) {
 		note(`po[${code}]: catalog missing (run pnpm i18n:extract)`);
 		continue;
 	}
-	const missing = readFileSync(path, "utf8")
-		.split(/\n\n+/)
-		.filter((b) => {
-			const id = decode(b.match(/^msgid ((?:"[^]*?"\s*)+)/m)?.[1]);
-			const str = decode(b.match(/^msgstr ((?:"[^]*?"\s*)+)/m)?.[1]);
-			return id && !str;
-		}).length;
+	const entries = readFileSync(path, "utf8")
+		.split(/\r?\n\s*\r?\n/)
+		.map((block) => ({
+			id: decode(block.match(/^msgid ((?:"[^]*?"\s*)+)/m)?.[1]),
+			str: decode(block.match(/^msgstr ((?:"[^]*?"\s*)+)/m)?.[1]),
+		}));
+	const missing = entries.filter(({ id, str }) => id && !str).length;
 	if (missing) note(`po[${code}]: ${missing} untranslated string(s)`);
+}
+
+const linguiLocales = ["en", ...LOCALES.map(({ code }) => code)];
+const tempRoot = mkdtempSync(join(tmpdir(), "vautix-i18n-"));
+try {
+	for (const code of linguiLocales) {
+		const targetDir = join(tempRoot, code);
+		mkdirSync(targetDir, { recursive: true });
+		copyFileSync(PO_CATALOG(code), join(targetDir, "messages.po"));
+	}
+	const config = getConfig({ configPath: repo("lingui.config.ts") });
+	config.locales = linguiLocales;
+	config.catalogs[0].path = join(tempRoot, "{locale}/messages").replace(/\\/g, "/");
+	const { command } = await import(
+		pathToFileURL(repo("node_modules/@lingui/cli/dist/lingui-compile.js")).href
+	);
+	const compiled = await command(config, {
+		verbose: false,
+		allowEmpty: true,
+		failOnCompileError: false,
+		typescript: true,
+		workersOptions: { poolSize: 0 },
+	});
+	if (!compiled) note("lingui: temporary catalog compilation failed");
+	for (const code of linguiLocales) {
+		const compiledPath = PO_CATALOG(code).replace(/\.po$/, ".ts");
+		if (!existsSync(compiledPath)) {
+			note(`lingui[${code}]: messages.ts missing (run pnpm i18n:compile)`);
+			continue;
+		}
+		const generatedPath = join(tempRoot, code, "messages.ts");
+		const [{ messages: generated }, { messages: committed }] = await Promise.all([
+			import(pathToFileURL(generatedPath).href),
+			import(pathToFileURL(compiledPath).href),
+		]);
+		if (JSON.stringify(generated) !== JSON.stringify(committed)) {
+			note(`lingui[${code}]: messages.ts differs from messages.po (run pnpm i18n:compile)`);
+		}
+	}
+} finally {
+	rmSync(tempRoot, { recursive: true, force: true });
 }
 
 // --- Android: every translatable source string present in each values-<locale> ---

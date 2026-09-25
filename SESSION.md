@@ -63,3 +63,28 @@
   1. 确认用户是否已完成推送（问一句即可）；已推送则先看 CI 的 `audit` job 首跑结果。
   2. 执行任务 1：重新生成 `pairing-sas` 测试的 pinned 向量，跑 core 套件确认 1310/1310 通过。
   3. 随后按用户意向决定是否继续任务 4 的挂点补齐。
+
+## 2026-09-24 — Lingui 编译 catalog 漂移修复
+
+- **里程碑**：定位并修复 E2E 中导出对话框标题显示 `xQMnJZ`、备份空状态显示 `38im1n` 的存量失败；根因不是 WASM，而是 Bramble→Vautix 改名后 PO 文案已更新、已提交 `messages.ts` 的生成 ID 仍旧。
+- **完成了什么**：从现有六个 PO 重新编译 en/de/es/fr/it/pt-BR 的运行时 catalog；`i18n-check` 现在用 Lingui 官方 API 在临时目录重编译并与已提交 `messages.ts` 作对象级比较，同时修复 Windows CRLF 下空翻译检查只读到 header 的问题；同步更新 `docs/i18n.md`。
+- **关键决策**：不手写 Lingui hash/PO 规则；门禁直接采用官方编译结果，避免解析器再次与 Lingui 漂移。新增直接依赖固定为 `@lingui/conf@6.6.0`，lockfile 仅增加根 importer 条目。
+- **验证**：i18n check、frozen lockfile、Chromium production build、全 workspace typecheck、Biome、core 1310 tests、extension 889 tests及生产 ID runtime 断言均通过。
+- **遗留事项**：本机无 `packages/platform-extension/public/wasm` 与 `cargo`，聚焦 E2E 在建 vault 阶段超时，尚未走到本次断言；用户提交并推送后须以 CI `E2E (extension)` 的 7 条目标测试作最终验收。
+
+## 2026-09-24 — 当前状态与下次恢复点
+
+- **已完成里程碑**：
+  - kdbx/quick-xml CI 编译链已收官；Desktop job 与 vault-crypto 76 tests 已绿，pairing-sas pinned vector 亦已闭合（core 1310 tests 全绿）。
+  - Lingui catalog 漂移修复已实现：六个运行时 `messages.ts` 已重编译，i18n 门禁会使用 Lingui 官方编译结果检测 PO/TS 漂移。
+- **当前开发实现进度**：`main` 当前 HEAD 为 `70d5380e`，与 `origin/main` 无提交差异；本轮 i18n 修复共 11 个文件尚未提交。已通过 i18n check、frozen lockfile、production build、全 workspace typecheck、Biome、core 1310 tests、extension 889 tests及生产 ID runtime 断言。
+- **待完成任务（按优先级）**：
+  1. 用户审查并提交、推送本轮 i18n 修复。
+  2. 确认 GitHub `CI` 与 `E2E (extension)` 全绿，重点核验 7 条 export/per-vault-backup 测试。
+  3. i18n E2E 收官后推进审计日志第二阶段（四个事件挂点 + Activity 面板）。
+  4. 评估 roster phase-2：先做五端 backfill 覆盖与 `admissionKey` pinning 核查，flip 须用户批准；其后为 VEK residency hardening #1。
+- **当前阻碍 / 卡点**：本机无扩展 WASM 产物且无 `cargo`，无法本地完成真实 E2E/Rust 验证；所有 git 写操作由用户执行。`docs/ghsite` 是既有未跟踪目录，不应纳入本轮提交。
+- **下一会话明确下一步**：
+  1. 先确认用户是否已提交并推送；未推送则只提供检查与提交范围，不代替执行 git 写操作。
+  2. 已推送则检查最新 run 的 `CI` 与 `E2E (extension)`；若失败，优先取得对应 `error-context.md`/job 日志再诊断。
+  3. 两项全绿后关闭本轮 E2E 里程碑，并让用户从审计日志第二阶段与 roster phase-2 核查中确定下一项。
