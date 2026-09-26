@@ -480,11 +480,16 @@ jobs:
         with:
           tool: cargo-ndk@3.5.4
 
+      # JDK 21, not 17: capacitor-android compiles its own Java with source/target 21 (the
+      # template's setting app/build.gradle's jvmTarget mirrors), so on 17 the failure lands as
+      # `error: invalid source release: 21` in :capacitor-android:compileDebugJavaWithJavac —
+      # a module of a dependency, which reads like a broken checkout rather than a JDK floor.
+      # The same floor as `pnpm run release android` (docs/release-signing.md).
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       # The runner image ships the Android SDK (ANDROID_HOME) with an NDK; the FFI script
       # auto-resolves ANDROID_NDK_HOME from it.
