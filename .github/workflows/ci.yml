@@ -467,6 +467,14 @@ jobs:
         with:
           workspaces: packages/core-rust
 
+      # Same precompiled-binary install and same pin as the build job: the mobile WASM build below
+      # shells out to wasm-pack, and a missing one fails there rather than at the WASM step of the
+      # build job, which is where the pin is documented.
+      - name: Install wasm-pack
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack@0.13.1
+
       - name: Install cargo-ndk
         uses: taiki-e/install-action@v2
         with:
