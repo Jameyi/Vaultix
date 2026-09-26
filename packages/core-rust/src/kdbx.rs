@@ -577,26 +577,18 @@ fn parse_inner_xml(xml: &[u8], inner_stream_key: &[u8]) -> Res<Vec<OutEntry>> {
                     )
                     .map_err(|_| KdbxError::Corrupt("xml unescape"))?
                     .into_owned(),
+                    // The reference itself, e.g. `lt` or `#60`: the crate resolves both halves.
                     Event::GeneralRef(g) => {
-                        // Deref gives the content between `&` and `;`: `amp`, `#60`, `#x3C`.
-                        let body = g.as_ref();
-                        if let Some(num) = body.strip_prefix(b"#") {
-                            let code = if let Some(hex) = num.strip_prefix(b"x") {
-                                u32::from_str_radix(std::str::from_utf8(hex).map_err(|_| KdbxError::Corrupt("xml utf8"))?, 16)
-                            } else {
-                                std::str::from_utf8(num).map_err(|_| KdbxError::Corrupt("xml utf8"))?.parse::<u32>()
-                            }
-                            .map_err(|_| KdbxError::Corrupt("xml entity"))?;
-                            char::from_u32(code).ok_or(KdbxError::Corrupt("xml entity"))?.to_string()
+                        if let Some(c) = g
+                            .resolve_char_ref()
+                            .map_err(|_| KdbxError::Corrupt("xml entity"))?
+                        {
+                            c.to_string()
                         } else {
-                            match body {
-                                b"amp" => "&".into(),
-                                b"lt" => "<".into(),
-                                b"gt" => ">".into(),
-                                b"quot" => "\"".into(),
-                                b"apos" => "'".into(),
-                                _ => return Err(KdbxError::Corrupt("xml entity")),
-                            }
+                            let name = g.decode().map_err(|_| KdbxError::Corrupt("xml utf8"))?;
+                            quick_xml::escape::resolve_xml_entity(&name)
+                                .ok_or(KdbxError::Corrupt("xml entity"))?
+                                .to_string()
                         }
                     }
                     _ => unreachable!(),
