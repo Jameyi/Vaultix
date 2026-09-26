@@ -173,6 +173,44 @@ registered for debug builds) plus `"log:default"` in `capabilities/default.json`
 prints to the dev terminal. Worth re-adding for the duration of a debugging session and
 removing afterwards.
 
+### Windows: not implemented, and not buildable
+
+The macOS and Linux channels ship. **Windows is a target, not a port**, and the crate does not
+compile there: `cargo build` on a windows target fails with `error[E0433]: cannot find unix in os`
+before reaching any Tauri code. A `desktop-windows` CI job was written against that assumption
+and removed for it. Read this before adding one back.
+
+Three gaps, all in `packages/platform-desktop/src-tauri/src/`:
+
+- **`socket.rs` is the whole local IPC and it is Unix-only, with no `cfg` at all.**
+  `UnixListener`/`UnixStream` are imported once and used at seven sites, and `restrict()` sets
+  `0o600` through `PermissionsExt::from_mode`. This is the app's link to the browser extension,
+  so it is the load-bearing one: the extension reaches it through `chrome.runtime.connectNative`
+  to the native-messaging proxy (`scripts/stage-proxy.mjs`), which Chrome spawns per connection.
+  Windows has no unix sockets, so this wants a named pipe (`\\.\pipe\...`) — and because
+  `stage-proxy.mjs` is Node and does the connecting, **the proxy changes too**, not just the Rust
+  side. `socket_addr.rs:31` says the same thing in the source.
+- **`manifest.rs` has no `BROWSERS` for Windows.** The const is defined twice, under
+  `#[cfg(target_os = "macos")]` and `#[cfg(target_os = "linux")]`, so every use of it is a
+  `cannot find value BROWSERS` error elsewhere in the same file. The install paths differ
+  outright, not just in separator (`%LOCALAPPDATA%\Google\Chrome\User Data\...` and friends).
+- **`socket_addr.rs` derives the data directory for two platforms only.** One `cfg` block per
+  platform, each the whole body, so a Windows arm is missing rather than wrong.
+
+Also unimplemented and not visible in the compiler errors: the native-messaging host manifest is
+registered as a JSON file under the user's config dir, which is the macOS/Linux convention;
+Windows expects a `NativeMessagingHosts` registry key.
+
+What a port costs, in order: the transport (a cross-platform local-socket crate, since std has
+none), the two missing `cfg` arms, the Node proxy, the host-manifest registration, and then
+`PermissionsExt` for the 0600 equivalent. A CI job cannot carry that discovery — it just reports
+the first `E0433` and stops. Do it as its own piece of work, and add the job when there is
+something to build.
+
+`build.rs` and `stage-proxy.mjs` already carry the Windows sidecar `.exe` naming, added ahead of
+the port. Both branch on the target triple / `process.platform` at runtime, so they are inert on
+macOS and Linux and light up when the port lands.
+
 ## Why Tauri, and why the mobile Tauri rejection does not transfer
 
 Commit `ca82927d` switched the mobile plan from Tauri to Capacitor. That decision was specifically
