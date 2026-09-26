@@ -10,9 +10,17 @@ mod crypto;
 mod i18n;
 mod index_store;
 mod lifetime;
+// The browser link's state and the commands the webview calls. Portable, so a build without the
+// transport below still answers the webview — with no browser connected, which is the truth.
+mod link;
+// The native-messaging host manifest, and the socket the proxy connects to. Both are unix-only:
+// a manifest is a JSON file under the user's config dir on macOS/Linux and a registry key on
+// Windows, and the socket itself is a unix domain socket. See docs/desktop-port.md.
+#[cfg(unix)]
 mod manifest;
 mod menu;
 mod pairing;
+#[cfg(unix)]
 mod socket;
 mod secure_store;
 // Shared with the proxy binary through `#[path]` rather than linked, so the app only uses
@@ -157,6 +165,7 @@ pub fn run() {
 
             // Rewritten every launch, not installed once: the manifest carries an absolute
             // path to the proxy, so an app update or a move silently breaks every browser.
+            #[cfg(unix)]
             manifest::refresh();
 
             // The backup schedule. Runs from here, not from a JS timer, because the main window
@@ -166,6 +175,10 @@ pub fn run() {
             // The browser proxy's end of the pipe. Bound at startup rather than on first
             // pairing: an extension that is already paired reconnects whenever its browser
             // starts, without the user doing anything.
+            //
+            // Not built where there is no transport to bind (see `socket`), which is the whole
+            // reason a Windows build has no browser link rather than a broken one.
+            #[cfg(unix)]
             match storage::data_dir(app.handle()) {
                 // Not fatal. A vault manager with no browser link is still a vault manager,
                 // and refusing to launch over it would be a worse failure than losing fill.
@@ -263,13 +276,13 @@ pub fn run() {
             index_store::spotlight_copy_password,
             index_store::link_set_index,
             index_store::link_clear_index,
-            socket::link_sync_send,
-            socket::link_sync_peers,
-            socket::link_arm_sync_invite,
-            socket::link_clear_sync_invite,
-            socket::link_set_sync_identity,
-            socket::spotlight_active_tab,
-            socket::spotlight_request_fill,
+            link::link_sync_send,
+            link::link_sync_peers,
+            link::link_arm_sync_invite,
+            link::link_clear_sync_invite,
+            link::link_set_sync_identity,
+            link::spotlight_active_tab,
+            link::spotlight_request_fill,
             secure_store::secure_get,
             secure_store::secure_set,
             secure_store::secure_delete,

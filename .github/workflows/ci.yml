@@ -326,10 +326,11 @@ jobs:
   # .deb. It also runs the crate's own tests, which cover the credential store and the backup
   # signing that the desktop alone uses.
   #
-  # There is no Windows counterpart, because there is no Windows build: the crate does not compile
-  # for a windows target (the browser-link transport is a unix socket). A job mirroring this one was
-  # written, failed on `cannot find unix in os`, and was removed rather than left red. What the port
-  # needs is written up in docs/desktop-port.md — read that before adding the job back.
+  # There is no Windows counterpart yet, and that is a decision rather than an omission: the shell
+  # builds and runs there as a portable, unsigned folder (see docs/desktop-port.md), but the
+  # browser link does not, because its transport is a unix domain socket. A job mirroring this one
+  # was written before the crate could compile for a windows target and was removed rather than left
+  # red. Add it back when the link has a transport — a green windows build is worth having then.
   desktop-linux:
     name: Desktop (Linux .deb)
     runs-on: ubuntu-latest

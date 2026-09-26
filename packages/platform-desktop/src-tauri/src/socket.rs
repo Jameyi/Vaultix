@@ -12,27 +12,31 @@
 //!
 //! Framing is a 4-byte little-endian length followed by JSON, the same shape Chrome's native
 //! messaging uses, so the proxy can pump bytes between the two without parsing anything.
+//!
+//! Unix-only, and the whole reason the desktop shell does not build for Windows: a unix domain
+//! socket has no equivalent there, and a named pipe is a port rather than a build flag. The
+//! state and the `#[tauri::command]`s the webview calls live in `link`, which is portable, so a
+//! Windows build keeps that surface and answers it with no browser connected. See
+//! docs/desktop-port.md.
 
 use std::{
-    collections::HashMap,
     fs,
     io::{Read, Write},
     os::unix::net::{UnixListener, UnixStream},
     path::{Path, PathBuf},
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        mpsc, Mutex, OnceLock,
-    },
+    sync::mpsc,
     thread,
-    time::{Duration, Instant},
 };
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter};
 
 use vault_crypto::handshake;
 
-use crate::{index_store, pairing};
+use crate::{
+    index_store,
+    link::{active_tab, claim_invite, emit, next_link, outboxes, sync_identity},
+    pairing,
+};
 
 /// Chrome caps a native-messaging frame at 1 MB. Nothing this protocol carries comes near it,
 /// so a larger frame is a bug or an attempt to exhaust memory, not a big credential.
@@ -192,220 +196,6 @@ impl Answer {
     }
 }
 
-/// The page the browser last reported, for the panel to show as a fill target.
-static ACTIVE_TAB: OnceLock<Mutex<Option<String>>> = OnceLock::new();
-
-fn active_tab() -> &'static Mutex<Option<String>> {
-    ACTIVE_TAB.get_or_init(|| Mutex::new(None))
-}
-
-/// Where a fill from the panel would land, as the browser last reported it. Empty when no
-/// browser is connected or it is not on a page worth naming.
-#[tauri::command]
-pub fn spotlight_active_tab() -> Option<String> {
-    active_tab().lock().ok().and_then(|t| t.clone())
-}
-
-/// Fill an entry on the page in front of the user, through a browser that need not be unlocked.
-///
-/// This hands over ONE credential, which is the whole point of the link: the user should not have
-/// to unlock twice, so a locked browser cannot fill from a vault it cannot read and the app has
-/// to do it for them. The VEK never crosses, only the entry they just chose.
-///
-/// The user's selection in the panel IS the authorization, made while this app was unlocked. On
-/// top of that the entry is checked against the page the browser last reported, so a wrong tab in
-/// front of the user is caught rather than filled. That report comes from the browser and a
-/// compromised one could lie about it, which is why it is a second line and not the only one: the
-/// panel names the page before the user commits.
-#[tauri::command]
-pub fn spotlight_request_fill(id: String) -> Result<(), String> {
-    if vault_crypto::is_locked() {
-        return Err("locked".into());
-    }
-    let entry = index_store::secret_for(&id).ok_or("unknown entry")?;
-    // Only where the entry belongs. A login with no hostnames at all is not pinned to anywhere,
-    // so it is left to the user's choice rather than refused.
-    if let Some(page) = active_tab().lock().ok().and_then(|t| t.clone()) {
-        if !entry.hostnames.is_empty()
-            && !entry
-                .hostnames
-                .iter()
-                .any(|h| h.eq_ignore_ascii_case(&page) || page.ends_with(&format!(".{h}")))
-        {
-            return Err(format!("that entry is not for {page}"));
-        }
-    }
-    let frame = serde_json::json!({
-        "fill": {
-            "username": entry.username,
-            "password": entry.password,
-            "totp": entry.totp,
-        }
-    })
-    .to_string();
-    let sent = {
-        let boxes = outboxes().lock().map_err(|_| "outbox lock poisoned")?;
-        // Every connected browser is asked. Only the one whose page has a matching field and
-        // hostname will act, and that decision is deliberately not made here.
-        boxes
-            .values()
-            .filter(|(_, tx)| tx.send(frame.clone()).is_ok())
-            .count()
-    };
-    log::info!("panel fill: asked {sent} browser(s)");
-    if sent > 0 {
-        Ok(())
-    } else {
-        Err("no browser connected".into())
-    }
-}
-
-/// This device's sync public key, published by the webview at startup.
-///
-/// Held here rather than read on demand because the private half lives in the OS credential
-/// store, and touching that from a socket thread would put a Keychain prompt in front of the
-/// user at a moment they did not ask for anything.
-static SYNC_IDENTITY: OnceLock<Mutex<Option<String>>> = OnceLock::new();
-
-fn sync_identity() -> &'static Mutex<Option<String>> {
-    SYNC_IDENTITY.get_or_init(|| Mutex::new(None))
-}
-
-/// Publish this device's sync public key for browsers to ask about.
-#[tauri::command]
-pub fn link_set_sync_identity(public_key: String) {
-    if let Ok(mut slot) = sync_identity().lock() {
-        *slot = Some(public_key);
-    }
-}
-
-/// The sync invite a browser may claim, and when it stops being claimable.
-///
-/// Deliberately narrow: one invite, single-use, and short-lived. It carries the enrollment PSK,
-/// which is a bearer secret worth the vault, so the window it exists in is the window the user is
-/// looking at a code on screen.
-static ARMED_INVITE: OnceLock<Mutex<Option<ArmedInvite>>> = OnceLock::new();
-
-struct ArmedInvite {
-    payload: String,
-    expires_at: Instant,
-}
-
-fn armed() -> &'static Mutex<Option<ArmedInvite>> {
-    ARMED_INVITE.get_or_init(|| Mutex::new(None))
-}
-
-/// Arm the invite a browser can claim, for `ttl_ms`. Replaces any previous one: a new invite
-/// supersedes, so an abandoned one cannot be claimed later.
-#[tauri::command]
-pub fn link_arm_sync_invite(payload: String, ttl_ms: u64) -> Result<(), String> {
-    let mut slot = armed().lock().map_err(|_| "invite lock poisoned")?;
-    *slot = Some(ArmedInvite {
-        payload,
-        expires_at: Instant::now() + Duration::from_millis(ttl_ms),
-    });
-    Ok(())
-}
-
-/// Disarm, for a dialog the user closed. Dismissing is a refusal.
-#[tauri::command]
-pub fn link_clear_sync_invite() {
-    if let Ok(mut slot) = armed().lock() {
-        *slot = None;
-    }
-}
-
-/// Take the armed invite, if there is a live one. Single-use: claiming it disarms it, so a second
-/// browser racing for the same code gets nothing.
-fn claim_invite() -> Option<String> {
-    let mut slot = armed().lock().ok()?;
-    let invite = slot.take()?;
-    if Instant::now() > invite.expires_at {
-        return None; // expired: dropped by the take above
-    }
-    Some(invite.payload)
-}
-
-/// The webview, once the app has one. Absent under `cargo test`, where emitting is a no-op:
-/// the socket is exercised directly there, with no window to deliver an event to.
-static APP: OnceLock<AppHandle> = OnceLock::new();
-
-/// Outbound queues, one per live link, keyed by the browser's static public key.
-///
-/// A single queue per link is what keeps the Noise nonce sequence honest. Answers and pushed
-/// sync frames come from different threads, and Noise numbers its transport frames in order, so
-/// two threads encrypting concurrently would produce frames the far side cannot decrypt in the
-/// order they arrive. Everything outbound goes through here as plaintext and is sealed by the
-/// one writer thread that drains it.
-/// The generation distinguishes one link to a browser from its replacement: a reconnect
-/// registers a new one, and the connection it displaced must not remove it on the way out.
-static OUTBOXES: OnceLock<Mutex<HashMap<String, (u64, mpsc::Sender<String>)>>> = OnceLock::new();
-static NEXT_LINK: AtomicU64 = AtomicU64::new(1);
-
-fn outboxes() -> &'static Mutex<HashMap<String, (u64, mpsc::Sender<String>)>> {
-    OUTBOXES.get_or_init(|| Mutex::new(HashMap::new()))
-}
-
-/// Give the socket a window to notify. Separate from `listen` because the link works without
-/// one: a browser can be connected and answering fills while no window is open, and the tests
-/// exercise the socket with no app at all.
-pub fn attach(app: AppHandle) {
-    let _ = APP.set(app);
-}
-
-fn emit(event: &str, payload: serde_json::Value) {
-    if let Some(app) = APP.get() {
-        let _ = app.emit(event, payload);
-    }
-}
-
-/// Hand a frame from the webview's sync host to one browser. Errors when that browser is not
-/// connected, which is ordinary: a peer that went away is not a failure of the caller.
-#[tauri::command]
-pub fn link_sync_send(peer_id: String, frame: String) -> Result<(), String> {
-    let queued = {
-        let boxes = outboxes().lock().map_err(|_| "outbox lock poisoned")?;
-        match boxes.get(&peer_id) {
-            Some((_, tx)) => tx
-                .send(serde_json::json!({ "sync": frame }).to_string())
-                .is_ok(),
-            None => false,
-        }
-    };
-    if queued {
-        Ok(())
-    } else {
-        Err("no such peer".into())
-    }
-}
-
-/// One connected browser, as reported to a webview catching up.
-#[derive(Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct ConnectedPeer {
-    pub peer_id: String,
-    /// The same generation the events carry, so a catch-up entry and an event about the same
-    /// connection are recognisably the same connection rather than two.
-    pub link: u64,
-}
-
-/// The browsers connected right now, so a webview that opened after they did can pick them up
-/// rather than waiting for a reconnect that may not come until the browser restarts.
-#[tauri::command]
-pub fn link_sync_peers() -> Vec<ConnectedPeer> {
-    outboxes()
-        .lock()
-        .map(|b| {
-            b.iter()
-                .map(|(peer_id, (link, _))| ConnectedPeer {
-                    peer_id: peer_id.clone(),
-                    link: *link,
-                })
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
 /// Serve application traffic over the established session until the browser goes away.
 ///
 /// Every answer is gated on the vault being unlocked. That is the single biggest bound on
@@ -422,7 +212,7 @@ fn serve_session(session_id: u32, stream: &mut UnixStream) -> Result<(), String>
         .map_err(|e| format!("clone stream: {e}"))?;
 
     let (tx, rx) = mpsc::channel::<String>();
-    let link = NEXT_LINK.fetch_add(1, Ordering::Relaxed);
+    let link = next_link();
     if let Ok(mut boxes) = outboxes().lock() {
         // A reconnect supersedes: the old stream is already dead or dying, and leaving its queue
         // in place would send this browser's frames into a socket nobody reads.
@@ -729,6 +519,10 @@ fn restrict(path: &Path) -> std::io::Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // The link's commands and state moved to `crate::link` when the transport became unix-only.
+    // Glob-imported rather than named so a test can reach whatever the transport needs without
+    // this list having to be kept in step with it.
+    use crate::link::*;
     use std::os::unix::net::UnixStream as ClientStream;
     use tempfile::TempDir;
     use vault_crypto::handshake;

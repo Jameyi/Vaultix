@@ -173,43 +173,54 @@ registered for debug builds) plus `"log:default"` in `capabilities/default.json`
 prints to the dev terminal. Worth re-adding for the duration of a debugging session and
 removing afterwards.
 
-### Windows: not implemented, and not buildable
+### Windows: builds, minus the browser link
 
-The macOS and Linux channels ship. **Windows is a target, not a port**, and the crate does not
-compile there: `cargo build` on a windows target fails with `error[E0433]: cannot find unix in os`
-before reaching any Tauri code. A `desktop-windows` CI job was written against that assumption
-and removed for it. Read this before adding one back.
+The macOS and Linux channels ship. **Windows now compiles and runs as a portable build** — unzip
+`vautix-desktop.exe` and double-click it; no installer, no registry — and it has **no browser
+link**, which is a deliberate absence rather than a broken feature. Read this before adding one
+back or assuming parity.
 
-Three gaps, all in `packages/platform-desktop/src-tauri/src/`:
+The link was split in two for exactly this. `link.rs` owns the state and the seven
+`#[tauri::command]`s the webview calls, and it is portable; `socket.rs` owns the transport and is
+`#[cfg(unix)]`. A Windows build keeps the command surface and answers it with no browser
+connected, so **not one command body carries an `if cfg!`** — `outboxes()` starts empty, which is
+already the answer `link_sync_peers` gives when the browser is merely closed. The absence of a
+transport and the absence of a browser are the same answer, so the code does not distinguish them.
+What is gated instead is what only a transport could call: `claim_invite`, `emit`, `attach`, and
+the link-generation counter.
 
-- **`socket.rs` is the whole local IPC and it is Unix-only, with no `cfg` at all.**
-  `UnixListener`/`UnixStream` are imported once and used at seven sites, and `restrict()` sets
-  `0o600` through `PermissionsExt::from_mode`. This is the app's link to the browser extension,
-  so it is the load-bearing one: the extension reaches it through `chrome.runtime.connectNative`
-  to the native-messaging proxy (`scripts/stage-proxy.mjs`), which Chrome spawns per connection.
-  Windows has no unix sockets, so this wants a named pipe (`\\.\pipe\...`) — and because
-  `stage-proxy.mjs` is Node and does the connecting, **the proxy changes too**, not just the Rust
-  side. `socket_addr.rs:31` says the same thing in the source.
-- **`manifest.rs` has no `BROWSERS` for Windows.** The const is defined twice, under
-  `#[cfg(target_os = "macos")]` and `#[cfg(target_os = "linux")]`, so every use of it is a
-  `cannot find value BROWSERS` error elsewhere in the same file. The install paths differ
-  outright, not just in separator (`%LOCALAPPDATA%\Google\Chrome\User Data\...` and friends).
-- **`socket_addr.rs` derives the data directory for two platforms only.** One `cfg` block per
-  platform, each the whole body, so a Windows arm is missing rather than wrong.
+`manifest.rs` is `#[cfg(unix)]` for the same reason. It installs the native-messaging host
+manifest, and that is a JSON file under the user's config dir on macOS/Linux but a
+`NativeMessagingHosts` registry key on Windows — which a build that installs nothing has no
+business writing. `socket_addr.rs` needed no change: its existing "any other platform" arm returns
+`None`, and `proxy.rs` already answered that with `unsupported platform`. The proxy is now a
+`#[cfg(unix)]` transport behind a cross-platform `main`, so on Windows it reports `unavailable`
+through the channel the extension understands — the same answer it gives when the app is not
+running — rather than dying silently and leaving a connection that hangs.
 
-Also unimplemented and not visible in the compiler errors: the native-messaging host manifest is
-registered as a JSON file under the user's config dir, which is the macOS/Linux convention;
-Windows expects a `NativeMessagingHosts` registry key.
+What porting the link to Windows actually costs, in order:
 
-What a port costs, in order: the transport (a cross-platform local-socket crate, since std has
-none), the two missing `cfg` arms, the Node proxy, the host-manifest registration, and then
-`PermissionsExt` for the 0600 equivalent. A CI job cannot carry that discovery — it just reports
-the first `E0433` and stops. Do it as its own piece of work, and add the job when there is
-something to build.
+- **The transport.** A named pipe (`\\.\pipe\...`), via a cross-platform local-socket crate since
+  std has none (`uds_windows` is the smallest change for this synchronous code; `interprocess`
+  covers both platforms with one API). The 0600 in `restrict()` becomes a pipe ACL.
+- **`stage-proxy.mjs`**, which is Node and does the connecting. Chrome spawns the proxy on every
+  launch, so this is not optional and not a Rust-only change.
+- **Host manifest registration**, as a registry key rather than a file.
+- Then the `desktop-windows` CI job, which is worth having at that point: the crate compiling on
+  a windows target is exactly what a job can prove, and it is what a `cargo check` could not
+  before the split.
 
 `build.rs` and `stage-proxy.mjs` already carry the Windows sidecar `.exe` naming, added ahead of
 the port. Both branch on the target triple / `process.platform` at runtime, so they are inert on
-macOS and Linux and light up when the port lands.
+macOS and Linux and light up when the transport lands.
+
+Two things a Windows build does not get, both consequences of running from a folder:
+
+- **WebView2 is a prerequisite, not something the app installs.** `webviewInstallMode` is the
+  *installer's* job; an unpacked binary cannot bootstrap it. Windows 11 and Windows 10 1803+ ship
+  the runtime, so this bites on LTSC, Server, and long-unupdated Windows 10.
+- **No self-update.** `createUpdaterArtifacts` and `latest.json` replace an installed application;
+  a folder the user unzipped has nothing to replace. Shipping fixes means shipping a new folder.
 
 ## Why Tauri, and why the mobile Tauri rejection does not transfer
 
