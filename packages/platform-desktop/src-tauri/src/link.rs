@@ -131,7 +131,12 @@ pub fn link_set_sync_identity(public_key: String) {
 static ARMED_INVITE: OnceLock<Mutex<Option<ArmedInvite>>> = OnceLock::new();
 
 struct ArmedInvite {
+    // Written on every platform (the webview arms an invite without asking what it can claim),
+    // read only by `claim_invite`, which is the transport's. So on Windows this is a value that
+    // is armed and never claimed, and CI's `-D warnings` reads that as two dead fields.
+    #[cfg_attr(not(unix), allow(dead_code))]
     payload: String,
+    #[cfg_attr(not(unix), allow(dead_code))]
     expires_at: Instant,
 }
 

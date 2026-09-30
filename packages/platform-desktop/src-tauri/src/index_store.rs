@@ -162,6 +162,11 @@ pub fn spotlight_search(query: String, limit: usize) -> Vec<MatchSummary> {
 /// Matching is exact on the indexed hostname. `@core` owns the real policy (registrable
 /// domain, per-entry subdomain modes) and the desktop deliberately does not reimplement it:
 /// a second matcher that disagreed with the first would be worse than a strict one.
+///
+/// Only the socket asks (`socket.rs`, unix-only); everywhere else this is reachable from the
+/// module's own tests, which is why it is not `#[cfg(unix)]` and why CI's `-D warnings` needs
+/// the non-unix case told apart from a genuinely dead function.
+#[cfg_attr(not(unix), allow(dead_code))]
 pub fn query(hostname: &str) -> Vec<MatchSummary> {
     let needle = hostname.trim().to_ascii_lowercase();
     INDEX
