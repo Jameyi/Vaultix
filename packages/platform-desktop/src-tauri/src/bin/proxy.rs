@@ -32,6 +32,8 @@ mod socket_addr;
 
 /// Matches the app's cap. A frame larger than this is a bug or an attempt to exhaust memory,
 /// and refusing it here keeps it off the socket entirely.
+// Only read by `pump`, which is unix-only; the bin itself still builds (and is tested) on Windows.
+#[cfg_attr(not(unix), allow(dead_code))]
 const MAX_FRAME: u32 = 1024 * 1024;
 
 /// Reported to the extension when there is no app to reach, so it can say "open Vautix"
