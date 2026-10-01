@@ -12,9 +12,6 @@ use std::{
 
 /// Must match `identifier` in tauri.conf.json: on macOS that is what names the app's data
 /// directory, and the proxy has no Tauri to ask.
-// Used only by the macOS/Linux arms of `data_dir_from`; on Windows nothing reads it, but the
-// constant documents the identifier contract and is exercised by the unix builds.
-#[cfg_attr(windows, allow(dead_code))]
 pub const APP_IDENTIFIER: &str = "app.vautix.desktop";
 
 pub const SOCKET_NAME: &str = "vautix.sock";

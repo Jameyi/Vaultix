@@ -27,12 +27,16 @@ use std::{
 #[cfg(unix)]
 use std::{io::Read, os::unix::net::UnixStream, thread};
 
+// The whole module is only reachable from the unix-only `pump` below, but the bin still has to
+// compile (and be tested) on Windows, where `-D warnings` would turn every unused item into an
+// error. One module-level allowance instead of sprinkling cfg_attrs on each item.
+#[allow(dead_code)]
 #[path = "../socket_addr.rs"]
 mod socket_addr;
 
 /// Matches the app's cap. A frame larger than this is a bug or an attempt to exhaust memory,
 /// and refusing it here keeps it off the socket entirely.
-// Only read by `pump`, which is unix-only; the bin itself still builds (and is tested) on Windows.
+// Read only by `pump`, which is unix-only; the bin still compiles (and is tested) on Windows.
 #[cfg_attr(not(unix), allow(dead_code))]
 const MAX_FRAME: u32 = 1024 * 1024;
 
