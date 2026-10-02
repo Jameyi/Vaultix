@@ -146,7 +146,6 @@
   - pnpm store 已在 D:（`D:\Program Files\opencode-storage\data\pnpm\store\v10`），无需迁移。
   - `pnpm run release` 需要 pnpm 在 PATH 上（`release.ts:248/350/513` 内部 spawn `pnpm --filter …`），且签名链需要 YubiKey + `age-plugin-yubikey` + `gh auth login`（见 `docs/release-signing.md`）。**发布必须在有 pnpm 的机器上做，Windows 这台即使装了 Rust 也不适合**（`release android` 的 gradlew/aapt2 路径是 macOS/Linux 假设）。
   - 所有 git 写操作由用户执行（项目记忆约定）。
-
 ## 2026-09-29 — 当前状态快照（Windows CI 构建 + 磁盘瘦身）
 
 - **已完成里程碑**：
@@ -164,3 +163,35 @@
   2. 验证通过后收集 UI/业务逻辑调整需求，UI 微调走本地 dev 预览。
   3. 更早的遗留增量（审计日志第二阶段挂点 + Activity 面板、roster phase-2 flip 须用户批准、VEK residency hardening #1）在两端验证收官后再排。
 - **环境备忘（更新）**：pnpm 已装、pre-commit 正常（不再需要 `--no-verify`）；本机无 cargo/rustc/winget/gh（维持不装）；C: 剩 4.5 GB / D: 剩约 508 GB；`docs/ghsite` 保持未跟踪，勿清理；所有 git 写操作由用户执行。
+
+## 2026-09-30 — 当前状态快照（CI 三红修复 + 推送成功，等 CI 验证）
+
+- **已完成里程碑**（3 个提交已推送 `5edf011a..594adb4c`）：
+  - `6d246f25` fix(security)：`pnpm-workspace.yaml` 加 overrides + 手改 lockfile 9 行，undici 升至 ≥7.29.1（GHSA-3wwx-pv8p-q78v）。由 Space Bunny 模型完成：刻意不走 `--lockfile-only` 重解析（会产出 56 行 peer 变体 churn，波及 lingui/babel 门禁），integrity 独立核实。本机已验证 `pnpm audit --prod` 零漏洞、`--frozen-lockfile` 自洽、全 workspace typecheck + ci:check + i18n:check 通过、core 1310 / extension 889 / desktop 37 / mobile 71 测试通过。
+  - `9f6571d8` fix(desktop)：`lib.rs` `socket::attach`→`link::attach`（Linux job 编译错）；`index_store.rs` 的 `query` 加 `#[allow(dead_code)]`（Windows 测试在用，不能 cfg 掉）、`link.rs` `ArmedInvite` 死字段处理。**仅按 CI 行号核对，本机无 cargo，未经编译器验证——CI 是唯一裁判**。
+  - `594adb4c` docs：会话记录更新。
+- **待完成任务清单**：
+  1. 等 CI 跑完，重点看 Desktop Linux/Windows 两个 job（Rust 改动的最终验证）与 Security audit job（应转绿）。
+  2. Windows 端人工验证安装包/便携版 exe，Android 端验证 APK（沿用 09-29 清单第 2、3 项）。
+  3. 残留工作区事项待用户定夺：`.codegraph/.gitignore` 的删除（上一会话磁盘瘦身遗留）是否提交；`screenshots/` 未跟踪目录入库或加 ignore。
+- **阻塞 / 卡点**：本机无 cargo，Rust 改动只能靠 CI 验证；如 CI 仍红，需用户贴日志。
+- **下一会话明确下一步**：
+  1. 问 CI 结果；红则按日志修（重点怀疑对象：`link.rs` dead-code 处理方式是否与 `-D warnings` 兼容）。
+  2. CI 全绿后催两端真机验证，再排更早遗留增量（审计日志第二阶段 + Activity 面板、roster phase-2 flip、VEK residency hardening #1）。
+- **环境备忘（更新）**：远端已改为 HTTPS（`https://github.com/Jameyi/Vaultix.git`，原 SSH 22 被网络阻断）；git 已配全局代理 `http://127.0.0.1:11119`（该端口为本机代理 HTTP 口，已验证可用），若推送报 connection reset 可再加 `git config --global http.version HTTP/1.1`；pre-commit 全量 typecheck 冷缓存时 mobile 包可达 3 分钟+，曾有钩子僵死（无 node 进程残留），重跑即恢复——后续可考虑改成只 typecheck 受影响包。
+
+## 2026-10-01 — 当前状态快照（Windows dead_code 连环报错收官中，等 CI 裁决）
+
+- **已完成里程碑**：
+  - `6d246f25` / `9f6571d8` / `594adb4c`（09-30，已推送）：undici 安全修复、`socket::attach`→`link::attach`、`index_store::query`/`link.rs` 死字段豁免——这批在 CI 的 `cargo test` 关已通过。
+  - `d1aef3de`（10-01，已推送）：Windows 打包阶段（tauri build / release）又冒出 4 个 dead_code（`SOCKET_NAME`、`data_dir_from`、`app_data_dir`、`default_socket_path`）。根因是同一类：`vautix-proxy` bin 的逻辑 `pump()` 为 `#[cfg(unix)]`，Windows 下整个 `socket_addr` 模块不可达，逐项打 attr 打不完（第一轮逐项修后新条目继续报红）。最终方案：`bin/proxy.rs` 的 `mod socket_addr` 声明上模块级 `#[allow(dead_code)]` + `MAX_FRAME` 单独 `#[cfg_attr(not(unix), allow(dead_code))]`；`socket_addr.rs` 本身无改动（app 主程序里都真实使用）。
+- **当前进度**：Windows job 已推进到打包（`cargo test` 关过了），仅剩 release build 这关等 `d1aef3de` 的 CI 裁决。
+- **待完成任务清单**：
+  1. 等 Desktop (Windows .exe/.msi) CI 结果；全绿则 dead_code 连环报错收官，产出 nsis/msi/便携版 artifact。
+  2. Windows / Android 两端真机验证安装包（沿用 09-29 清单）。
+  3. 残留工作区待定夺：`.codegraph/.gitignore` 删除是否提交；`screenshots/` 入库或加 ignore；本条 SESSION.md 更新需随下次提交入库。
+- **阻塞 / 卡点**：本机无 cargo，Rust 改动只能靠 CI 验证；推送依赖本机代理（11119 端口），偶发 reset 重试即可。
+- **下一会话明确下一步**：
+  1. 问 CI 结果。若 Windows job 仍红且又是 dead_code 新条目，直接在 `mod socket_addr` 的模块级豁免下检查是否有模块外的新条目；若是其他类型错误按日志修。
+  2. 全绿后催两端真机验证，再排更早遗留增量（审计日志第二阶段 + Activity 面板、roster phase-2 flip、VEK residency hardening #1）。
+- **经验教训**：`-D warnings` + 跨平台条件编译的组合下，dead_code 会按"平台分支→模块→bin"逐层冒出；遇到就评估"平台条件性使用 vs 真死代码"，条件性使用一律用 `cfg_attr`/模块级 `allow` 平台化豁免，不要删也不要逐项补丁。

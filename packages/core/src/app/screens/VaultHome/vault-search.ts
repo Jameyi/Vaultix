@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import type { EntryType } from "../../../hooks/useVault";
+import { tagKey } from "../../../vault/tags";
 
 /** Type filter values; "all" disables the filter. */
 const TYPE_FILTERS = ["all", "login", "card", "note", "ssh-key"] as const;
@@ -22,6 +23,12 @@ export interface VaultSearch {
 	type: TypeFilter;
 	sort: SortKey;
 	/**
+	 * Tag filter, as the tag's display spelling ("" disables it). A one-pick equivalent of
+	 * a `#tag` query token for users who never learn the syntax; exact-match by `tagKey`,
+	 * unlike the prefix matching a typed token gets.
+	 */
+	tag: string;
+	/**
 	 * Which side of the archive to list. The two sets are disjoint, not additive: false
 	 * (the default) lists live entries only, true lists archived ones only. A view rather
 	 * than an include-flag, so an archived entry can't be mistaken for a live one in a
@@ -34,6 +41,7 @@ export const DEFAULT_SEARCH: VaultSearch = {
 	q: "",
 	type: "all",
 	sort: "name-asc",
+	tag: "",
 	archived: false,
 };
 
@@ -43,6 +51,7 @@ export const vaultSearchSchema = z.object({
 	q: z.string().optional().catch(undefined),
 	type: z.enum(TYPE_FILTERS).optional().catch(undefined),
 	sort: z.enum(SORT_KEYS).optional().catch(undefined),
+	tag: z.string().optional().catch(undefined),
 	archived: z.boolean().optional().catch(undefined),
 });
 
@@ -161,11 +170,15 @@ export function filterAndSortEntries<T extends SearchableEntry>(
 	matchedIds?: ReadonlySet<string>,
 ): T[] {
 	const { text, tags } = parseQuery(search.q);
+	// The dropdown filter is exact-match on the comparison key; a typed `#token` stays
+	// prefix-match while being typed.
+	const tagFilter = search.tag ? tagKey(search.tag) : null;
 	const filtered = items.filter((item) => {
 		// The archive side is a hard gate, ahead of the query: searching the live vault must
 		// never surface an archived entry, however well it matches.
 		if ((item.archived ?? false) !== search.archived) return false;
 		if (search.type !== "all" && item.type !== search.type) return false;
+		if (tagFilter !== null && !item.tagKeys?.includes(tagFilter)) return false;
 		// Every tag token must match some tag, as with text tokens: two of them narrow.
 		const keys = item.tagKeys;
 		if (tags.length > 0 && !tags.every((t) => keys?.some((k) => k.startsWith(t)))) return false;

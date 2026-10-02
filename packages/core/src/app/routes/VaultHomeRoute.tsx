@@ -19,6 +19,7 @@ export function VaultHomeRoute() {
 		q: raw.q ?? DEFAULT_SEARCH.q,
 		type: raw.type ?? DEFAULT_SEARCH.type,
 		sort: raw.sort ?? DEFAULT_SEARCH.sort,
+		tag: raw.tag ?? DEFAULT_SEARCH.tag,
 		archived: raw.archived ?? DEFAULT_SEARCH.archived,
 	};
 	const { entries, ready, deleteEntry, touchEntry } = useVault();

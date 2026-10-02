@@ -120,6 +120,13 @@ export function VaultSearchBar({
 		{ value: "recent-updated", label: t`Recently updated` },
 	];
 
+	// The tag dropdown lists only tags actually in use; with none it would be a
+	// permanent dead control. Hidden entirely rather than showing an empty "All".
+	const tagOptions: { value: string; label: string }[] =
+		tags.length > 0
+			? [{ value: "", label: t`All tags` }, ...tags.map((tag) => ({ value: tag, label: tag }))]
+			: [];
+
 	// The chips only ever scroll on a narrow desktop window or a long-worded
 	// locale, and a chip scrolled out of sight reads as no filter at all.
 	useEffect(() => {
@@ -256,6 +263,20 @@ export function VaultSearchBar({
 					onChange={(type) => onChange({ type })}
 					className="sm:hidden min-w-0 flex-1"
 				/>
+
+				{/* The named-group filter: a one-pick equivalent of a `#tag` token. Only rendered
+					while the vault has tags at all; a select needs a current value, so a stale tag
+					(a rename elsewhere) falls back to the unfiltered option. */}
+				{tagOptions.length > 0 && (
+					<SelectPill
+						icon={Tag}
+						label={t`Filter by group`}
+						value={tagOptions.some((o) => o.value === search.tag) ? search.tag : ""}
+						options={tagOptions}
+						onChange={(tag) => onChange({ tag })}
+						className="min-w-0 flex-1 sm:flex-none sm:shrink-0"
+					/>
+				)}
 
 				<fieldset
 					className="relative hidden sm:block flex-1 min-w-0 border-0 p-0 m-0"

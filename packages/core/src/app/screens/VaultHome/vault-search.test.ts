@@ -112,6 +112,31 @@ describe("filterAndSortEntries", () => {
 		expect(filterAndSortEntries(items, search({ q: "#work" }))).toHaveLength(0);
 	});
 
+	it("filters by the tag dropdown, exact on the comparison key", () => {
+		const items = [
+			item({ name: "AI Draw", searchText: "ai draw", tagKeys: ["ai-绘图"] }),
+			item({ name: "Google", searchText: "google", tagKeys: ["谷歌"] }),
+			item({ name: "Untagged", searchText: "untagged" }),
+		];
+		expect(filterAndSortEntries(items, search({ tag: "AI-绘图" })).map((i) => i.name)).toEqual([
+			"AI Draw",
+		]);
+		// "" (or default) disables the filter.
+		expect(filterAndSortEntries(items, search())).toHaveLength(3);
+		// A tag that was renamed away matches nothing rather than everything.
+		expect(filterAndSortEntries(items, search({ tag: "gone" }))).toHaveLength(0);
+	});
+
+	it("the dropdown tag filter ANDs with a typed #tag query", () => {
+		const items = [
+			item({ name: "Both", searchText: "both", tagKeys: ["a", "b"] }),
+			item({ name: "OnlyA", searchText: "onlya", tagKeys: ["a"] }),
+		];
+		expect(filterAndSortEntries(items, search({ tag: "a", q: "#b" })).map((i) => i.name)).toEqual([
+			"Both",
+		]);
+	});
+
 	it("filters by type before matching text", () => {
 		const items = [
 			item({ name: "Visa", type: "card", searchText: "visa" }),
