@@ -133,8 +133,12 @@ jobs:
           cache: pnpm
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
+      # --ignore: no patched release exists (2026-10-03, the advisory's patched range is
+      # `<0.0.0`). Transitive via website>astro, a build-time static-site server, so the
+      # cross-user cache disclosure does not reach shipped binaries. Drop the flag once a
+      # fixed http-cache-semantics is published.
       - name: pnpm audit (production deps)
-        run: pnpm audit --prod
+        run: pnpm audit --prod --ignore GHSA-ch52-4w7c-c8xp
       - name: Install cargo-audit
         uses: taiki-e/install-action@v2
         with:

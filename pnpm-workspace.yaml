@@ -6,6 +6,9 @@ packages:
   - packages/platform-desktop
   - website
   - nostr-relay/cf-worker
+auditConfig:
+  ignoreCves:
+    - GHSA-ch52-4w7c-c8xp
 
 # Build scripts the cf-worker's wrangler toolchain needs to fetch its platform
 # binaries; pnpm blocks unapproved postinstall scripts by default.
@@ -19,7 +22,7 @@ onlyBuiltDependencies:
 # clean.
 overrides:
   adm-zip: ^0.6.0 # web-ext > firefox-profile
-  shell-quote: ^1.9.0 # web-ext > fx-runner, concurrently
-  sharp: ^0.35.0 # wrangler > miniflare, astro
   minimatch@3>brace-expansion: ^2.1.4
+  sharp: ^0.35.0 # wrangler > miniflare, astro
+  shell-quote: ^1.9.0 # web-ext > fx-runner, concurrently
   undici: ^7.29.1 # web-ext > addons-linter > cheerio, vitest > jsdom, website > astro > unifont (GHSA-3wwx-pv8p-q78v)
