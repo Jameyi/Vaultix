@@ -287,6 +287,10 @@ msgstr "Aliases"
 msgid "All"
 msgstr "All"
 
+#: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
+msgid "All tags"
+msgstr "All tags"
+
 #: packages/core/src/app/screens/Settings/components/TapToUnlockSection.tsx
 msgid "all your devices"
 msgstr "all your devices"
@@ -502,58 +506,6 @@ msgstr "Biometric unlock isn't available on this device."
 #: packages/core/src/app/components/SasDisplay.tsx
 msgid "Book"
 msgstr "Book"
-
-#: packages/core/src/app/update-prompt-copy.tsx
-msgid "Vautix {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
-msgstr "Vautix {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
-
-#: packages/core/src/hooks/useCryptoErrorMessage.tsx
-msgid "Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again."
-msgstr "Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again."
-
-#: packages/core/src/app/ErrorBoundary.tsx
-msgid "Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
-msgstr "Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
-
-#: packages/core/src/app/screens/Settings/components/SupportSection.tsx
-msgid "Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
-msgstr "Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
-
-#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Vautix is installed directly, so updates are checked here."
-msgstr "Vautix is installed directly, so updates are checked here."
-
-#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-#~ msgid "Vautix is running but locked. Unlock it there first."
-#~ msgstr "Vautix is running but locked. Unlock it there first."
-
-#: packages/core/src/app/update-prompt-copy.tsx
-msgid "Vautix is up to date"
-msgstr "Vautix is up to date"
-
-#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Vautix is up to date."
-msgstr "Vautix is up to date."
-
-#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Vautix needs that permission to talk to the desktop app."
-msgstr "Vautix needs that permission to talk to the desktop app."
-
-#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Vautix needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
-msgstr "Vautix needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
-
-#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
-msgstr "Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
-
-#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
-msgid "Vautix restarts by itself once this finishes."
-msgstr "Vautix restarts by itself once this finishes."
-
-#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
-msgid "Vautix will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
-msgstr "Vautix will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
 
 #: packages/core/src/app/components/EntryRow.tsx
 #: packages/core/src/app/components/ui/password-strength-meter.tsx
@@ -1387,6 +1339,10 @@ msgstr "Files are read on this device only. Nothing is uploaded. Delete the expo
 #~ msgstr "Fill logins from the Vautix extension without unlocking twice."
 
 #: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
+msgid "Filter by group"
+msgstr "Filter by group"
+
+#: packages/core/src/app/screens/VaultHome/VaultSearchBar.tsx
 msgid "Filter by type"
 msgstr "Filter by type"
 
@@ -2113,14 +2069,6 @@ msgstr "Open <0>{0}</0> as the vault on this device. Enter its master password."
 msgid "Open an encrypted .vautix backup and make it the vault on this device."
 msgstr "Open an encrypted .vautix backup and make it the vault on this device."
 
-#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
-msgid "Open Vautix on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
-msgstr "Open Vautix on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
-
-#: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
-msgid "Open Vautix on your other device and scan the code, or paste it there."
-msgstr "Open Vautix on your other device and scan the code, or paste it there."
-
 #: packages/core/src/app/screens/Import/components/KdbxUnlock.tsx
 msgid "Open database"
 msgstr "Open database"
@@ -2138,6 +2086,14 @@ msgstr "Open it from the {0} popup and unlock it with its master password."
 #: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
 msgid "Open that vault"
 msgstr "Open that vault"
+
+#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
+msgid "Open Vautix on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
+msgstr "Open Vautix on this computer, go to Settings and choose Connect a browser, then enter the code it shows."
+
+#: packages/core/src/app/screens/Settings/components/SyncConnectSection.tsx
+msgid "Open Vautix on your other device and scan the code, or paste it there."
+msgstr "Open Vautix on your other device and scan the code, or paste it there."
 
 #: packages/core/src/app/routes/VaultHomeRoute.tsx
 #: packages/core/src/app/screens/Auth/Auth.tsx
@@ -3270,10 +3226,6 @@ msgid "Toggle autofill on web pages"
 msgstr "Toggle autofill on web pages"
 
 #: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Toggle Vautix passkey provider"
-msgstr "Toggle Vautix passkey provider"
-
-#: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
 msgid "Toggle breach checks"
 msgstr "Toggle breach checks"
 
@@ -3300,6 +3252,10 @@ msgstr "Toggle start at login"
 #: packages/core/src/app/screens/Settings/components/BiometricSection.tsx
 msgid "Toggle unlock on open"
 msgstr "Toggle unlock on open"
+
+#: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
+msgid "Toggle Vautix passkey provider"
+msgstr "Toggle Vautix passkey provider"
 
 #: packages/core/src/app/screens/Auth/Auth.tsx
 msgid "Too many failed attempts. Unlock your device with its passcode first, or use your master password."
@@ -3507,10 +3463,6 @@ msgstr "Unsigned"
 msgid "Update and restart"
 msgstr "Update and restart"
 
-#: packages/core/src/app/update-prompt-copy.tsx
-msgid "Update Vautix"
-msgstr "Update Vautix"
-
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
 msgid "Update failed: {error}"
 msgstr "Update failed: {error}"
@@ -3523,6 +3475,10 @@ msgstr "Update now"
 msgid "Update password"
 msgstr "Update password"
 
+#: packages/core/src/app/update-prompt-copy.tsx
+msgid "Update Vautix"
+msgstr "Update Vautix"
+
 #. placeholder {0}: formatDateTime(entry.updatedAt)
 #: packages/core/src/app/screens/EntryDetail/EntryDetail.tsx
 msgid "Updated {0}"
@@ -3531,10 +3487,6 @@ msgstr "Updated {0}"
 #: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
 msgid "Updates"
 msgstr "Updates"
-
-#: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
-msgid "Use Vautix for passkeys"
-msgstr "Use Vautix for passkeys"
 
 #: packages/core/src/app/entry-modes/card.tsx
 msgid "Use digits only."
@@ -3563,6 +3515,10 @@ msgstr "Use Touch ID or Windows Hello instead of typing your master password."
 #: packages/core/src/app/screens/Settings/components/TapToUnlockSection.tsx
 msgid "Use Touch ID, Windows Hello or a security key like a YubiKey instead of typing your master password."
 msgstr "Use Touch ID, Windows Hello or a security key like a YubiKey instead of typing your master password."
+
+#: packages/core/src/app/screens/Settings/components/GeneralSection.tsx
+msgid "Use Vautix for passkeys"
+msgstr "Use Vautix for passkeys"
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "username"
@@ -3603,6 +3559,58 @@ msgstr "Vault restored"
 #: packages/core/src/app/OptionsApp.tsx
 msgid "Vault unlocked"
 msgstr "Vault unlocked"
+
+#: packages/core/src/app/update-prompt-copy.tsx
+msgid "Vautix {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
+msgstr "Vautix {version} is available. Updating downloads it and restarts the app. Your vault is not touched."
+
+#: packages/core/src/hooks/useCryptoErrorMessage.tsx
+msgid "Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again."
+msgstr "Vautix couldn't safely update this device's key storage, so the vault stayed locked. Try again."
+
+#: packages/core/src/app/ErrorBoundary.tsx
+msgid "Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
+msgstr "Vautix hit an unexpected error. Your vault is safe — it stays encrypted on this device. Try reloading; if it keeps happening, reopen the app."
+
+#: packages/core/src/app/screens/Settings/components/SupportSection.tsx
+msgid "Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
+msgstr "Vautix is free and open source. If it's useful to you, a tip helps keep it going. Scan a code with your wallet, or copy the address. Thank you."
+
+#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
+msgid "Vautix is installed directly, so updates are checked here."
+msgstr "Vautix is installed directly, so updates are checked here."
+
+#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
+#~ msgid "Vautix is running but locked. Unlock it there first."
+#~ msgstr "Vautix is running but locked. Unlock it there first."
+
+#: packages/core/src/app/update-prompt-copy.tsx
+msgid "Vautix is up to date"
+msgstr "Vautix is up to date"
+
+#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
+msgid "Vautix is up to date."
+msgstr "Vautix is up to date."
+
+#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
+msgid "Vautix needs that permission to talk to the desktop app."
+msgstr "Vautix needs that permission to talk to the desktop app."
+
+#: packages/core/src/app/screens/Settings/components/DesktopLinkSection.tsx
+msgid "Vautix needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
+msgstr "Vautix needs your permission to talk to the desktop app on this computer. Your browser will ask you to confirm."
+
+#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
+msgid "Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
+msgstr "Vautix only needs to upload and list. Restricting the key to this one bucket, and leaving out delete, limits what it can do if it is ever stolen."
+
+#: packages/core/src/app/screens/Settings/components/UpdatesSection.tsx
+msgid "Vautix restarts by itself once this finishes."
+msgstr "Vautix restarts by itself once this finishes."
+
+#: packages/core/src/app/screens/Settings/components/BackupSection.tsx
+msgid "Vautix will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
+msgstr "Vautix will never delete anything here, so this can use a credential that isn't allowed to. One that's stolen then can't destroy your backup history."
 
 #: packages/core/src/app/entry-modes/login.tsx
 msgid "verification code"
