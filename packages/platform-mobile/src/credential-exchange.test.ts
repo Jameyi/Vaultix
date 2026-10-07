@@ -7,16 +7,27 @@ const native = vi.hoisted(() => ({
 	exportCredentials: vi.fn(),
 	consumeImportToken: vi.fn(),
 	importCredentials: vi.fn(),
+	addListener: vi.fn(),
 }));
+
+// The platform the mocked Capacitor reports; flipped per test.
+const capacitor = vi.hoisted(() => ({ platform: "ios" }));
 
 const autoLock = vi.hoisted(() => ({ armFilePickGrace: vi.fn() }));
 
-vi.mock("@capacitor/core", () => ({ registerPlugin: () => native }));
+vi.mock("@capacitor/core", () => ({
+	Capacitor: { getPlatform: () => capacitor.platform },
+	registerPlugin: () => native,
+}));
 vi.mock("./auto-lock", () => autoLock);
 
-const { claimImportToken, exchangeAvailability, exportToApp, redeemImportToken } = await import(
-	"./credential-exchange"
-);
+const {
+	claimImportToken,
+	exchangeAvailability,
+	exportToApp,
+	onImportAvailable,
+	redeemImportToken,
+} = await import("./credential-exchange");
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -99,5 +110,30 @@ describe("import token", () => {
 		expect(await redeemImportToken("T")).toBe('{"accounts":[]}');
 		expect(native.importCredentials).toHaveBeenCalledWith({ token: "T" });
 		expect(autoLock.armFilePickGrace).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("onImportAvailable", () => {
+	it("subscribes on iOS, and unsubscribe removes the listener", async () => {
+		capacitor.platform = "ios";
+		const remove = vi.fn().mockResolvedValue(undefined);
+		native.addListener.mockResolvedValue({ remove });
+		const cb = vi.fn();
+		const off = onImportAvailable(cb);
+		expect(native.addListener).toHaveBeenCalledWith("importAvailable", cb);
+		off();
+		// The unsubscribe removes the handle once the plugin's addListener resolves; that
+		// lands a microtask later, so wait for it rather than asserting synchronously.
+		await vi.waitFor(() => expect(remove).toHaveBeenCalled());
+	});
+
+	// Off iOS the proxy's addListener() rejects, and the only .catch sits inside the
+	// unsubscribe — which a mounted Root never runs — so the rejection would go unhandled
+	// for the app's whole lifetime. The guard must not even touch the plugin there.
+	it("never touches the plugin off iOS (web/Android)", () => {
+		capacitor.platform = "android";
+		const off = onImportAvailable(() => {});
+		expect(native.addListener).not.toHaveBeenCalled();
+		off();
 	});
 });

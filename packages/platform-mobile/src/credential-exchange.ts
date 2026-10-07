@@ -1,4 +1,4 @@
-import { registerPlugin } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { ExchangeAvailability } from "@core/index";
 import { armFilePickGrace } from "./auto-lock";
 
@@ -60,6 +60,12 @@ export async function exportToApp(
  * exists, which is why the token is parked natively rather than pushed. Returns an unsubscribe.
  */
 export function onImportAvailable(cb: () => void): () => void {
+	// The plugin is iOS-only: on web/Android the proxy's addListener() rejects, and the
+	// only .catch sits inside the unsubscribe — which a mounted Root never runs, so the
+	// rejection goes unhandled for the app's whole lifetime. (Surfaced loudly by the
+	// index.html boot-error overlay, which painted over the E2E peers.) The OS can only
+	// hand us a transfer on iOS anyway, so don't subscribe anywhere else.
+	if (Capacitor.getPlatform() !== "ios") return () => {};
 	const handle = Native.addListener?.("importAvailable", cb);
 	return () => {
 		void handle?.then((h) => h.remove()).catch(() => {});

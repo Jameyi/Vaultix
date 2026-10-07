@@ -13,7 +13,9 @@
 			// before React mounts (or a boot await rejects), paint the error on a fixed
 			// overlay — otherwise the native splash just sticks and the failure is
 			// undiagnosable from a screenshot. Capture phase so module load failures
-			// (element errors, no e.message) are caught too.
+			// (element errors, no e.message) are caught too. The overlay is paint-only
+			// (pointer-events:none): it must never block the app's own clicks, or a
+			// non-fatal rejection wedges every E2E peer at the first tap.
 			(function () {
 				var shown = false;
 				var show = function (heading, detail) {
@@ -24,7 +26,7 @@
 						"style",
 						"position:fixed;top:0;left:0;right:0;z-index:99999;margin:0;padding:12px;" +
 							"background:#111;color:#f88;font:12px/1.4 monospace;white-space:pre-wrap;" +
-							"word-break:break-all;max-height:60vh;overflow:auto;",
+							"word-break:break-all;max-height:60vh;overflow:auto;pointer-events:none;",
 					);
 					el.textContent = heading + "\n" + detail;
 					(document.body || document.documentElement).appendChild(el);

@@ -229,9 +229,11 @@
   1. `index.html` 加启动错误陷阱：`window.onerror`/`unhandledrejection`/资源加载失败画到屏幕固定 overlay（无 devtools 时唯一可见诊断面）。
   2. `capacitor.config.ts`：`launchAutoHide:true` + `launchShowDuration:10000`——健康路径仍由 main.tsx 先行 hide()，死启动 10s 后 native 侧放掉 splash 露出错误 overlay。
   3. `main.tsx`：`SplashScreen.hide().catch()` 防迟到/重复调用 reject 触发错误 overlay。
+- **E2E 回归暴露并修复的存量 bug（10-07 第二轮）**：错误陷阱让一个**一直存在但此前静默**的 boot rejection 现形——`credential-exchange.ts` 的 `onImportAvailable` 无平台守卫，web/Android 上插件 proxy 的 `addListener()` reject，而唯一 `.catch` 在 unsubscribe 里（挂载的 Root 永不卸载），reject 悬置整个生命周期；overlay 初版拦点击，E2E 两个 sync 用例被挡死超时。修复：①`onImportAvailable` 加 `Capacitor.getPlatform() !== "ios"` 守卫（该插件本就 iOS-only）；②overlay 加 `pointer-events:none` 只显示不拦截。验证：credential-exchange 12/12 单测（新增 2 例守卫用例）、tsc、Biome 全过。
+  - **教训**：E2E 里"插件未实现"类 rejection 以前只是控制台噪音；诊断设施上线会把存量噪音变成硬失败——加诊断的同时要清一遍启动路径上的未处理 rejection。
 - **待完成任务清单**：
-  1. 用户提交推送 → CI 出新 `android-apk` → **先卸载旧 app 再装新包**（两次 CI 的 debug 签名 key 不同，覆盖装会报"未安装"）→ 开 app 看结果：正常进入 / 10s 后 splash 消失露出红色错误文字（截图回报）/ 白屏（也回报）。
-  2. 按回报定位启动根因（错误栈直接给方向）。
+  1. 用户提交推送 → CI 全绿（E2E sync 应恢复 4/4）→ 出新 `android-apk` → **先卸载旧 app 再装新包**（两次 CI 的 debug 签名 key 不同，覆盖装会报"未安装"）→ 开 app 看结果：正常进入 / 10s 后 splash 消失露出红色错误文字（截图回报）/ 白屏（也回报）。
+  2. 按回报定位 Android 启动根因（错误栈直接给方向）。
   3. 次要：换掉含 "Bramble" 的 splash.png（需新品牌图或从图标重生成，等启动问题解决后处理）。
   4. 跟进项不变：http-cache-semantics 修复版发布后移除 `--ignore`；`.codegraph/.gitignore`、`screenshots/` 处置。
 - **阻塞 / 卡点**：无 adb/无设备日志通道，诊断全靠"改代码 → CI 出包 → 实机看"循环（每轮 25–40 分钟）；错误落地后应可收敛到 1–2 轮。
