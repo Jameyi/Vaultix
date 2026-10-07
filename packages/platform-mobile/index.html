@@ -8,6 +8,47 @@
 		/>
 		<meta name="color-scheme" content="light dark" />
 		<title>Vautix</title>
+		<script>
+			// Boot-failure trap: on a device there are no devtools, so if the bundle dies
+			// before React mounts (or a boot await rejects), paint the error on a fixed
+			// overlay — otherwise the native splash just sticks and the failure is
+			// undiagnosable from a screenshot. Capture phase so module load failures
+			// (element errors, no e.message) are caught too.
+			(function () {
+				var shown = false;
+				var show = function (heading, detail) {
+					if (shown) return;
+					shown = true;
+					var el = document.createElement("pre");
+					el.setAttribute(
+						"style",
+						"position:fixed;top:0;left:0;right:0;z-index:99999;margin:0;padding:12px;" +
+							"background:#111;color:#f88;font:12px/1.4 monospace;white-space:pre-wrap;" +
+							"word-break:break-all;max-height:60vh;overflow:auto;",
+					);
+					el.textContent = heading + "\n" + detail;
+					(document.body || document.documentElement).appendChild(el);
+				};
+				window.addEventListener(
+					"error",
+					function (e) {
+						if (e.message) {
+							show("boot error: " + e.message, (e.error && e.error.stack) || "");
+						} else if (e.target && e.target.src) {
+							show("failed to load:", e.target.src);
+						}
+					},
+					true,
+				);
+				window.addEventListener("unhandledrejection", function (e) {
+					var r = e.reason;
+					show(
+						"boot rejection:",
+						r && (r.stack || r.message) ? String(r.stack || r.message) : String(r),
+					);
+				});
+			})();
+		</script>
 	</head>
 	<body>
 		<div id="root"></div>

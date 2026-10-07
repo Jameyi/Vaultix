@@ -161,12 +161,15 @@ void (async () => {
 			<Root />
 		</PlatformProvider>,
 	);
-	// Hold the native splash (launchAutoHide:false) across the async boot above, then
-	// fade it out after the first frame has painted so the app never shows a blank white
-	// WebView. No-op in the dev browser. Double-rAF ensures the first render is on screen.
+	// Hold the native splash across the async boot above (capacitor.config.ts sets a
+	// 10s launchShowDuration as the native fallback if boot dies), then fade it out
+	// after the first frame has painted so the app never shows a blank white WebView.
+	// No-op in the dev browser. Double-rAF ensures the first render is on screen; the
+	// catch keeps a dropped/late hide() from tripping the index.html error overlay
+	// on a healthy boot.
 	requestAnimationFrame(() =>
 		requestAnimationFrame(() => {
-			void SplashScreen.hide({ fadeOutDuration: 200 });
+			SplashScreen.hide({ fadeOutDuration: 200 }).catch(() => {});
 		}),
 	);
 })();

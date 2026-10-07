@@ -195,3 +195,43 @@
   1. 问 CI 结果。若 Windows job 仍红且又是 dead_code 新条目，直接在 `mod socket_addr` 的模块级豁免下检查是否有模块外的新条目；若是其他类型错误按日志修。
   2. 全绿后催两端真机验证，再排更早遗留增量（审计日志第二阶段 + Activity 面板、roster phase-2 flip、VEK residency hardening #1）。
 - **经验教训**：`-D warnings` + 跨平台条件编译的组合下，dead_code 会按"平台分支→模块→bin"逐层冒出；遇到就评估"平台条件性使用 vs 真死代码"，条件性使用一律用 `cfg_attr`/模块级 `allow` 平台化豁免，不要删也不要逐项补丁。
+
+## 2026-10-03 — 当前状态快照（CI 全绿；分组筛选已实装；Windows 包已下载待实机测试）
+
+- **已完成里程碑**：
+  - **Windows CI 打包收官**：dead_code 连环报错终结（proxy bin 模块级豁免方案）；WiX `light.exe` CI 上静默失败无法修，Windows job 改为 `tauri build --bundles nsis` 跳过 MSI（Tauri v2 更新器本就走 NSIS 产物，无功能损失），job 更名 `Desktop (Windows .exe)`。
+  - **分组筛选功能落地**（用户需求：主界面下拉框按命名分组筛选条目）：复用现有 tags 系统，未新造概念。`VaultSearch` 加 `tag` 字段（""=不过滤，路由参数持久化）、`filterAndSortEntries` 按 `tagKey` 精确匹配、搜索栏复用 `SelectPill` 加分组下拉（vault 无标签时隐藏）、路由参数合并。本机验证：core typecheck 通过、vault-search 29/29 测试通过（含新增 2 例）。
+  - **i18n 门禁修复**：新增 2 个 UI 字符串（"All tags"/"Filter by group"）5 语言翻译手写补入 .po + 重新 compile，`i18n:check` 本地全过。**教训：凡新增 `Trans` 文案，收尾必跑 `pnpm run i18n:check`**。
+  - **audit job 修复三轮**：undici（lockfile 手改 9 行）、devalue 5.9.3（同法，3 处）后，http-cache-semantics 上游**无修复版**（patched `<0.0.0`），按策略在 ci.yml 用 `pnpm audit --prod --ignore GHSA-ch52-4w7c-c8xp` 定向豁免（带日期注释：transitive 经 website>astro 构建期，不进用户二进制；修复版发布后删除）。`pnpm-workspace.yaml` 的 `auditConfig`/`ignoreCves` 配置实测均不生效（pnpm 10.33），勿再尝试。
+- **当前进度**：**CI 全部 job 绿；Windows 实机测试已通过（10-03 用户确认）**——安装包/便携版可用，dead_code 与 NSIS-only 修复在真机验证收官。
+- **待完成任务清单**：
+  1. ~~Windows 实机测试~~ **已完成（10-03 用户确认：通过）**。
+  2. Android APK 实机验证（`android-apk` artifact，沿用 09-29 清单）——现为唯一未验证端。
+  3. **跟进项**：http-cache-semantics 出修复版后移除 ci.yml 的 `--ignore GHSA-ch52-4w7c-c8xp`。
+  4. 残留工作区待定夺：`.codegraph/.gitignore` 删除是否提交；`screenshots/`（含 mainUI.jpg）入库或加 ignore；SESSION.md 本条随下次提交入库。
+- **阻塞 / 卡点**：本机无 cargo，所有端本地预览不可行（`pnpm run dev` 是 Unix 脚本、`tauri dev`/WASM 构建均需 Rust 工具链）——UI 验证只能走"提交 → CI artifact → 实机"循环（每轮 15–25 分钟）。若要恢复本地预览需推翻"不装 Rust"决策。
+- **下一会话明确下一步**：
+  1. Android 实机验证（唯一未验证端）：装 `android-apk` artifact → 测创建金库/解锁/条目增删/锁定/分组筛选。分组筛选交互若要迭代（如下拉框内直接新建分组名 = 标签管理入口，属新需求需另行规划），基于真机反馈排期。
+  2. 两端验证收官后，排更早遗留增量：审计日志第二阶段挂点 + Activity 面板、roster phase-2 flip（须用户批准）、VEK residency hardening #1；另议 pre-commit 钩子改成只 typecheck 受影响包（全量冷缓存 3 分钟+，曾僵死）。
+- **环境备忘（更新）**：git 代理 `http://127.0.0.1:11119` 偶发 reset，重试即可；远端为 HTTPS；本机无 cargo/rustc/ollama（i18n 翻译本机不能走 Ollama 管线，小批量手写 .po + `pnpm run i18n:compile` 可行）。
+
+## 2026-10-07 — 当前状态快照（Android 实机首测失败：卡启动图；诊断轮已就绪待出包）
+
+- **已完成里程碑**：
+  - Windows 实机测试通过（10-03/10-06 用户确认）：安装、解锁、分组筛选（"AI绘图"/"谷歌"）均正常。
+  - Android 实机首测（10-07）：APK 安装成功但**启动卡死**——splash 图（内含旧名 "Bramble" 字样）永不消失。
+- **诊断结论**：
+  - 卡 splash = JS 启动链路失败：`launchAutoHide:false` 下只有 main.tsx 跑完才调 `SplashScreen.hide()`；启动崩了 splash 就永久停留。
+  - "Bramble" 字样烙在 `res/drawable*/splash.png`（9-20 旧资产，改名时未换）——表象问题，次要；res/ 与源码 grep 无 Bramble 文本，launcher 名已是 Vautix。
+  - 启动失败根因**未定位**（无 adb/设备日志，本机无 Android 工具链）；候选：Android System WebView 兼容（HarmonyOS 4.0/Kirin 980/Android 12 兼容层）、插件加载、native crypto 绑定。
+  - 排除项：`native-webrtc.ts` 安装是 iOS-only no-op；`resolveExchange()` Android 返回 undefined 不上启动路径。
+- **诊断轮改动（已验证 typecheck + Biome，待 CI 出包由用户重装回报）**：
+  1. `index.html` 加启动错误陷阱：`window.onerror`/`unhandledrejection`/资源加载失败画到屏幕固定 overlay（无 devtools 时唯一可见诊断面）。
+  2. `capacitor.config.ts`：`launchAutoHide:true` + `launchShowDuration:10000`——健康路径仍由 main.tsx 先行 hide()，死启动 10s 后 native 侧放掉 splash 露出错误 overlay。
+  3. `main.tsx`：`SplashScreen.hide().catch()` 防迟到/重复调用 reject 触发错误 overlay。
+- **待完成任务清单**：
+  1. 用户提交推送 → CI 出新 `android-apk` → **先卸载旧 app 再装新包**（两次 CI 的 debug 签名 key 不同，覆盖装会报"未安装"）→ 开 app 看结果：正常进入 / 10s 后 splash 消失露出红色错误文字（截图回报）/ 白屏（也回报）。
+  2. 按回报定位启动根因（错误栈直接给方向）。
+  3. 次要：换掉含 "Bramble" 的 splash.png（需新品牌图或从图标重生成，等启动问题解决后处理）。
+  4. 跟进项不变：http-cache-semantics 修复版发布后移除 `--ignore`；`.codegraph/.gitignore`、`screenshots/` 处置。
+- **阻塞 / 卡点**：无 adb/无设备日志通道，诊断全靠"改代码 → CI 出包 → 实机看"循环（每轮 25–40 分钟）；错误落地后应可收敛到 1–2 轮。
