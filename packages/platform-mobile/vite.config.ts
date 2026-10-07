@@ -16,5 +16,12 @@ export default defineConfig({
 	build: {
 		outDir: "dist",
 		emptyOutDir: true,
+		// Android System WebView on long-tail devices (HarmonyOS ships a never-updated
+		// kernel, ~Chromium 70) fails to PARSE the syntax Vite's default target emits —
+		// class fields land as bare `x = ...` inside class bodies — so the whole bundle
+		// dies at parse time before a single line runs ("Unexpected token '='" under the
+		// splash). es2017 makes esbuild transpile class fields / `?.` / `??` down while
+		// keeping async/await native; every WebView Capacitor can run parses es2017.
+		target: "es2017",
 	},
 });
