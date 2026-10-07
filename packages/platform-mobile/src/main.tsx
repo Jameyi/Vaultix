@@ -1,3 +1,7 @@
+// Polyfills for old Android System WebViews that never update (measured floor: Chromium
+// 83). Must stay the FIRST import: these patch runtime APIs the bundle calls, and any
+// module body or boot await may reach them before anything else runs.
+import "./compat";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Device } from "@capacitor/device";
 import { SplashScreen } from "@capacitor/splash-screen";

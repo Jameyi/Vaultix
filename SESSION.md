@@ -231,9 +231,10 @@
   3. `main.tsx`：`SplashScreen.hide().catch()` 防迟到/重复调用 reject 触发错误 overlay。
 - **E2E 回归暴露并修复的存量 bug（10-07 第二轮）**：错误陷阱让一个**一直存在但此前静默**的 boot rejection 现形——`credential-exchange.ts` 的 `onImportAvailable` 无平台守卫，web/Android 上插件 proxy 的 `addListener()` reject，而唯一 `.catch` 在 unsubscribe 里（挂载的 Root 永不卸载），reject 悬置整个生命周期；overlay 初版拦点击，E2E 两个 sync 用例被挡死超时。修复：①`onImportAvailable` 加 `Capacitor.getPlatform() !== "ios"` 守卫（该插件本就 iOS-only）；②overlay 加 `pointer-events:none` 只显示不拦截。验证：credential-exchange 12/12 单测（新增 2 例守卫用例）、tsc、Biome 全过。
   - **教训**：E2E 里"插件未实现"类 rejection 以前只是控制台噪音；诊断设施上线会把存量噪音变成硬失败——加诊断的同时要清一遍启动路径上的未处理 rejection。
-- **Android 启动根因已定位（10-07 第三轮，诊断 overlay 立功）**：实机现象 B——10s 后 splash 消失、黑底红字 `boot error: Uncaught SyntaxError: Unexpected token '='`。**解析期错误**：HarmonyOS 手机（Kirin 980）的 Android System WebView 是从未更新的老内核（约 Chromium 70），解析不了 Vite 默认 target 产出的新语法（class 字段——`native-webrtc.ts` 等处大量使用），**整个 JS 包一行都没跑**，这就是 splash 永久卡死的根因。Windows/扩展端内核新故无感。
-  - **修复**：`packages/platform-mobile/vite.config.ts` 加 `build.target: "es2017"`——esbuild 把 class 字段/`?.`/`??` 转译下去，async/await 保留原生； Capacitor 能跑的 WebView 都解析 es2017。本地验证：mobile build exit 0（esbuild 对 target 外语法会硬报错）、产物 grep `static {` = 0、无裸 class 字段、tsc + Biome 过。
-  - **教训**：老设备 WebView 的语法兼容问题在 CI（新内核跑 E2E）上永远测不出来；真机一上来就现形。mobile 端日后引入新构建配置时以 es2017 为底线。
+- **Android 启动根因已定位（10-07 第三轮，诊断 overlay 立功）**：实机现象 B——10s 后 splash 消失、黑底红字 `boot error: Uncaught SyntaxError: Unexpected token '='`。**解析期错误**：实测手机 Android System WebView = **83.0.4103.106**（HarmonyOS 4.0/Kirin 980，无 GMS 从不更新）。Chromium 83 不支持 `??=`（85+）与 `static {}` 块（94+），Vite 8 默认 target（chrome 107 档）产物必含这些语法——解析器在 `=` 处崩，**整个 JS 包一行都没跑**，这就是 splash 永久卡死的根因。（初判"class 字段"不准：class 字段 74+ 即可，83 支持。）Windows/扩展端内核新故无感。
+  - **修复（两件套）**：①`packages/platform-mobile/vite.config.ts` 加 `build.target: "es2017"`——esbuild 把 `??=`/`static {}`/class 字段等语法全部转译，async/await 保留原生；②es2017 **只降语法不补 API**——对着 83 缺口 grep es2017 产物，发现 3 个运行时缺口：`replaceAll`（85+，路由库）、`crypto.randomUUID`（92+，自有 6 处：条目/注册表/存储/时钟 ID）、`.at()`（92+，路由库 + 自有 1 处）→ 新增 `packages/platform-mobile/src/compat.ts` 轻量 polyfill（`.at`/`replaceAll`/`randomUUID` 各带版本注释），`main.tsx` **首位导入**（patch 必须先于一切模块体执行）。已逐项特性检测，新内核零开销。
+  - **验证**：mobile build exit 0（esbuild 对 target 外语法硬报错）、es2017 产物 grep 无 `??=`/`static {}`、tsc + Biome 过、重 build 后 polyfill 进 bundle。
+  - **教训**：①老设备 WebView 的语法兼容问题在 CI（新内核跑 E2E）上永远测不出来，真机一上来就现形——mobile 端构建以 es2017 为底线；②**esbuild 降 target ≠ 完整兼容**——语法之外必须对着 WebView 版本缺口过一遍运行时 API（本次 83 的清单：`replaceAll`/`.at`/`randomUUID`/`??=`/`static{}`）；③真机诊断三件套（错误 overlay + splash 兜底 + pointer-events:none）值得保留，以后升级构建配置先想到 WebView 83 这条线。
 - **待完成任务清单**：
   1. 用户提交推送 → CI 全绿 → 下载新 `android-apk` → 卸载旧 app 重装 → 应正常进入（现象 A）；若仍报错截图回报。
   2. 进 app 后的完整验证清单：创建金库/解锁/打标签/分组筛选/锁定。
