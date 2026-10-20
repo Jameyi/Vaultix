@@ -1,17 +1,22 @@
 # Session log
 
-## 2026-10-20 — audit job 双新 advisory 处置（quinn-proto 补丁升级 + zip 定向豁免，待 CI 裁决）
+## 2026-10-20 — 当前状态快照（audit job 双新 advisory 处置收官，CI #37 全绿；等 Android 实机扫码验证）
 
-- **起因**：CI #35（0c05f0b2 扫码修复）与 #36（cd3356f2 rustls 钉版）连续两轮 failed，红点是 audit job 的 `cargo audit (desktop src-tauri)` 步骤：新增 8 条漏洞 = quinn-proto 0.11.16 ×5（RUSTSEC-2026-0338..0342，修复 ≥0.11.18）+ zip 4.6.1 ×3（RUSTSEC-2026-0367/0368/0369，9.1 critical，修复 ≥9.0.0）。既有 8 条 warning 照旧放行。CodeQL 绿不影响门禁。
-- **处置**（`ci.yml` audit job，1 文件）：
-  1. desktop patch 步骤追加 `cargo update -p quinn-proto --precise 0.11.18`——quinn 0.11.11 对 proto 的 req 是 `^0.11.15`（crates.io 核实），补丁级兼容直通。
-  2. desktop audit 步骤加 `--ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369`，带日期注释与解除条件。
-- **zip 豁免的证据链（查过的事实，防止未来被"怎么留了三条 critical"误删）**：
-  - zip 9.x 全系 2026-10-09 起发布，4.x/8.x 线无可达修复；`tauri-plugin-updater` 全线（含 2.14.0/2026-10-14）声明 `zip = "^4"` optional，`cargo update` 跨不过大版本。
-  - 关 feature 不可行：zip 与 tar/flate2 捆在 updater 的同一 default feature；macOS `install_inner`（.app.tar.gz）无 feature-gate 直接用 flate2/tar——关掉必编译错（已读 2.10.1 源码核实）。
-  - 攻击面收窄三重：漏洞 `extract_zip` 仅 `#[cfg(windows)]` + feature zip；`website/public/desktop/latest.json` 不含 windows 平台条目（Windows 自更新本身 inert）；extract 前有 minisign `verify_signature`（updater.rs:712）。
-- **流程备注**：本机网络通道（直连/代理/curl/git 代理共用 11119 端口）本会话间歇性 reset，GitHub API 匿名轮询不可用，审计结论靠 crates.io API + 上游 crate 源码包 + 用户贴日志完成。
-- **待完成任务清单**：提交 `ci.yml` + 本条 → 推送 → 等 CI 裁决 audit job（重点：quinn-proto 0.11.18 解析无意外）→ 其余沿用 10-17 条清单（实机扫码配对验证、Bramble splash.png 替换、审计日志第二阶段、roster phase-2 flip 须批准、VEK residency #1）。
+- **已完成里程碑**：
+  - **audit job 双新 advisory 处置收官**（`e1f3bf8e`，2 files，CI #37 全绿 12m34s）：
+    1. quinn-proto 0.11.16 ×5（RUSTSEC-2026-0338..0342）→ desktop patch 步骤追加 `cargo update -p quinn-proto --precise 0.11.18`（quinn 0.11.11 对 proto req `^0.11.15`，补丁级兼容）。
+    2. zip 4.6.1 ×3（RUSTSEC-2026-0367/0368/0369，9.1 critical，修复 ≥9.0.0）→ desktop audit 步骤三条定向 `--ignore`（带日期注释与解除条件）。
+  - **zip 豁免证据链（防未来误删）**：zip 9.x 全系 10-09 起发布，4.x/8.x 无修复；`tauri-plugin-updater` 全线（含 2.14.0）锁 `zip ^4` 内 default feature，`cargo update` 跨不过大版本；关 feature 不可行——macOS `install_inner` 无 feature-gate 直接用 flate2/tar，与 zip 捆同一 feature，关掉必编译错（已读 2.10.1 源码核实）。攻击面三重收窄：`extract_zip` 仅 Windows 路径；`latest.json` 无 windows 平台条目（Windows 自更新 inert）；extract 前有 minisign `verify_signature`（updater.rs:712）。解除条件：tauri-plugin-updater 出适配 zip ≥9 的版本即删 ignore 重审计。
+- **当前进度**：CI 全部 job 绿（CodeQL 照常运行不受影响）；`e1f3bf8e` 已推送，本地无未推送提交。
+- **待完成任务清单**：
+  1. **Android 实机扫码配对验证（唯一验收点）**：装最新 `android-apk` artifact → 全屏取景 → "Code scanned" → 填主密码 join → 双向后台同步；异常截图回报。
+  2. Android 配对收官后：Bramble splash.png 替换。
+  3. 更早遗留增量：审计日志第二阶段（autofill.fill/backup.run/device.enroll/device.revoke 挂点 + Activity 面板）、roster phase-2 flip（须用户批准）、VEK residency hardening #1；Tailwind CSS 兼容层（WebView 83 隐患）视实机情况立项。
+  4. 残留工作区待定夺：`.codegraph/.gitignore` 删除、`screenshots/`、`all_plugins.jsonl`、`wp_test.json`、`docs/ghsite.txt` 等未跟踪文件处置。
+  5. 跟进项：http-cache-semantics 修复版发布后移除 ci.yml `--ignore GHSA-ch52-4w7c-c8xp`。
+- **阻塞 / 卡点**：GitHub API 匿名轮询本会话不可用（直连/代理 11119 间歇 reset），CI 状态靠用户浏览器页面回报；无 adb/设备日志通道，Android 诊断靠 CI 出包循环；本机无 cargo，Rust 验证只能靠 CI；所有 git 写操作由用户执行。
+- **下一会话明确下一步**：
+  1. 问 Android 实机扫码配对现象；通过则 Android 收官，排 splash.png 替换与更早遗留增量；异常则按截图诊断。
 
 ## 2026-10-17 — Android 扫码配对修复 + rustls advisory 处置（状态快照）
 
