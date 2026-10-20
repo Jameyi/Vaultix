@@ -144,9 +144,9 @@ jobs:
         with:
           tool: cargo-audit@0.22.2
       # Transitive deps patched in the runner before the scan (no local cargo in this
-      # project). quick-xml is upgraded in Cargo.toml (direct dep); rkyv/rustls ride
-      # transitive locks, so release a patch-level update here, then audit. Remove this
-      # step once the committed lockfiles have caught up.
+      # project). quick-xml is upgraded in Cargo.toml (direct dep); rkyv/rustls/h2/
+      # quinn-proto ride transitive locks, so release patch-level updates here, then
+      # audit. Remove these steps once the committed lockfiles have caught up.
       - name: Patch transitive deps with RustSec advisories
         run: cargo update -p rkyv && cargo update -p rustls --precise 0.23.46
         working-directory: packages/core-rust
@@ -154,10 +154,20 @@ jobs:
         run: cargo audit
         working-directory: packages/core-rust
       - name: Patch transitive deps with RustSec advisories (desktop)
-        run: cargo update -p h2 && cargo update -p rustls --precise 0.23.46
+        run: cargo update -p h2 && cargo update -p rustls --precise 0.23.46 && cargo update -p quinn-proto --precise 0.11.18
         working-directory: packages/platform-desktop/src-tauri
+      # --ignore (2026-10-20, RUSTSEC-2026-0367/0368/0369): fixed only in zip >=9.0.0, but
+      # tauri-plugin-updater locks zip to ^4 (2.10.1..2.14.0 all declare `zip = "^4"`,
+      # optional under the default `zip` feature), so no `cargo update` can cross the major.
+      # The vulnerable ZipArchive::extract is reachable only from the Windows updater path
+      # (updater.rs extract_zip, cfg(windows) + feature zip), and our update manifest
+      # (website/public/desktop/latest.json) serves no windows platform; extraction also
+      # runs only after minisign verification (verify_signature precedes extraction).
+      # Drop these ignores and re-audit once tauri-plugin-updater publishes a release whose
+      # zip requirement admits >=9. Can NOT turn the feature off instead: macOS install
+      # code uses flate2/tar ungated, and those ride the same feature.
       - name: cargo audit (desktop src-tauri)
-        run: cargo audit
+        run: cargo audit --ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369
         working-directory: packages/platform-desktop/src-tauri
 
   transport-contract-chromium:

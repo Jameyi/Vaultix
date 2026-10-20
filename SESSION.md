@@ -1,5 +1,36 @@
 # Session log
 
+## 2026-10-20 — audit job 双新 advisory 处置（quinn-proto 补丁升级 + zip 定向豁免，待 CI 裁决）
+
+- **起因**：CI #35（0c05f0b2 扫码修复）与 #36（cd3356f2 rustls 钉版）连续两轮 failed，红点是 audit job 的 `cargo audit (desktop src-tauri)` 步骤：新增 8 条漏洞 = quinn-proto 0.11.16 ×5（RUSTSEC-2026-0338..0342，修复 ≥0.11.18）+ zip 4.6.1 ×3（RUSTSEC-2026-0367/0368/0369，9.1 critical，修复 ≥9.0.0）。既有 8 条 warning 照旧放行。CodeQL 绿不影响门禁。
+- **处置**（`ci.yml` audit job，1 文件）：
+  1. desktop patch 步骤追加 `cargo update -p quinn-proto --precise 0.11.18`——quinn 0.11.11 对 proto 的 req 是 `^0.11.15`（crates.io 核实），补丁级兼容直通。
+  2. desktop audit 步骤加 `--ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369`，带日期注释与解除条件。
+- **zip 豁免的证据链（查过的事实，防止未来被"怎么留了三条 critical"误删）**：
+  - zip 9.x 全系 2026-10-09 起发布，4.x/8.x 线无可达修复；`tauri-plugin-updater` 全线（含 2.14.0/2026-10-14）声明 `zip = "^4"` optional，`cargo update` 跨不过大版本。
+  - 关 feature 不可行：zip 与 tar/flate2 捆在 updater 的同一 default feature；macOS `install_inner`（.app.tar.gz）无 feature-gate 直接用 flate2/tar——关掉必编译错（已读 2.10.1 源码核实）。
+  - 攻击面收窄三重：漏洞 `extract_zip` 仅 `#[cfg(windows)]` + feature zip；`website/public/desktop/latest.json` 不含 windows 平台条目（Windows 自更新本身 inert）；extract 前有 minisign `verify_signature`（updater.rs:712）。
+- **流程备注**：本机网络通道（直连/代理/curl/git 代理共用 11119 端口）本会话间歇性 reset，GitHub API 匿名轮询不可用，审计结论靠 crates.io API + 上游 crate 源码包 + 用户贴日志完成。
+- **待完成任务清单**：提交 `ci.yml` + 本条 → 推送 → 等 CI 裁决 audit job（重点：quinn-proto 0.11.18 解析无意外）→ 其余沿用 10-17 条清单（实机扫码配对验证、Bramble splash.png 替换、审计日志第二阶段、roster phase-2 flip 须批准、VEK residency #1）。
+
+## 2026-10-17 — Android 扫码配对修复 + rustls advisory 处置（状态快照）
+
+- **已完成里程碑**：
+  - **Android 启动收官**：CI #34 全绿，用户实机确认 app 正常进入（WebView 83 修复验证通过）。
+  - **扫码配对修复**（`0c05f0b2`）：实机扫码取景非全屏/下方截断、扫码无反应，根因是 `platform-mobile/src/scan.ts` 遮罩用 CSS `inset` 简写（Chromium 87+），83 静默丢弃导致 fixed 定位塌缩。改为显式 `top/left/width/height`，并把 jsQR 解码降采样到长边 ≤640px。新增 `scan.test.ts` 回归 5 例（scan+qr-scanner 10/10、tsc、Biome 全过）。
+  - **rustls advisory 处置**（`cd3356f2`）：2026-10-14 新发布 RUSTSEC-2026-0346/0347/0348/0349 四条，audit job 被卡；ci.yml 两处 `--precise 0.23.45` → `0.23.46`（core-rust 与 desktop src-tauri）。提交时 CI 尚未裁决。
+- **已知隐患（记录待办）**：Tailwind v4 官方基线 Chrome 111+，组件里大量 `inset-0` 等工具类在 WebView 83 上会静默退化——扫码遮罩只是最显眼一例；若实机还有界面破损，立项做 CSS 兼容层。
+- **待完成任务清单**：
+  1. 用户推送 `0c05f0b2` + `cd3356f2` → CI 裁决：audit job 绿 + 下载新 android-apk。
+  2. 实机验证扫码配对（本次验收点）：全屏取景 → "Code scanned" → 填主密码 join → 双向后台同步；异常截图回报。若 `--precise 0.23.46` 因 index 同步延迟报"版本不存在"，回报后调整。
+  3. Android 配对收官后：Bramble splash.png 替换。
+  4. 更早遗留增量：审计日志第二阶段（autofill.fill/backup.run/device.enroll/device.revoke 挂点 + Activity 面板）、roster phase-2 flip（须用户批准）、VEK residency hardening #1；Tailwind CSS 兼容层视实机情况立项。
+  5. 工作区待定夺：SESSION.md 本条随下次提交入库；`.codegraph/.gitignore` 删除、`screenshots/` 等未跟踪文件处置。
+- **阻塞 / 卡点**：无 adb/设备日志通道，Android 诊断靠 CI 出包循环（25–40 分钟/轮）；本机无 cargo，rustls 升级只能走 CI patch 步骤；git 推送由用户手动执行。
+- **下一会话明确下一步**：
+  1. 问 CI 结果（audit job + android-apk）与实机扫码配对现象；通过则 Android 收官。
+  2. 收官后排第 3、4 项增量。
+
 ## 2026-09-20 — 威胁模型汇总文档落地
 
 - **里程碑**：新增 `docs/threat-model.md`，已登记进 `docs/README.md` 索引。
@@ -215,7 +246,7 @@
   2. 两端验证收官后，排更早遗留增量：审计日志第二阶段挂点 + Activity 面板、roster phase-2 flip（须用户批准）、VEK residency hardening #1；另议 pre-commit 钩子改成只 typecheck 受影响包（全量冷缓存 3 分钟+，曾僵死）。
 - **环境备忘（更新）**：git 代理 `http://127.0.0.1:11119` 偶发 reset，重试即可；远端为 HTTPS；本机无 cargo/rustc/ollama（i18n 翻译本机不能走 Ollama 管线，小批量手写 .po + `pnpm run i18n:compile` 可行）。
 
-## 2026-10-07 — 当前状态快照（Android 实机首测失败：卡启动图；诊断轮已就绪待出包）
+## 2026-10-07 — 当前状态快照（Android 启动根因已修复（WebView 83 兼容两件套）；修复已推送，CI 运行中待出包验证）
 
 - **已完成里程碑**：
   - Windows 实机测试通过（10-03/10-06 用户确认）：安装、解锁、分组筛选（"AI绘图"/"谷歌"）均正常。
@@ -223,9 +254,8 @@
 - **诊断结论**：
   - 卡 splash = JS 启动链路失败：`launchAutoHide:false` 下只有 main.tsx 跑完才调 `SplashScreen.hide()`；启动崩了 splash 就永久停留。
   - "Bramble" 字样烙在 `res/drawable*/splash.png`（9-20 旧资产，改名时未换）——表象问题，次要；res/ 与源码 grep 无 Bramble 文本，launcher 名已是 Vautix。
-  - 启动失败根因**未定位**（无 adb/设备日志，本机无 Android 工具链）；候选：Android System WebView 兼容（HarmonyOS 4.0/Kirin 980/Android 12 兼容层）、插件加载、native crypto 绑定。
   - 排除项：`native-webrtc.ts` 安装是 iOS-only no-op；`resolveExchange()` Android 返回 undefined 不上启动路径。
-- **诊断轮改动（已验证 typecheck + Biome，待 CI 出包由用户重装回报）**：
+- **诊断设施（已上线并在实机验证其价值）**：
   1. `index.html` 加启动错误陷阱：`window.onerror`/`unhandledrejection`/资源加载失败画到屏幕固定 overlay（无 devtools 时唯一可见诊断面）。
   2. `capacitor.config.ts`：`launchAutoHide:true` + `launchShowDuration:10000`——健康路径仍由 main.tsx 先行 hide()，死启动 10s 后 native 侧放掉 splash 露出错误 overlay。
   3. `main.tsx`：`SplashScreen.hide().catch()` 防迟到/重复调用 reject 触发错误 overlay。
@@ -236,8 +266,11 @@
   - **验证**：mobile build exit 0（esbuild 对 target 外语法硬报错）、es2017 产物 grep 无 `??=`/`static {}`、tsc + Biome 过、重 build 后 polyfill 进 bundle。
   - **教训**：①老设备 WebView 的语法兼容问题在 CI（新内核跑 E2E）上永远测不出来，真机一上来就现形——mobile 端构建以 es2017 为底线；②**esbuild 降 target ≠ 完整兼容**——语法之外必须对着 WebView 版本缺口过一遍运行时 API（本次 83 的清单：`replaceAll`/`.at`/`randomUUID`/`??=`/`static{}`）；③真机诊断三件套（错误 overlay + splash 兜底 + pointer-events:none）值得保留，以后升级构建配置先想到 WebView 83 这条线。
 - **待完成任务清单**：
-  1. 用户提交推送 → CI 全绿 → 下载新 `android-apk` → 卸载旧 app 重装 → 应正常进入（现象 A）；若仍报错截图回报。
+  1. 等 CI 全绿（修复已推送，运行中）→ 下载新 `android-apk` → 卸载旧 app 重装 → 预期现象 A（正常进入）；异常则红字截图回报。
   2. 进 app 后的完整验证清单：创建金库/解锁/打标签/分组筛选/锁定。
   3. 次要：换掉含 "Bramble" 的 splash.png（等启动收官后处理）。
   4. 跟进项不变：http-cache-semantics 修复版发布后移除 `--ignore`；`.codegraph/.gitignore`、`screenshots/` 处置。
-- **阻塞 / 卡点**：无 adb/无设备日志通道，诊断全靠"改代码 → CI 出包 → 实机看"循环（每轮 25–40 分钟）；错误落地后应可收敛到 1–2 轮。
+- **阻塞 / 卡点**：无 adb/无设备日志通道，Android 诊断靠"改代码 → CI 出包 → 实机看"循环（每轮 25–40 分钟）；根因已落地，预期本轮收官。
+- **下一会话明确下一步**：
+  1. 问 CI 结果与实机重装现象；正常则 Android 验证走完第 2 项清单后收官。
+  2. Android 收官后：Bramble splash.png 替换；排更早遗留增量（审计日志第二阶段 + Activity 面板、roster phase-2 flip 须用户批准、VEK residency hardening #1）；另议 pre-commit 钩子只 typecheck 受影响包。
