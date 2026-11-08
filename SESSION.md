@@ -1,5 +1,21 @@
 # Session log
 
+## 2026-11-08 — Android 老设备"全界面无样式 + 输入框点不动"定因收官：CSS 兼容层已修（等 CI 出包实机验证）
+
+- **问题 2 定因（截图证实）**：vivo V2057A / Android 10（WebView 实测下限 Chromium 83）上 app 整个界面无样式（白底黑字、无卡片/边框/按钮，Master password "看不到输入框"、无处点击）。根因：Tailwind v4 全部输出包在 cascade `@layer` 块里，Chromium 83（@layer 需 99+）把整个块静默丢弃 → 所有工具类失效。之前华为 Mate 20 Pro（HarmonyOS 4，WebView 较新）上的"密码框点不动"是同一 UI 在新内核下 label/fieldset 浮层等交互误导 + autofill 疑点混杂，非同一根因。
+- **修复（本会话，未提交）**：
+  1. `packages/platform-mobile/vite.config.ts`：`css.transformer: "lightningcss"` + `build.cssTarget: "chrome83"`（oklch/color-mix 降级；oklch 已清零，color-mix/@property 残留均在 `@supports` 渐进增强块内，83 安全），并新增 `unwrapCssLayers()` vite 插件在 generateBundle 解包 `@layer` 壳（lightningcss 不解 layer；解包后源顺序=声明顺序，级联语义不变）。
+  2. `packages/platform-mobile/src/styles/mobile.css`：`#root` `100dvh` 前加 `height:100vh` 兜底（dvh 需 108+，否则 83 上 #root 塌缩）。
+  3. `packages/platform-mobile/package.json`：新增 devDep `lightningcss ^1.33.0`。
+- **验证已过**：dist CSS `@layer`=0、`oklch(`=0、关键工具类（w-full/rounded-lg/pointer-events-none）在产物中；headless Chromium 驱动新 dist：密码框 hit=SELF、鼠标+触摸均可聚焦可输入（valueLen=8）、样式类渲染正常；`typecheck` exit 0。临时诊断脚本 `.diag-join.cjs`/`.diag-out.txt` 验证后删除，勿入库。
+- **待完成任务清单**：
+  1. 用户提交本修复 + splash.png 重生成改动（见下），推送等 CI → 装 `android-apk` artifact 在 vivo 实机复验：界面有样式（圆角卡片/边框/彩色按钮）→ Master password 可点可输 → 完成扫码 join。
+  2. 华为 Mate 20 Pro 上的现象在新包下复测；若仍异常再按"autofill 服务=密码保险箱"线索走系统设置排查（本轮未定因，优先级降）。
+  3. 更早遗留增量不变：审计日志第二阶段、roster phase-2 flip（须用户批准）、VEK residency hardening #1；工作区未跟踪文件（screenshots/、all_plugins.jsonl、wp_test.json、docs/ghsite.txt、.codegraph/.gitignore 删除）处置。
+- **阻塞 / 卡点**：无 adb/设备日志通道，Android 验证仍靠 CI 出包循环；git 推送由用户执行。
+- **下一会话明确下一步**：
+  1. 问 vivo 实机新包现象（样式是否恢复、join 是否走通）；通过则 Android 收官。
+
 ## 2026-10-20 — 当前状态快照（audit job 双新 advisory 处置收官，CI #37 全绿；等 Android 实机扫码验证）
 
 - **已完成里程碑**：
@@ -279,3 +295,29 @@
 - **下一会话明确下一步**：
   1. 问 CI 结果与实机重装现象；正常则 Android 验证走完第 2 项清单后收官。
   2. Android 收官后：Bramble splash.png 替换；排更早遗留增量（审计日志第二阶段 + Activity 面板、roster phase-2 flip 须用户批准、VEK residency hardening #1）；另议 pre-commit 钩子只 typecheck 受影响包。
+
+## 2026-10-25 — 当前状态快照（Android 实机两项问题：splash 已修未提交；join 输入框点不动待定因）
+
+**已完成里程碑**
+- Splash 品牌修复（问题 1 已解，待 CI 出包验收）：旧 splash PNG 是 2026-07 的 Bramble 锁形，改名提交 `24740e73` 只改了 `gen-splash.mjs` 文案没重生成资产。已重跑 `packages/platform-mobile/scripts/gen-splash.mjs` 重新生成 android/ios 全部 splash PNG（git status 14 个文件变更，未提交）。图标源 = launcher foreground（旧 glyph 换名，与 app 内 VautixGlyph 同图，品牌一致可接受）。
+
+**当前开发实现进度**
+- HEAD 仍 `3cea8a34`（CI #37 全绿后无新提交）；本地新增 splash PNG 改动。
+- 问题 2（join 页 master password 输入框点不动）**未定因**。已排除：实机 UI 完全有样式 + 扫码取景框可见 + Join 按钮可点 → "Chromium 83 丢 `@layer` 整层 CSS" 假设不成立（本地 build 产物 CSS 确有 4 个 @layer 块 properties/theme/base/utilities 未解包，若真机 WebView 是 83 则整屏应无样式；真机有样式 → 真机 WebView 较新）。剩余候选（按可疑度）：a) 扫码成功后取景 overlay/canvas/video 残留挂载覆盖输入区（z-index/pointer-events）；b) `scanning` state（JoinCard.tsx L30/36/44）或 L69 `disab...` 变量未复位 → field disabled/pointer-events-none；c) 扫码成功路径 blur/全屏透明 tap 层截获点击。
+
+**待完成任务清单**
+1. 定因问题 2：读 JoinCard.tsx 全量（重点 L25-100：scan handler、disab 变量、L74 card div 及其后 JSX；扫码成功后的 DOM 挂载）+ text-field/password-field 的 pointer-events 遮罩 + scan 成功后 video/canvas 挂载状态 → 最小修复
+2. 验证：`npx --yes pnpm@10 --filter @vault/platform-mobile build` + 产物断言 + `typecheck` + `ci:check`
+3. 提交 splash + 问题 2 修复（git 命令由用户手动执行）→ CI 出包 → Android 实机验收：启动页显示 Vaultix + 扫码后 master password 可输入 + join 成功同步
+4. 更早遗留（问题 2 收官后）：审计日志第二阶段（4 挂点 + Activity 面板）、roster phase-2 flip（**须用户批准**）、VEK residency hardening #1
+5. 工作区杂项待定夺：`.codegraph/.gitignore` 删除、`screenshots/`、`all_plugins.jsonl`、`wp_test.json`、`docs/ghsite.txt`
+
+**当前阻碍 / 卡点**
+- 2026-10-25 会话工具输出被压缩到 ~100 字符/命令，长文件读不全 → 问题 2 定因受阻。规避：`sed -n 'X,Yp'` 每窗 ≤20 行、每窗拼成单行输出；或让用户贴 JoinCard.tsx L25-100 原文。
+- 无 adb / 无真机远程诊断；Android 验证循环 = 改码 → 本地 build 出包 → 用户装 apk 回报。
+
+**下一会话需要执行的明确下一步**
+1. 分窗读 JoinCard.tsx（sed -n 每窗 20 行、单行拼接输出），定因问题 2（优先验证假设 a/b）
+2. 最小修复问题 2 → 本地 build 验证 → 把提交步骤给用户
+3. splash PNG 改动与问题 2 修复合并提交（提供 git 步骤，用户手动执行）
+4. CI 绿后用户装新 android-apk 实机验收两项问题

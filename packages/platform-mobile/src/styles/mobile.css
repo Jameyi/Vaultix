@@ -12,6 +12,9 @@
  */
 
 #root {
+	/* 100dvh needs Chromium 108; the vh fallback covers the old-WebView floor
+	   (Chromium 83), where dvh alone would collapse #root to content height. */
+	height: 100vh;
 	height: 100dvh;
 	box-sizing: border-box;
 	padding-top: env(safe-area-inset-top);
