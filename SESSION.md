@@ -1,20 +1,24 @@
 # Session log
 
-## 2026-11-08 — Android 老设备"全界面无样式 + 输入框点不动"定因收官：CSS 兼容层已修（等 CI 出包实机验证）
+## 2026-11-09 — CI `f94e7310` 回报处置：crypto-bigint 豁免落地（未提交）；其余两个失败为 runner 网络抖动
 
-- **问题 2 定因（截图证实）**：vivo V2057A / Android 10（WebView 实测下限 Chromium 83）上 app 整个界面无样式（白底黑字、无卡片/边框/按钮，Master password "看不到输入框"、无处点击）。根因：Tailwind v4 全部输出包在 cascade `@layer` 块里，Chromium 83（@layer 需 99+）把整个块静默丢弃 → 所有工具类失效。之前华为 Mate 20 Pro（HarmonyOS 4，WebView 较新）上的"密码框点不动"是同一 UI 在新内核下 label/fieldset 浮层等交互误导 + autofill 疑点混杂，非同一根因。
-- **修复（本会话，未提交）**：
-  1. `packages/platform-mobile/vite.config.ts`：`css.transformer: "lightningcss"` + `build.cssTarget: "chrome83"`（oklch/color-mix 降级；oklch 已清零，color-mix/@property 残留均在 `@supports` 渐进增强块内，83 安全），并新增 `unwrapCssLayers()` vite 插件在 generateBundle 解包 `@layer` 壳（lightningcss 不解 layer；解包后源顺序=声明顺序，级联语义不变）。
-  2. `packages/platform-mobile/src/styles/mobile.css`：`#root` `100dvh` 前加 `height:100vh` 兜底（dvh 需 108+，否则 83 上 #root 塌缩）。
-  3. `packages/platform-mobile/package.json`：新增 devDep `lightningcss ^1.33.0`。
-- **验证已过**：dist CSS `@layer`=0、`oklch(`=0、关键工具类（w-full/rounded-lg/pointer-events-none）在产物中；headless Chromium 驱动新 dist：密码框 hit=SELF、鼠标+触摸均可聚焦可输入（valueLen=8）、样式类渲染正常；`typecheck` exit 0。临时诊断脚本 `.diag-join.cjs`/`.diag-out.txt` 验证后删除，勿入库。
+- **已完成里程碑**：
+  - **CSS 兼容修复（`f94e7310`，已推送）**：① `vite.config.ts` 加 `css.transformer:"lightningcss"` + `build.cssTarget:"chrome83"` + 自研 `unwrapCssLayers()` 插件解包 `@layer` 壳；② `mobile.css` `#root` `100dvh` 前加 `100vh` 兜底；③ 新 devDep `lightningcss`。同提交含重生成的 Vaultix splash 图。本地验证全过（dist `@layer`=0/`oklch`=0、headless 密码框可聚焦可输入、typecheck 过）。
+  - **问题 2 定因（vivo 截图证实）**：vivo V2057A / Android 10（WebView 下限 Chromium 83）整界面无样式，根因 Tailwind v4 的 `@layer` 被 83 整块丢弃（@layer 需 99+）。
+  - **CI `f94e7310` 三个失败处置**：① Cargo audit `crypto-bigint 0.5.5` RUSTSEC-2026-0387（timing variability，唯一代码性失败）→ 已在 ci.yml 两处 audit 加 `--ignore RUSTSEC-2026-0387` 带日期注释：elliptic-curve 0.13 锁 `crypto-bigint ^0.5` 且 0.5 线无补丁（修复在 ≥0.7.6，需 p256/elliptic-curve 0.14 大版本），`--precise` 跨不过；侧信道需本地计时观测，风险可接受；解除条件=依赖树离开 crypto-bigint 0.5。② Linux.deb 的 AppRun 下载 504、③ Android 的 gradle 发行包下载超时——均为 runner 网络瞬时故障，无需改码，重跑即愈。
+- **当前进度**：`f94e7310` 已推送；ci.yml 豁免改动**未提交**；等下一轮 CI 全绿后下载 `android-apk`。
 - **待完成任务清单**：
-  1. 用户提交本修复 + splash.png 重生成改动（见下），推送等 CI → 装 `android-apk` artifact 在 vivo 实机复验：界面有样式（圆角卡片/边框/彩色按钮）→ Master password 可点可输 → 完成扫码 join。
-  2. 华为 Mate 20 Pro 上的现象在新包下复测；若仍异常再按"autofill 服务=密码保险箱"线索走系统设置排查（本轮未定因，优先级降）。
+  1. 用户提交 ci.yml 豁免（命令见下）推送 → 重跑/等新 CI 全绿 → **vivo 实机复验（唯一验收点）**：界面有样式 → Master password 可点可输 → 扫码 join 双向同步；异常截图回报。
+  2. 华为 Mate 20 Pro 装同包复测；仍异常则按"系统 autofill=密码保险箱"线索走设置对照（改"不自动填充"）。
   3. 更早遗留增量不变：审计日志第二阶段、roster phase-2 flip（须用户批准）、VEK residency hardening #1；工作区未跟踪文件（screenshots/、all_plugins.jsonl、wp_test.json、docs/ghsite.txt、.codegraph/.gitignore 删除）处置。
-- **阻塞 / 卡点**：无 adb/设备日志通道，Android 验证仍靠 CI 出包循环；git 推送由用户执行。
+  4. 跟进项不变：http-cache-semantics 修复版发布后移除 ci.yml `--ignore GHSA-ch52-4w7c-c8xp`；elliptic-curve/p256 出 0.14 后移除 RUSTSEC-2026-0387 豁免。
+- **阻塞 / 卡点**：无 adb/设备日志通道，Android 验证靠 CI 出包循环；CI 状态靠用户浏览器回报；git 推送由用户执行。
 - **下一会话明确下一步**：
-  1. 问 vivo 实机新包现象（样式是否恢复、join 是否走通）；通过则 Android 收官。
+  1. 问新 CI 结果 + vivo 实机新包现象（样式恢复、join 走通与否）；通过则 Android 收官。
+
+## 2026-11-08 — Android 老设备"全界面无样式"定因收官：CSS 兼容修复已推送（`f94e7310`，等 CI 出包实机验证）
+
+- （本条已被 2026-11-09 快照取代，详见上条；历史要点：问题 2 定因截图证实、修复三文件、本地验证全过。）
 
 ## 2026-10-20 — 当前状态快照（audit job 双新 advisory 处置收官，CI #37 全绿；等 Android 实机扫码验证）
 

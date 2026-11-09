@@ -150,8 +150,17 @@ jobs:
       - name: Patch transitive deps with RustSec advisories
         run: cargo update -p rkyv && cargo update -p rustls --precise 0.23.46
         working-directory: packages/core-rust
+      # --ignore (2026-11-09, RUSTSEC-2026-0387): crypto-bigint timing variability is fixed
+      # only in >=0.7.6, but elliptic-curve 0.13 (via p256 0.13) declares `crypto-bigint = "^0.5"`
+      # and the 0.5 line has NO patched release, so no `cargo update` can reach it. The fix
+      # arrives with the p256/elliptic-curve 0.14 lines. Exposure is low here: the advisory is
+      # a timing/microarchitectural side channel on constant-time ops, exploitable only by an
+      # attacker who can observe high-resolution timing of local crypto (p256 sign/ECDH runs
+      # in-process on the user's own machine, not against a remote timing oracle).
+      # Drop this ignore and re-audit once the tree moves to elliptic-curve/p256 0.14
+      # (`cargo tree -i crypto-bigint@0.5.5` prints nothing).
       - name: cargo audit (core-rust)
-        run: cargo audit
+        run: cargo audit --ignore RUSTSEC-2026-0387
         working-directory: packages/core-rust
       - name: Patch transitive deps with RustSec advisories (desktop)
         run: cargo update -p h2 && cargo update -p rustls --precise 0.23.46 && cargo update -p quinn-proto --precise 0.11.18
@@ -166,8 +175,10 @@ jobs:
       # Drop these ignores and re-audit once tauri-plugin-updater publishes a release whose
       # zip requirement admits >=9. Can NOT turn the feature off instead: macOS install
       # code uses flate2/tar ungated, and those ride the same feature.
+      # --ignore (2026-11-09): same crypto-bigint 0.5.5 / elliptic-curve 0.13 lock as core-rust
+      # — see the core-rust audit step for the full rationale and drop condition.
       - name: cargo audit (desktop src-tauri)
-        run: cargo audit --ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369
+        run: cargo audit --ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369 --ignore RUSTSEC-2026-0387
         working-directory: packages/platform-desktop/src-tauri
 
   transport-contract-chromium:
