@@ -163,22 +163,26 @@ jobs:
         run: cargo audit --ignore RUSTSEC-2026-0387
         working-directory: packages/core-rust
       - name: Patch transitive deps with RustSec advisories (desktop)
-        run: cargo update -p h2 && cargo update -p rustls --precise 0.23.46 && cargo update -p quinn-proto --precise 0.11.18
+        run: cargo update -p h2 && cargo update -p rustls --precise 0.23.46 && cargo update -p quinn-proto --precise 0.11.18 && cargo update -p webpki-root-certs
         working-directory: packages/platform-desktop/src-tauri
-      # --ignore (2026-10-20, RUSTSEC-2026-0367/0368/0369): fixed only in zip >=9.0.0, but
-      # tauri-plugin-updater locks zip to ^4 (2.10.1..2.14.0 all declare `zip = "^4"`,
-      # optional under the default `zip` feature), so no `cargo update` can cross the major.
-      # The vulnerable ZipArchive::extract is reachable only from the Windows updater path
-      # (updater.rs extract_zip, cfg(windows) + feature zip), and our update manifest
+      # --ignore (2026-10-20, RUSTSEC-2026-0367/0368/0369; 2026-11-09, RUSTSEC-2026-0429):
+      # all four fixed only in zip >=9.0.0, but tauri-plugin-updater locks zip to ^4
+      # (2.10.1..2.14.0 all declare `zip = "^4"`, optional under the default `zip` feature),
+      # so no `cargo update` can cross the major. The vulnerable ZipArchive::extract is
+      # reachable only from the Windows updater path (updater.rs extract_zip,
+      # cfg(windows) + feature zip), and our update manifest
       # (website/public/desktop/latest.json) serves no windows platform; extraction also
       # runs only after minisign verification (verify_signature precedes extraction).
+      # 0429 is a process-abort DoS on a crafted symlink entry, so the same narrowed
+      # attack surface applies — an attacker would need a trusted, signed update manifest
+      # with a symlink entry, which ours never contains.
       # Drop these ignores and re-audit once tauri-plugin-updater publishes a release whose
       # zip requirement admits >=9. Can NOT turn the feature off instead: macOS install
       # code uses flate2/tar ungated, and those ride the same feature.
       # --ignore (2026-11-09): same crypto-bigint 0.5.5 / elliptic-curve 0.13 lock as core-rust
       # — see the core-rust audit step for the full rationale and drop condition.
       - name: cargo audit (desktop src-tauri)
-        run: cargo audit --ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369 --ignore RUSTSEC-2026-0387
+        run: cargo audit --ignore RUSTSEC-2026-0367 --ignore RUSTSEC-2026-0368 --ignore RUSTSEC-2026-0369 --ignore RUSTSEC-2026-0387 --ignore RUSTSEC-2026-0429
         working-directory: packages/platform-desktop/src-tauri
 
   transport-contract-chromium:

@@ -1,17 +1,17 @@
 # Session log
 
-## 2026-11-09 — CI `f94e7310` 回报处置：crypto-bigint 豁免落地（未提交）；其余两个失败为 runner 网络抖动
+## 2026-11-09 — CI 两轮 audit 回报处置收官（`4af1092c` 后再修 webpki 升级 + zip 0429 豁免，未提交）
 
 - **已完成里程碑**：
-  - **CSS 兼容修复（`f94e7310`，已推送）**：① `vite.config.ts` 加 `css.transformer:"lightningcss"` + `build.cssTarget:"chrome83"` + 自研 `unwrapCssLayers()` 插件解包 `@layer` 壳；② `mobile.css` `#root` `100dvh` 前加 `100vh` 兜底；③ 新 devDep `lightningcss`。同提交含重生成的 Vaultix splash 图。本地验证全过（dist `@layer`=0/`oklch`=0、headless 密码框可聚焦可输入、typecheck 过）。
-  - **问题 2 定因（vivo 截图证实）**：vivo V2057A / Android 10（WebView 下限 Chromium 83）整界面无样式，根因 Tailwind v4 的 `@layer` 被 83 整块丢弃（@layer 需 99+）。
-  - **CI `f94e7310` 三个失败处置**：① Cargo audit `crypto-bigint 0.5.5` RUSTSEC-2026-0387（timing variability，唯一代码性失败）→ 已在 ci.yml 两处 audit 加 `--ignore RUSTSEC-2026-0387` 带日期注释：elliptic-curve 0.13 锁 `crypto-bigint ^0.5` 且 0.5 线无补丁（修复在 ≥0.7.6，需 p256/elliptic-curve 0.14 大版本），`--precise` 跨不过；侧信道需本地计时观测，风险可接受；解除条件=依赖树离开 crypto-bigint 0.5。② Linux.deb 的 AppRun 下载 504、③ Android 的 gradle 发行包下载超时——均为 runner 网络瞬时故障，无需改码，重跑即愈。
-- **当前进度**：`f94e7310` 已推送；ci.yml 豁免改动**未提交**；等下一轮 CI 全绿后下载 `android-apk`。
+  - **CSS 兼容修复（`f94e7310`，已推送）**：`vite.config.ts` 加 `css.transformer:"lightningcss"` + `build.cssTarget:"chrome83"` + 自研 `unwrapCssLayers()` 插件解包 `@layer` 壳；`mobile.css` `#root` `100dvh` 加 `100vh` 兜底；新 devDep `lightningcss`。本地验证全过。定因：vivo V2057A / Android 10（WebView 下限 Chromium 83）整界面无样式 = Tailwind v4 的 `@layer` 被 83 整块丢弃。
+  - **crypto-bigint 豁免（`4af1092c`，已推送）**：RUSTSEC-2026-0387 加两处 `--ignore`（elliptic-curve 0.13 锁 `^0.5` 且 0.5 线无补丁，修复在 p256/elliptic-curve 0.14）。
+  - **第二轮 audit 处置（本会话，未提交）**：CI `4af1092c` desktop audit 报两个新 error——① `webpki-root-certs 1.0.9` RUSTSEC-2026-0383（emSign 中间根信任，修复 ≥1.0.10 补丁级）→ desktop patch 步骤追加 `cargo update -p webpki-root-certs`（仅 desktop lock 含此 crate，core-rust 无）；② `zip 4.6.1` RUSTSEC-2026-0429（extract 对 symlink 声明大尺寸 abort 进程，7.5 DoS，修复 ≥9.0.0）→ 追加 `--ignore RUSTSEC-2026-0429`：与既有 0367 系同一锁死原因（tauri-plugin-updater 锁 zip ^4）且同一攻击面收窄（仅 Windows updater 路径、manifest 无 windows 条目、minisign 验签在前；签名 manifest 永不含 symlink 条目）。ci.yml YAML 已用 PyYAML 验证解析通过。
+- **当前进度**：`f94e7310`、`4af1092c` 已推送；webpki 升级 + 0429 豁免改动**未提交**，等下一轮 CI 全绿后下载 `android-apk`。
 - **待完成任务清单**：
-  1. 用户提交 ci.yml 豁免（命令见下）推送 → 重跑/等新 CI 全绿 → **vivo 实机复验（唯一验收点）**：界面有样式 → Master password 可点可输 → 扫码 join 双向同步；异常截图回报。
+  1. 用户提交 ci.yml 改动（命令见下）→ 等 CI 全绿 → **vivo 实机复验（唯一验收点）**：界面有样式 → Master password 可点可输 → 扫码 join 双向同步；异常截图回报。
   2. 华为 Mate 20 Pro 装同包复测；仍异常则按"系统 autofill=密码保险箱"线索走设置对照（改"不自动填充"）。
   3. 更早遗留增量不变：审计日志第二阶段、roster phase-2 flip（须用户批准）、VEK residency hardening #1；工作区未跟踪文件（screenshots/、all_plugins.jsonl、wp_test.json、docs/ghsite.txt、.codegraph/.gitignore 删除）处置。
-  4. 跟进项不变：http-cache-semantics 修复版发布后移除 ci.yml `--ignore GHSA-ch52-4w7c-c8xp`；elliptic-curve/p256 出 0.14 后移除 RUSTSEC-2026-0387 豁免。
+  4. 豁免跟进项：http-cache-semantics 修复版发布后移除 `GHSA-ch52-4w7c-c8xp` ignore；tauri-plugin-updater 出适配 zip ≥9 版本后移除 zip 四连 ignore；elliptic-curve/p256 出 0.14 后移除 0387 ignore。
 - **阻塞 / 卡点**：无 adb/设备日志通道，Android 验证靠 CI 出包循环；CI 状态靠用户浏览器回报；git 推送由用户执行。
 - **下一会话明确下一步**：
   1. 问新 CI 结果 + vivo 实机新包现象（样式恢复、join 走通与否）；通过则 Android 收官。
