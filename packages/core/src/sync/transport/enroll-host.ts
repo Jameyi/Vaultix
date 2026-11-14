@@ -186,6 +186,21 @@ export async function startEnroll(role: EnrollRole, opts: EnrollOptions): Promis
 			opts.onInviteExpired?.();
 			session?.stop();
 		}, INVITE_TTL_MS);
+	} else {
+		// The joiner had no such bound: when the inviter never appears on the relay (its window
+		// already closed, the relay unreachable from this device, the socket dropped), handlePeer
+		// is never called, so neither onJoined nor onJoinError fires and the host's `await joined`
+		// hangs forever — a spinner with nothing to report. The inviter can only serve a device
+		// within ITS window, which ends no later than this joiner's own window (the joiner starts
+		// after reading a not-yet-expired code), so giving up here loses no join that could still
+		// succeed.
+		expiry = setTimeout(() => {
+			opts.report("⚠ the inviting device never appeared, giving up");
+			opts.onJoinError?.(
+				"Couldn't reach the other device. Make sure its pairing window is still open and both devices can reach the network, then generate a new code and try again.",
+			);
+			session?.stop();
+		}, INVITE_TTL_MS);
 	}
 	opts.report(role === "inviter" ? "waiting for a device to join…" : "connecting to inviter…");
 	return session;

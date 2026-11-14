@@ -836,3 +836,70 @@ describe("large vault: bundle spans multiple Noise frames", () => {
 		expect(onJoined).toHaveBeenCalledOnce();
 	});
 });
+
+describe("startEnroll — bounded waits", () => {
+	// Without the joiner-side bound, a joiner whose inviter never appears on the relay (its
+	// window already closed, the relay unreachable from this device, the socket dropped) sat on
+	// the host's `await joined` forever: handlePeer never runs, so neither onJoined nor
+	// onJoinError fires. The inviter's own window ends no later than the joiner's (the joiner
+	// starts after reading a not-yet-expired code), so giving up here loses no join that could
+	// still succeed.
+	it("joiner: gives up with an actionable error when the inviter never appears", async () => {
+		vi.useFakeTimers();
+		try {
+			const onJoinError = vi.fn();
+			const stop = vi.fn();
+			const session = await startEnroll("joiner", {
+				relayUrl: "wss://r",
+				groupKeyB64: b64(32),
+				psk: b64(32),
+				devicePrivB64: b64(32),
+				inviterPub: b64(16),
+				ownEntry,
+				password: "pw",
+				wasm: mockWasm(),
+				report: () => {},
+				onJoinError,
+				join: async () => ({ stop }),
+				fetchIce: async () => [],
+			});
+			expect(onJoinError).not.toHaveBeenCalled();
+			await vi.advanceTimersByTimeAsync(INVITE_TTL_MS);
+			expect(onJoinError).toHaveBeenCalledOnce();
+			expect(String(onJoinError.mock.calls[0]?.[0])).toMatch(/couldn't reach the other device/i);
+			expect(stop).toHaveBeenCalled(); // the deaf session is torn down, not left running
+			session.stop(); // idempotent even after the timer already stopped it
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("inviter: expiry still fires as before (regression guard for the shared timer)", async () => {
+		vi.useFakeTimers();
+		try {
+			const onInviteExpired = vi.fn();
+			const stop = vi.fn();
+			await startEnroll("inviter", {
+				relayUrl: "wss://r",
+				groupKeyB64: b64(32),
+				psk: b64(32),
+				devicePrivB64: b64(32),
+				devicePubB64: b64(16),
+				vekB64: b64(32),
+				approve: async () => true,
+				wasm: mockWasm(),
+				report: () => {},
+				roster: emptyRoster(),
+				entries: emptyEntriesPayload(),
+				onInviteExpired,
+				join: async () => ({ stop }),
+				fetchIce: async () => [],
+			});
+			await vi.advanceTimersByTimeAsync(INVITE_TTL_MS);
+			expect(onInviteExpired).toHaveBeenCalledOnce();
+			expect(stop).toHaveBeenCalled();
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+});

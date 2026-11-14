@@ -1,12 +1,32 @@
 # Session log
 
+## 2026-11-14 — Android join"一直 loading 无反应"定因+修复（未提交）；CSS 修复实机生效确认
+
+- **已完成里程碑**：
+  - **CSS 兼容修复实机验证通过**（`f94e7310`，CI #40 绿）：vivo V2057A 上界面恢复完整样式（卡片/边框/按钮），用户能走完 join 表单到 submit——老设备无样式问题收官。
+  - **join 挂起定因**：手机粘贴 PC pair code + master password 点 join 后永久 loading。根因：`startEnroll`（enroll-host.ts）只给 inviter 挂了 `INVITE_TTL_MS` 过期定时器，**joiner 侧无任何边界**——当 PC 邀请端在 relay 上始终不出现（窗口已关/relay 从手机不可达/网络中断），`handlePeer` 从不执行，`onJoined`/`onJoinError` 都不触发，`joinGroup` 的 `await joined` 永久挂起，只剩"connecting to inviter…"状态行。辅助因素：`Mesh.start()` 在 relay 连不上时不 reject（只记状态 + scheduleReconnect），session 处于"启动了但聋"状态。
+  - **修复（本会话，未提交）**：
+    1. `packages/core/src/sync/transport/enroll-host.ts`：`startEnroll` 给 joiner 侧补上与 inviter 对称的 `INVITE_TTL_MS` 定时器——超时则 report + `onJoinError`（可操作文案：确认对方窗口未关、双端网络可达、重新生成 code）+ `session?.stop()`。时序论证：joiner 只在 code 未过期时启动，其窗口终点 ≥ inviter 窗口终点，故不会误杀仍在窗口内的合法 join。
+    2. `enroll-host.test.ts`：新增 "startEnroll — bounded waits" describe 两个用例（joiner 超时发 onJoinError 并停 session + 幂等 stop；inviter expiry 回归守护）。
+  - **验证已过**：enroll-host.test.ts 32/32（含 2 新用例）、core typecheck exit 0。
+- **当前进度**：join 修复改动未提交（enroll-host.ts + 测试）；提交推送 + CI 绿后需新 android-apk 实机重验 join。
+- **待完成任务清单**：
+  1. 用户提交 join 修复（命令见下）→ CI 全绿 → 新 android-apk 装 vivo 重走 join：若 relay 可达则应走通；若 PC 窗口已关或网络不通，3 分钟后应出现明确错误（而非永久 loading）。
+  2. 若 join 仍失败（现在会有明确错误了）：按错误提示排查——PC 端配对窗口是否还开着、手机/PC 网络到 `wss://vautix-relay.flythenimbus.workers.dev` 是否可达（VPN/公司网络/ captive portal 嫌疑）。
+  3. 更早遗留增量不变：审计日志第二阶段、roster phase-2 flip（须用户批准）、VEK residency hardening #1；工作区未跟踪文件（screenshots/、all_plugins.jsonl、wp_test.json、docs/ghsite.txt、.codegraph/.gitignore 删除）处置。
+  4. 豁免跟进项不变：http-cache-semantics 修复版后移除 `GHSA-ch52-4w7c-c8xp`；tauri-plugin-updater 适配 zip ≥9 后移除 zip 四连 ignore；elliptic-curve/p256 出 0.14 后移除 0387 ignore。
+- **定因补充（2026-11-14 下午）——join 卡住的真正环境根因**：手机**和 PC** 均无法访问 `vautix-relay.flythenimbus.workers.dev`（PC curl 15s 超时，手机浏览器转圈；对照组 github/cloudflare/vautix.com 全通）。DNS 解析该域名返回 Facebook IP 段（`31.13.82.33`、`2a03:2880:...face:b00c...`）——**`*.workers.dev` 在中国大陆被 DNS 污染**，relay worker 本身大概率存活。PC 能生成 pair code 是因为 invite 武装不依赖 relay 连通（失败只写状态行）。修复路径已交付用户：A) 代理访问验证 worker 存活；B) **正式修复=Cloudflare 给 `vautix-relay` worker 绑自定义域（候选 `relay.vautix.com`，需域名托管在同一账号）**，绑定后我改 5 处 `DEFAULT_RELAY`（core/mobile/desktop/extension/settings）；C) 两端开代理临时绕过（不推荐）。等待用户绑定自定义域后执行改码。
+- **阻塞 / 卡点**：无 adb/设备日志通道，Android 验证靠 CI 出包循环（10–20 分钟/轮）；relay 是外部依赖（fly.io worker），其可用性不在本仓库控制内；git 推送由用户执行。
+- **下一会话明确下一步**：
+  1. 问用户：A 验证结果（代理能否打开 relay URL）+ 是否已绑自定义域（如 `relay.vautix.com`）；已绑则改 5 处 DEFAULT_RELAY 并出提交步骤，随后等 join 修复（enroll-host 超时）+ 新 relay 地址一起 CI 出包实机重验 join。
+
 ## 2026-11-09 — CI 两轮 audit 回报处置收官（`4af1092c` 后再修 webpki 升级 + zip 0429 豁免，未提交）
 
 - **已完成里程碑**：
   - **CSS 兼容修复（`f94e7310`，已推送）**：`vite.config.ts` 加 `css.transformer:"lightningcss"` + `build.cssTarget:"chrome83"` + 自研 `unwrapCssLayers()` 插件解包 `@layer` 壳；`mobile.css` `#root` `100dvh` 加 `100vh` 兜底；新 devDep `lightningcss`。本地验证全过。定因：vivo V2057A / Android 10（WebView 下限 Chromium 83）整界面无样式 = Tailwind v4 的 `@layer` 被 83 整块丢弃。
   - **crypto-bigint 豁免（`4af1092c`，已推送）**：RUSTSEC-2026-0387 加两处 `--ignore`（elliptic-curve 0.13 锁 `^0.5` 且 0.5 线无补丁，修复在 p256/elliptic-curve 0.14）。
   - **第二轮 audit 处置（本会话，未提交）**：CI `4af1092c` desktop audit 报两个新 error——① `webpki-root-certs 1.0.9` RUSTSEC-2026-0383（emSign 中间根信任，修复 ≥1.0.10 补丁级）→ desktop patch 步骤追加 `cargo update -p webpki-root-certs`（仅 desktop lock 含此 crate，core-rust 无）；② `zip 4.6.1` RUSTSEC-2026-0429（extract 对 symlink 声明大尺寸 abort 进程，7.5 DoS，修复 ≥9.0.0）→ 追加 `--ignore RUSTSEC-2026-0429`：与既有 0367 系同一锁死原因（tauri-plugin-updater 锁 zip ^4）且同一攻击面收窄（仅 Windows updater 路径、manifest 无 windows 条目、minisign 验签在前；签名 manifest 永不含 symlink 条目）。ci.yml YAML 已用 PyYAML 验证解析通过。
-- **当前进度**：`f94e7310`、`4af1092c` 已推送；webpki 升级 + 0429 豁免改动**未提交**，等下一轮 CI 全绿后下载 `android-apk`。
+- **当前进度**：`f94e7310`（CSS 兼容）、`4af1092c`（0387 豁免）、`511a7962`（webpki 升级 + 0429 豁免）均已推送，**CI #40 全绿（11-09）**；等 vivo 实机复验 CSS 修复效果。
 - **待完成任务清单**：
   1. 用户提交 ci.yml 改动（命令见下）→ 等 CI 全绿 → **vivo 实机复验（唯一验收点）**：界面有样式 → Master password 可点可输 → 扫码 join 双向同步；异常截图回报。
   2. 华为 Mate 20 Pro 装同包复测；仍异常则按"系统 autofill=密码保险箱"线索走设置对照（改"不自动填充"）。
